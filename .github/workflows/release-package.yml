@@ -1,0 +1,27 @@
+name: on release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  publish-github-registry:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://npm.pkg.github.com/
+      - run: yarn install --frozen-lockfile
+      - name: Build type declarations
+        run: yarn tsc
+      - name: Build packages
+        run: yarn build
+      - run: yarn publish:github
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

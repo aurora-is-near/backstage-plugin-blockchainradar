@@ -1,0 +1,1 @@
+export { CustomCatalogPage } from './CustomCatalogPage';
