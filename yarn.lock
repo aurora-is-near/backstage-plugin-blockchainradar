@@ -52,6 +52,7 @@ __metadata:
     axios: ^1.2.2
     bs58: ^5.0.0
     cross-fetch: ^3.1.5
+    eslint-plugin-jest: ^27.2.1
     ethers: ^5.6.6
     lodash: ^4.17.21
     msw: ^0.35.0
@@ -12926,7 +12927,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jest@npm:^27.0.0":
+"eslint-plugin-jest@npm:^27.0.0, eslint-plugin-jest@npm:^27.2.1":
   version: 27.2.1
   resolution: "eslint-plugin-jest@npm:27.2.1"
   dependencies:
