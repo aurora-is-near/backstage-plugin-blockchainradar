@@ -5,9 +5,14 @@
 
 The Blockchain Plugins for Backstage is a collection of plugins that aims to solve asset management on EVM chains and on [NEAR](https://near.org/).
 
+## Goals
+
+- Keep an inventory of contracts, multisig safes and access keys
+- Provide insights about the state of on-chain access management
+
 ## Features
 
-- First-class support for smart contracts & multisig safes as an asset type
+- First-class support for smart contracts & multisigs in [Software Catalog](https://backstage.io/docs/features/software-catalog/)
   - Cross-contract relationships mapping via on-chain state ingestion
   - Etherscan/Blockscout source code and verification status discovery
 - Multisig support: [Gnosis Safe](https://safe.global/) and [SputnikDAO](https://astrodao.com/)
