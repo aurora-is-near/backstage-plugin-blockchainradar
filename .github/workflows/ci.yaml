@@ -1,5 +1,7 @@
-name: CI
-on: [pull_request]
+name: Lint and tests
+on:
+  - pull_request
+  - workflow_dispatch
 
 jobs:
   lint:
