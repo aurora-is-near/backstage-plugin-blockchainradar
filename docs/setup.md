@@ -1,5 +1,15 @@
 # Setup
 
+## Prerequisites
+
+The plugins are published on Github, so you need to set the registry in `.yarnrc.yml`:
+
+```yml
+npmScopes:
+  '@aurora-is-near':
+    npmRegistryServer: 'https://npm.pkg.github.com'
+```
+
 ## Backend
 
 Add the plugin to your backend app:
@@ -119,5 +129,4 @@ blockchain:
   experimental:
     plugins:
       - id: blockchain
-        # Add any necessary configuration options here
 ```

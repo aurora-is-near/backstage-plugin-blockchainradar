@@ -59,7 +59,7 @@ export function BlockchainInsightsCard(props: BlockchainInsightsCardProps) {
 
   return (
     <Card className={cardClass}>
-      <CardHeader title="Aurora Labs On-Chain Insights" />
+      <CardHeader title="On-Chain Insights" />
       <Divider />
       <CardContent className={cardContentClass}>
         <AboutContent entity={entity} />
