@@ -57,3 +57,5 @@ result
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+app-config.local.yaml
