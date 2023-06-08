@@ -1,0 +1,1 @@
+export { CustomEntityPage } from './CustomEntityPage';
