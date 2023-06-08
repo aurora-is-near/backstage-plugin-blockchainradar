@@ -24,15 +24,7 @@ backend:
       - host: localhost
 
 organization:
-  name: Aurora Labs
-
-scaffolder:
-techdocs:
-  builder: 'local' # Alternatives - 'external'
-  generator:
-    runIn: 'docker' # Alternatives - 'local'
-  publisher:
-    type: 'local'
+  name: ACME Corp.
 
 catalog:
   import:
