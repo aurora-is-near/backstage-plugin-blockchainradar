@@ -179,7 +179,6 @@ __metadata:
     "@backstage/plugin-catalog-react": ^1.6.0
     "@backstage/plugin-org": ^0.6.8
     "@backstage/plugin-pagerduty": ^0.5.11
-    "@backstage/plugin-techdocs": ^1.6.2
     "@backstage/test-utils": ^1.3.1
     "@backstage/theme": ^0.3.0
     "@emotion/react": ^11.11.0
@@ -3846,67 +3845,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/plugin-techdocs-react@npm:^1.1.6":
-  version: 1.1.6
-  resolution: "@backstage/plugin-techdocs-react@npm:1.1.6"
-  dependencies:
-    "@backstage/catalog-model": ^1.3.0
-    "@backstage/config": ^1.0.7
-    "@backstage/core-components": ^0.13.1
-    "@backstage/core-plugin-api": ^1.5.1
-    "@backstage/version-bridge": ^1.0.4
-    "@material-ui/core": ^4.12.2
-    "@material-ui/lab": 4.0.0-alpha.61
-    "@material-ui/styles": ^4.11.0
-    "@types/react": ^16.13.1 || ^17.0.0
-    jss: ~10.10.0
-    lodash: ^4.17.21
-    react-helmet: 6.1.0
-    react-use: ^17.2.4
-  peerDependencies:
-    react: ^16.13.1 || ^17.0.0
-    react-dom: ^16.13.1 || ^17.0.0
-    react-router-dom: 6.0.0-beta.0 || ^6.3.0
-  checksum: 15ee7b5d01f31bd9b08ac3ffb147d673e6a3e2bf7b9a0188336a6fe129f71c69399f45b482c2577ea638061829e494f5a874840e6200ead020dbbfb6b3b1d43c
-  languageName: node
-  linkType: hard
-
-"@backstage/plugin-techdocs@npm:^1.6.2":
-  version: 1.6.2
-  resolution: "@backstage/plugin-techdocs@npm:1.6.2"
-  dependencies:
-    "@backstage/catalog-model": ^1.3.0
-    "@backstage/config": ^1.0.7
-    "@backstage/core-components": ^0.13.1
-    "@backstage/core-plugin-api": ^1.5.1
-    "@backstage/errors": ^1.1.5
-    "@backstage/integration": ^1.4.5
-    "@backstage/integration-react": ^1.1.13
-    "@backstage/plugin-catalog-react": ^1.6.0
-    "@backstage/plugin-search-common": ^1.2.3
-    "@backstage/plugin-search-react": ^1.6.0
-    "@backstage/plugin-techdocs-react": ^1.1.6
-    "@backstage/theme": ^0.3.0
-    "@material-ui/core": ^4.12.2
-    "@material-ui/icons": ^4.9.1
-    "@material-ui/lab": 4.0.0-alpha.61
-    "@material-ui/styles": ^4.10.0
-    "@types/react": ^16.13.1 || ^17.0.0
-    dompurify: ^2.2.9
-    event-source-polyfill: 1.0.25
-    git-url-parse: ^13.0.0
-    jss: ~10.10.0
-    lodash: ^4.17.21
-    react-helmet: 6.1.0
-    react-use: ^17.2.4
-  peerDependencies:
-    react: ^16.13.1 || ^17.0.0
-    react-dom: ^16.13.1 || ^17.0.0
-    react-router-dom: 6.0.0-beta.0 || ^6.3.0
-  checksum: 7297679049c11c00de556111e6de2a33397612e717e62271d51ab1cacd6cfe8c73d1bbfccc26418aa1894ce7247ca16974ff171176eb24f9d03150d81ed432df
-  languageName: node
-  linkType: hard
-
 "@backstage/release-manifests@npm:^0.0.9":
   version: 0.0.9
   resolution: "@backstage/release-manifests@npm:0.0.9"
@@ -6079,7 +6017,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@material-ui/styles@npm:^4.10.0, @material-ui/styles@npm:^4.11.0, @material-ui/styles@npm:^4.11.4, @material-ui/styles@npm:^4.11.5":
+"@material-ui/styles@npm:^4.11.4, @material-ui/styles@npm:^4.11.5":
   version: 4.11.5
   resolution: "@material-ui/styles@npm:4.11.5"
   dependencies:
@@ -13233,7 +13171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^2.2.7, dompurify@npm:^2.2.9":
+"dompurify@npm:^2.2.7":
   version: 2.4.5
   resolution: "dompurify@npm:2.4.5"
   checksum: d6d3c3b320f15cdb5b26aa1902c3275a3ab2c3705a9df4420bb94691d7c4df67959ec7b91e486c308320791b0ee000456f042734c45d76721e61c2768eac706e
@@ -14407,13 +14345,6 @@ __metadata:
     bn.js: 4.11.6
     number-to-bn: 1.7.0
   checksum: df6b4752ff7461a59a20219f4b1684c631ea601241c39660e3f6c6bd63c950189723841c22b3c6c0ebeb3c9fc99e0e803e3c613101206132603705fcbcf4def5
-  languageName: node
-  linkType: hard
-
-"event-source-polyfill@npm:1.0.25":
-  version: 1.0.25
-  resolution: "event-source-polyfill@npm:1.0.25"
-  checksum: ed30428cc80eadfd693d267ba4a72dceaae938174cd116081ce38ad62bfd95f199430be7e8341e6f8f1e29489bbd5cfd4b3f6c8d6d463435623f7f91ae5f71b1
   languageName: node
   linkType: hard
 
@@ -18616,7 +18547,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jss@npm:10.10.0, jss@npm:^10.5.1, jss@npm:~10.10.0":
+"jss@npm:10.10.0, jss@npm:^10.5.1":
   version: 10.10.0
   resolution: "jss@npm:10.10.0"
   dependencies:
