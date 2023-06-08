@@ -4,7 +4,10 @@ import {
   createRoutableExtension,
 } from '@backstage/core-plugin-api';
 
+import { BlockchainInsightsCardProps } from './components/BlockchainInsightsCard';
 import { catalogRouteRef } from './routes';
+
+export { AboutContent, AboutField } from './components/BlockchainInsightsCard';
 
 export const customCatalogPagePlugin = createPlugin({
   id: 'catalog-index',
@@ -26,9 +29,7 @@ export type {
   AboutContentProps,
   AboutFieldProps,
 } from './components/BlockchainInsightsCard';
-export { AboutContent, AboutField } from './components/BlockchainInsightsCard';
 
-import { BlockchainInsightsCardProps } from './components/BlockchainInsightsCard';
 
 /** @public */
 export const EntityBlockchainInsightsCard: (
