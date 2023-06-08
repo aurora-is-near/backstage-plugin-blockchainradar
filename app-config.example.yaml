@@ -1,0 +1,50 @@
+proxy:
+  '/pagerduty':
+    target: https://api.pagerduty.com
+    headers:
+      Authorization: ${PAGERDUTY_TOKEN}
+
+blockchain:
+  etherscan:
+    ethereum-mainnet:
+      network: mainnet
+      apiKey: ${ETHERSCAN_API_KEY}
+    ethereum-goerli:
+      network: goerli
+      apiKey: ${ETHERSCAN_API_KEY}
+    aurora-mainnet:
+      network: aurora
+      apiKey: ${AURORASCAN_API_KEY}
+
+catalog:
+  # Backstage example components
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-components.yaml
+
+  # Backstage example systems
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-systems.yaml
+
+  # Backstage example APIs
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-apis.yaml
+
+  # Backstage example organization groups
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml
+
+  # Backstage example domains
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-domains.yaml
+
+  # Backstage example resources
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-resources.yaml
+
+  # The backstage demo deployment (this)
+  - type: url
+    target: https://github.com/backstage/demo/blob/master/catalog-info.yaml
+
+  # The backstage library repository
+  - type: url
+    target: https://github.com/backstage/backstage/blob/master/catalog-info.yaml
