@@ -9,6 +9,7 @@ import { PageWithHeader } from '@backstage/core-components';
 import { configApiRef, useApi } from '@backstage/core-plugin-api';
 import {
   CatalogFilterLayout,
+  EntityKindPicker,
   EntityListProvider,
   EntityTagPicker,
   EntityTypePicker,
@@ -16,10 +17,8 @@ import {
 } from '@backstage/plugin-catalog-react';
 
 import {
-  CatalogKindHeader,
   CatalogTable,
   DefaultCatalogPageProps,
-  // catalogPlugin,
 } from '@backstage/plugin-catalog';
 import { EntitySecurityTierPicker } from './SecurityTierPicker';
 import { useLocation } from 'react-router-dom';
@@ -49,7 +48,7 @@ export const CustomCatalogPage = ({
     <PageWithHeader title={title} themeId="home">
       <EntityListProvider key={title}>
         <Content>
-          <ContentHeader titleComponent={<CatalogKindHeader />}>
+          <ContentHeader titleComponent={<EntityKindPicker />}>
             {/* <CreateButton title="Create Component" to={createComponentLink()} /> */}
             <SupportButton>All your software catalog entities</SupportButton>
           </ContentHeader>
