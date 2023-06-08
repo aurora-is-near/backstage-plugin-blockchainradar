@@ -52,7 +52,7 @@ createDevApp()
         </Content>
       </Page>
     ),
-    title: 'AnnouncementsCard',
+    title: 'BlockchainInsightsCard',
     path: '/blockchain/BlockchainInsightsCard',
   })
   .render();
