@@ -1,13 +1,4 @@
 /* eslint-disable @backstage/no-undeclared-imports */
-
-/*
- * Hi!
- *
- * Note that this is an EXAMPLE Backstage backend. Please check the README.
- *
- * Happy hacking!
- */
-
 import Router from 'express-promise-router';
 import {
   createServiceBuilder,
@@ -22,28 +13,20 @@ import {
   HostDiscovery,
 } from '@backstage/backend-common';
 import { TaskScheduler } from '@backstage/backend-tasks';
-import { Config } from '@backstage/config';
-// import app from './plugins/app';
-// import auth from './plugins/auth';
-import catalog from './service/catalog';
-// import scaffolder from './plugins/scaffolder';
-// import proxy from './plugins/proxy';
-// import techdocs from './plugins/techdocs';
-// import search from './plugins/search';
-// import graphql from './plugins/graphql';
-// import events from './plugins/events';
-
-// import { PluginEnvironment } from './types';
 import { ServerPermissionClient } from '@backstage/plugin-permission-node';
 import { DefaultIdentityClient } from '@backstage/plugin-auth-node';
+import { Config } from '@backstage/config';
 
-const root = getRootLogger();
+import catalog from './service/catalog';
+// import proxy from './plugins/proxy';
+
+const logger = getRootLogger();
 
 function makeCreateEnv(config: Config) {
-  const reader = UrlReaders.default({ logger: root, config });
+  const reader = UrlReaders.default({ logger, config });
   const discovery = HostDiscovery.fromConfig(config);
   const cacheManager = CacheManager.fromConfig(config);
-  const databaseManager = DatabaseManager.fromConfig(config, { logger: root });
+  const databaseManager = DatabaseManager.fromConfig(config, { logger });
   const tokenManager = ServerTokenManager.noop();
   const taskScheduler = TaskScheduler.fromConfig(config);
 
@@ -55,21 +38,17 @@ function makeCreateEnv(config: Config) {
     tokenManager,
   });
 
-  root.info(`Created UrlReader ${reader}`);
-
-  return (plugin: string)  => {
-    const logger = root.child({ type: 'plugin', plugin });
+  return (plugin: string) => {
     const database = databaseManager.forPlugin(plugin);
     const cache = cacheManager.forPlugin(plugin);
     const scheduler = taskScheduler.forPlugin(plugin);
     return {
-      logger,
+      logger: logger.child({ type: 'plugin', plugin }),
       database,
       cache,
       config,
       reader,
       discovery,
-      tokenManager,
       scheduler,
       permissions,
       identity,
@@ -95,12 +74,7 @@ async function main() {
 
   const apiRouter = Router();
   apiRouter.use('/catalog', await catalog(catalogEnv));
-  // apiRouter.use('/scaffolder', await scaffolder(scaffolderEnv));
-  // apiRouter.use('/auth', await auth(authEnv));
-  // apiRouter.use('/techdocs', await techdocs(techdocsEnv));
   // apiRouter.use('/proxy', await proxy(proxyEnv));
-  // apiRouter.use('/search', await search(searchEnv));
-  // apiRouter.use('/events', await events(eventsEnv, []));
 
   // Add backends ABOVE this line; this 404 handler is the catch-all fallback
   apiRouter.use(notFoundHandler());
@@ -109,9 +83,9 @@ async function main() {
 
   const service = createServiceBuilder(module)
     .loadConfig(config)
-    .addRouter('/api', apiRouter)
-    // .addRouter('/graphql', await graphql(graphqlEnv))
-    // .addRouter('', await app(appEnv));
+    .addRouter('/api', apiRouter);
+  // .addRouter('/graphql', await graphql(graphqlEnv))
+  // .addRouter('', await app(appEnv));
 
   await service.start().catch(err => {
     console.log(err);
@@ -126,6 +100,6 @@ main().catch(error => {
 });
 
 process.on('SIGINT', () => {
-  root.info('CTRL+C pressed; exiting.');
+  logger.info('CTRL+C pressed; exiting.');
   process.exit(0);
 });

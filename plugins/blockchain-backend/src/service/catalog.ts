@@ -1,8 +1,11 @@
 /* eslint-disable @backstage/no-undeclared-imports */
-import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
+import { CatalogBuilder, CatalogEnvironment } from '@backstage/plugin-catalog-backend';
 import { EntityProvider } from '@backstage/plugin-catalog-node';
-// import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backend';
 import { GithubEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
+import {
+  PluginEndpointDiscovery,
+} from '@backstage/backend-common';
+import { PluginTaskScheduler } from '@backstage/backend-tasks';
 
 import {
   ContractProcessor,
@@ -12,8 +15,13 @@ import {
   SecurityPolicyProcessor,
 } from '@aurora-is-near/backstage-plugin-blockchain-backend';
 
+type PluginEnvironment =CatalogEnvironment & {
+  discovery: PluginEndpointDiscovery;
+  scheduler: PluginTaskScheduler;
+};
+
 export default async function createPlugin(
-  env: any,
+  env: PluginEnvironment,
   providers?: Array<EntityProvider>,
 ) {
   const builder = CatalogBuilder.create(env);
