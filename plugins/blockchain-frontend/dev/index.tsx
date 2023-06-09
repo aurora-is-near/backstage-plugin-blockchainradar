@@ -14,26 +14,28 @@ import { apiDocsPlugin } from '@backstage/plugin-api-docs';
 import { orgPlugin } from '@backstage/plugin-org';
 import { Grid, Typography } from '@material-ui/core';
 
-import { customCatalogPagePlugin } from '../src/plugin';
-import { CustomCatalogPage } from '../src/components/CustomCatalogPage';
-import { CustomEntityPage } from '../src/components/CustomEntityPage';
+import {
+  blockchainPlugin,
+  BlockchainIndexPage,
+  BlockchainEntityPage,
+} from '../src/plugin';
 
 createDevApp()
   .registerPlugin(catalogPlugin)
   .registerPlugin(orgPlugin)
   .registerPlugin(catalogGraphPlugin)
   .registerPlugin(apiDocsPlugin)
-  .registerPlugin(customCatalogPagePlugin)
+  .registerPlugin(blockchainPlugin)
   .addPage({
-    element: <CatalogIndexPage />,
     title: 'Root Page',
     path: '/catalog',
-    children: <CustomCatalogPage />,
+    element: <CatalogIndexPage />,
+    children: <BlockchainIndexPage />,
   })
   .addPage({
     path: '/catalog/:kind/:namespace/:name',
     element: <CatalogEntityPage />,
-    children: <CustomEntityPage />,
+    children: <BlockchainEntityPage />,
   })
   .addPage({
     path: '/catalog-graph',
@@ -42,7 +44,7 @@ createDevApp()
   .addPage({
     element: (
       <Page themeId="home">
-        <Header title="BlockchainInsightsCard" />
+        <Header title="EntityBlockchainInsightsCard" />
 
         <Content>
           <Grid container>
@@ -53,7 +55,7 @@ createDevApp()
         </Content>
       </Page>
     ),
-    title: 'BlockchainInsightsCard',
+    title: 'EntityBlockchainInsightsCard',
     path: '/blockchain/BlockchainInsightsCard',
   })
   .render();

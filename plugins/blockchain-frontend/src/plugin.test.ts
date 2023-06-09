@@ -1,7 +1,7 @@
-import { customCatalogPagePlugin } from './plugin';
+import { blockchainPlugin } from './plugin';
 
-describe('custom-catalog-page', () => {
+describe('blockchainPlugin', () => {
   it('should export plugin', () => {
-    expect(customCatalogPagePlugin).toBeDefined();
+    expect(blockchainPlugin).toBeDefined();
   });
 });

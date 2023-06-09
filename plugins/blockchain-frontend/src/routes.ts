@@ -1,5 +1,5 @@
 import { createRouteRef } from '@backstage/core-plugin-api';
 
-export const catalogRouteRef = createRouteRef({
-  id: 'catalog-index',
+export const rootRouteRef = createRouteRef({
+  id: 'blockchain-catalog',
 });

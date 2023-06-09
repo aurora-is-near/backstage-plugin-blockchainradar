@@ -23,7 +23,7 @@ import {
 import { EntitySecurityTierPicker } from './SecurityTierPicker';
 import { useLocation } from 'react-router-dom';
 
-export const CustomCatalogPage = ({
+export const BlockchainIndexPage = ({
   columns,
   actions,
   initiallySelectedFilter = 'owned',

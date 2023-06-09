@@ -4,36 +4,58 @@ import {
   createRoutableExtension,
 } from '@backstage/core-plugin-api';
 
-import { BlockchainInsightsCardProps } from './components/BlockchainInsightsCard';
-import { catalogRouteRef } from './routes';
+import { rootRouteRef } from './routes';
 
+/** @public */
 export { AboutContent, AboutField } from './components/BlockchainInsightsCard';
-
-export const customCatalogPagePlugin = createPlugin({
-  id: 'catalog-index',
-  routes: {
-    catalogPage: catalogRouteRef,
-  },
-});
-
-export const CustomCatalogIndexPage = customCatalogPagePlugin.provide(
-  createRoutableExtension({
-    component: () =>
-      import('./components/CustomCatalogPage').then(m => m.CustomCatalogPage),
-    mountPoint: catalogRouteRef,
-  }),
-);
-
 export type {
   BlockchainInsightsCardProps,
   AboutContentProps,
   AboutFieldProps,
 } from './components/BlockchainInsightsCard';
 
-/** @public */
-export const EntityBlockchainInsightsCard: (
-  props: BlockchainInsightsCardProps,
-) => JSX.Element = customCatalogPagePlugin.provide(
+export const blockchainPlugin = createPlugin({
+  id: 'blockchain-catalog',
+  routes: {
+    catalogPage: rootRouteRef,
+  },
+});
+
+export const BlockchainIndexPage = blockchainPlugin.provide(
+  createRoutableExtension({
+    component: () =>
+      import('./components/BlockchainIndexPage').then(
+        m => m.BlockchainIndexPage,
+      ),
+    mountPoint: rootRouteRef,
+  }),
+);
+export const CustomCatalogPage = BlockchainIndexPage;
+
+export const BlockchainEntityPage = blockchainPlugin.provide(
+  createRoutableExtension({
+    component: () =>
+      import('./components/BlockchainEntityPage').then(
+        m => m.BlockchainEntityPage,
+      ),
+    mountPoint: rootRouteRef,
+  }),
+);
+export const CustomEntityPage = BlockchainEntityPage;
+
+export const EntityBlockchainContent = blockchainPlugin.provide(
+  createComponentExtension({
+    name: 'EntityBlockchainContent',
+    component: {
+      lazy: () =>
+        import('./components/BlockchainEntityPage').then(
+          m => m.EntityBlockchainContent,
+        ),
+    },
+  }),
+);
+
+export const EntityBlockchainInsightsCard = blockchainPlugin.provide(
   createComponentExtension({
     name: 'EntityBlockchainInsightsCard',
     component: {

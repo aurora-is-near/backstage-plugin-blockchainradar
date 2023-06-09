@@ -98,13 +98,7 @@ const entityWarningContent = (
   </>
 );
 
-const blockchainContent = (
-  <Grid item xs={12}>
-    <EntityBlockchainInsightsCard />
-  </Grid>
-);
-
-const overviewContent = (
+export const EntityBlockchainContent = () => (
   <Grid container spacing={3} alignItems="stretch">
     {entityWarningContent}
     <Grid item md={6}>
@@ -120,14 +114,18 @@ const overviewContent = (
     <Grid item md={8} xs={12}>
       <EntityHasSubcomponentsCard variant="gridItem" />
     </Grid>
-    {isComponentType('contract') && blockchainContent}
+    {isComponentType('contract') && (
+      <Grid item xs={12}>
+        <EntityBlockchainInsightsCard />
+      </Grid>
+    )}
   </Grid>
 );
 
-const contractDeploymentPage = (
+const ContractDeploymentPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <EntityBlockchainContent />
     </EntityLayout.Route>
     <EntityLayout.Route path="/definition" title="Definition">
       <Grid container spacing={3}>
@@ -139,10 +137,10 @@ const contractDeploymentPage = (
   </EntityLayout>
 );
 
-const serviceEntityPage = (
+const ServiceEntityPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <EntityBlockchainContent />
     </EntityLayout.Route>
 
     {/* <EntityLayout.Route path="/ci-cd" title="CI/CD">
@@ -173,10 +171,10 @@ const serviceEntityPage = (
   </EntityLayout>
 );
 
-const websiteEntityPage = (
+const WebsiteEntityPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <EntityBlockchainContent />
     </EntityLayout.Route>
 
     {/* <EntityLayout.Route path="/ci-cd" title="CI/CD">
@@ -203,10 +201,10 @@ const websiteEntityPage = (
  * https://material-ui.com/components/grid/#basic-grid.
  */
 
-const defaultEntityPage = (
+const DefaultEntityPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <EntityBlockchainContent />
     </EntityLayout.Route>
 
     {/* <EntityLayout.Route path="/docs" title="Docs">
@@ -215,21 +213,23 @@ const defaultEntityPage = (
   </EntityLayout>
 );
 
-const componentPage = (
+const ComponentPage = () => (
   <EntitySwitch>
     <EntitySwitch.Case if={isComponentType('service')}>
-      {serviceEntityPage}
+      <ServiceEntityPage />
     </EntitySwitch.Case>
 
     <EntitySwitch.Case if={isComponentType('website')}>
-      {websiteEntityPage}
+      <WebsiteEntityPage />
     </EntitySwitch.Case>
 
-    <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
+    <EntitySwitch.Case>
+      <DefaultEntityPage />
+    </EntitySwitch.Case>
   </EntitySwitch>
 );
 
-const userPage = (
+const UserPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3}>
@@ -245,7 +245,7 @@ const userPage = (
   </EntityLayout>
 );
 
-const groupPage = (
+const GroupPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3}>
@@ -264,7 +264,7 @@ const groupPage = (
   </EntityLayout>
 );
 
-const systemPage = (
+const SystemPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3} alignItems="stretch">
@@ -311,7 +311,7 @@ const systemPage = (
   </EntityLayout>
 );
 
-const domainPage = (
+const DomainPage = () => (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3} alignItems="stretch">
@@ -330,15 +330,19 @@ const domainPage = (
   </EntityLayout>
 );
 
-export const CustomEntityPage = () => (
+export const BlockchainEntityPage = () => (
   <EntitySwitch>
-    <EntitySwitch.Case if={isKind('component')} children={componentPage} />
-    <EntitySwitch.Case if={isKind('group')} children={groupPage} />
-    <EntitySwitch.Case if={isKind('user')} children={userPage} />
-    <EntitySwitch.Case if={isKind('system')} children={systemPage} />
-    <EntitySwitch.Case if={isKind('domain')} children={domainPage} />
-    <EntitySwitch.Case if={isKind('api')} children={contractDeploymentPage} />
-
-    <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
+    <EntitySwitch.Case if={isKind('component')} children={<ComponentPage />} />
+    <EntitySwitch.Case if={isKind('group')} children={<GroupPage />} />
+    <EntitySwitch.Case if={isKind('user')} children={<UserPage />} />
+    <EntitySwitch.Case if={isKind('system')} children={<SystemPage />} />
+    <EntitySwitch.Case if={isKind('domain')} children={<DomainPage />} />
+    <EntitySwitch.Case
+      if={isKind('api')}
+      children={<ContractDeploymentPage />}
+    />
+    <EntitySwitch.Case>
+      <DefaultEntityPage />
+    </EntitySwitch.Case>
   </EntitySwitch>
 );

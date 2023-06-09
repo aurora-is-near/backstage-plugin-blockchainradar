@@ -1,0 +1,1 @@
+export { BlockchainIndexPage } from './BlockchainIndexPage';
