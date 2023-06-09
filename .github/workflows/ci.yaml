@@ -1,11 +1,11 @@
-name: Lint and tests
+name: CI
 on:
   - pull_request
   - workflow_dispatch
 
 jobs:
-  lint:
-    name: Lint
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     strategy:
