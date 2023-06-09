@@ -27,7 +27,7 @@ jobs:
 
       - run: yarn prettier --check .
 
-      - run: yarn lint:all
+      - run: yarn lint
 
       - run: yarn tsc:full
 
