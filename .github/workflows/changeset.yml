@@ -33,7 +33,7 @@ jobs:
         uses: changesets/action@v1
         with:
           # Calls out to `changeset version`, but also runs prettier
-          version: yarn release
+          version: yarn version
           title: Version Packages - plugins
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
