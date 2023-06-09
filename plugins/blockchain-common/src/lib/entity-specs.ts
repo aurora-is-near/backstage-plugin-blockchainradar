@@ -20,7 +20,7 @@ export type ContractStateSpec = CacheableSpec & {
 };
 
 export type NearKeysSpec = CacheableSpec & {
-  keys: Record<string, string>; // public_key => json serialized permissons
+  keys: Record<string, string>; // public_key => json serialized permissions
 };
 
 export type ContractDeploymentSpec = {
