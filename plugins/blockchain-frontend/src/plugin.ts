@@ -30,7 +30,6 @@ export type {
   AboutFieldProps,
 } from './components/BlockchainInsightsCard';
 
-
 /** @public */
 export const EntityBlockchainInsightsCard: (
   props: BlockchainInsightsCardProps,

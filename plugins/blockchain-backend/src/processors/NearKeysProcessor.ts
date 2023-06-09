@@ -9,7 +9,10 @@ import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { NearKey } from '../entities/NearKey';
-import { isFullAccessKey, NearKeysSpec } from '@aurora-is-near/backstage-plugin-blockchain-common';
+import {
+  isFullAccessKey,
+  NearKeysSpec,
+} from '@aurora-is-near/backstage-plugin-blockchain-common';
 import { NearAdapter } from '../adapters/NearAdapter';
 import {
   isContractDeployment,

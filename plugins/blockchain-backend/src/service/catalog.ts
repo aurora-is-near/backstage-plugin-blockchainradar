@@ -1,10 +1,11 @@
 /* eslint-disable @backstage/no-undeclared-imports */
-import { CatalogBuilder, CatalogEnvironment } from '@backstage/plugin-catalog-backend';
+import {
+  CatalogBuilder,
+  CatalogEnvironment,
+} from '@backstage/plugin-catalog-backend';
 import { EntityProvider } from '@backstage/plugin-catalog-node';
 import { GithubEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
-import {
-  PluginEndpointDiscovery,
-} from '@backstage/backend-common';
+import { PluginEndpointDiscovery } from '@backstage/backend-common';
 import { PluginTaskScheduler } from '@backstage/backend-tasks';
 
 import {
@@ -15,7 +16,7 @@ import {
   SecurityPolicyProcessor,
 } from '@aurora-is-near/backstage-plugin-blockchain-backend';
 
-type PluginEnvironment =CatalogEnvironment & {
+type PluginEnvironment = CatalogEnvironment & {
   discovery: PluginEndpointDiscovery;
   scheduler: PluginTaskScheduler;
 };

@@ -193,7 +193,6 @@ const websiteEntityPage = (
         </Grid>
       </Grid>
     </EntityLayout.Route>
-
   </EntityLayout>
 );
 
