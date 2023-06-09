@@ -1,5 +1,14 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 0.1.5
+
+### Patch Changes
+
+- e9929a8: chore: adjust dev server to use new component naming
+- 21482e8: refactor: adjust frontend exports naming
+- Updated dependencies [0f0114d]
+  - @aurora-is-near/backstage-plugin-blockchain-common@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
