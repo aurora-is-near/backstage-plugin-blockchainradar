@@ -1,9 +1,3 @@
-proxy:
-  '/pagerduty':
-    target: https://api.pagerduty.com
-    headers:
-      Authorization: ${PAGERDUTY_TOKEN}
-
 blockchain:
   etherscan:
     ethereum-mainnet:

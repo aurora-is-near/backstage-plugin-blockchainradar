@@ -317,6 +317,7 @@ export class EtherscanFetcher {
     return {};
   }
 }
+
 export class BackstageEtherscanProvider extends ethers.providers
   .EtherscanProvider {
   constructor(network?: Networkish, apiKey?: string) {

@@ -14,7 +14,7 @@ import {
   NearKeysProcessor,
   SputnikProcessor,
   SecurityPolicyProcessor,
-} from '@aurora-is-near/backstage-plugin-blockchain-backend';
+} from '../processors';
 
 type PluginEnvironment = CatalogEnvironment & {
   discovery: PluginEndpointDiscovery;
@@ -34,7 +34,6 @@ export default async function createPlugin(
     }),
   );
 
-  // builder.addProcessor(new ScaffolderEntitiesProcessor());
   builder.addProcessor(new ContractProcessor(env));
   builder.addProcessor(new MultisigProcessor(env));
   builder.addProcessor(new SputnikProcessor(env));

@@ -182,6 +182,7 @@ export interface BlockchainUser extends UserEntity {
     nearKeys?: NearKeysSpec;
   };
 }
+
 export function isBlockchainUser(entity: Entity): entity is BlockchainUser {
   return isUserEntity(entity);
 }
@@ -191,11 +192,25 @@ export interface ContractComponentEntity extends ComponentEntity {
     type: 'contract';
   };
 }
+
 export function isContractComponent(
   entity: Entity,
 ): entity is ContractComponentEntity {
   return isComponentEntity(entity) && entity.spec.type === 'contract';
 }
+
+export interface MultisigComponentEntity extends ComponentEntity {
+  spec: ComponentEntity['spec'] & {
+    type: 'contract';
+  };
+}
+
+export function isMultisigComponent(
+  entity: Entity,
+): entity is MultisigComponentEntity {
+  return isComponentEntity(entity) && entity.spec.type === 'multisig';
+}
+
 
 type BlockchainAddressSpec = (ApiEntity['spec'] | ResourceEntity['spec']) & {
   lifecycle: string;
@@ -212,6 +227,7 @@ export interface BlockchainAddressEntity extends Entity {
     [Property in keyof BlockchainAddressSpec]: BlockchainAddressSpec[Property];
   };
 }
+
 export function isBlockchainAddress(
   entity: Entity,
 ): entity is BlockchainAddressEntity {
@@ -238,6 +254,7 @@ export interface ContractDeploymentEntity extends ApiEntity {
     [Property in keyof ContractDeploymentSpec]: ContractDeploymentSpec[Property];
   };
 }
+
 // Also processes multisig contracts - needs to fetch the policy
 // from the on-chain state
 export function isContractDeployment(
@@ -291,6 +308,7 @@ export interface SignerEntity extends BlockchainAddressEntity {
     [Property in keyof SignerSpec]: SignerSpec[Property];
   };
 }
+
 export function isSigner(entity: Entity): entity is SignerEntity {
   return isResourceEntity(entity) && entity.spec.type === 'signer-address';
 }
@@ -305,6 +323,7 @@ export interface CouncilEntity extends BlockchainAddressEntity {
     [Property in keyof CouncilSpec]: CouncilSpec[Property];
   };
 }
+
 export function isCouncil(entity: Entity): entity is CouncilEntity {
   return isResourceEntity(entity) && entity.spec.type === 'council-address';
 }
@@ -319,6 +338,7 @@ export interface AccessKeyEntity extends BlockchainAddressEntity {
     [Property in keyof AccessKeySpec]: AccessKeySpec[Property];
   };
 }
+
 export function isAccessKey(entity: Entity): entity is AccessKeyEntity {
   return isResourceEntity(entity) && entity.spec.type === 'access-key';
 }

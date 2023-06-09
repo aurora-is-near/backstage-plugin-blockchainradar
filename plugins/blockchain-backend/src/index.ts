@@ -1,1 +1,1 @@
-export * from './processors';
+export * from './plugin';
