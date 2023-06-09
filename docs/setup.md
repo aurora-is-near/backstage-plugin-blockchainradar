@@ -16,7 +16,7 @@ Add the plugin to your backend app:
 
 ```bash
 cd packages/backend
-yarn add @aurora-is-near/backstage-plugin-blockchain-common @aurora-is-near/backstage-plugin-blockchain-frontend"
+yarn add @aurora-is-near/backstage-plugin-blockchain-common @aurora-is-near/backstage-plugin-blockchain-backend
 ```
 
 Change `packages/backend/src/plugins/catalog.ts`:
@@ -43,7 +43,7 @@ export default async function createPlugin(
     }),
   );
 
-  builder.addProcessor(new ScaffolderEntitiesProcessor());
+  // ... other processors
   builder.addProcessor(new ContractProcessor(env));
   builder.addProcessor(new MultisigProcessor(env));
   builder.addProcessor(new SputnikProcessor(env));
@@ -73,17 +73,15 @@ export default async function createPlugin(
 In `packages/backend/src/index.ts` add the following:
 
 ```ts
-import announcements from './plugins/announcements';
+import catalog from './plugins/catalog';
 
 // ...
 async function main() {
   // ...
-  const announcementsEnv = useHotMemoize(module, () =>
-    createEnv('announcements'),
-  );
+  const catalogEnv = useHotMemoize(module, () => createEnv('catalog'));
 
   const apiRouter = Router();
-  apiRouter.use('/announcements', await announcements(announcementsEnv));
+  apiRouter.use('/catalog', await catalog(catalogEnv));
   // ...
 }
 ```
@@ -94,10 +92,47 @@ Add the plugin to your frontend app:
 
 ```bash
 cd packages/app
-yarn add @aurora-is-near/backstage-plugin-blockchain-common @aurora-is-near/backstage-plugin-blockchain-backend"
+yarn add @aurora-is-near/backstage-plugin-blockchain-common @aurora-is-near/backstage-plugin-blockchain-frontend
 ```
 
-Expose the entity card on `packages/app/src/components/catalog/EntityPage.tsx`
+Setup app instance and routes for catalog page components in `packages/app/src/App.tsx`:
+
+```ts
+import {
+  blockchainPlugin,
+  BlockchainIndexPage,
+  BlockchainEntityPage,
+} from '@aurora-is-near/backstage-plugin-frontend';
+
+const app = createApp({
+  // ...
+  bindRoutes({ bind }) {
+    // ...
+    bind(orgPlugin.externalRoutes, {
+      catalogIndex: blockchainPlugin.routes.catalogPage,
+    });
+  },
+});
+
+// ...
+
+const routes = (
+  <FlatRoutes>
+    <Route path="/catalog" element={<CatalogIndexPage />}>
+      <BlockchainIndexPage />
+    </Route>
+    <Route
+      path="/catalog/:namespace/:kind/:name"
+      element={<CatalogEntityPage />}
+    >
+      <BlockchainEntityPage />
+    </Route>
+    <Route path="/catalog-graph" element={<CatalogGraphPage />} />
+  </FlatRoutes>
+);
+```
+
+Alternatively, expose components into your custom pages: `packages/app/src/components/catalog/EntityPage.tsx`
 
 ```ts
 import { EntityBlockchainInsightsCard } from '@aurora-is-near/backstage-plugin-blockchain-frontend';
