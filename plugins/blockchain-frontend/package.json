@@ -35,7 +35,6 @@
     "@backstage/plugin-catalog-graph": "^0.2.30",
     "@backstage/plugin-catalog-react": "^1.6.0",
     "@backstage/plugin-org": "^0.6.8",
-    "@backstage/plugin-pagerduty": "^0.5.11",
     "@backstage/theme": "^0.3.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",

@@ -178,7 +178,6 @@ __metadata:
     "@backstage/plugin-catalog-graph": ^0.2.30
     "@backstage/plugin-catalog-react": ^1.6.0
     "@backstage/plugin-org": ^0.6.8
-    "@backstage/plugin-pagerduty": ^0.5.11
     "@backstage/test-utils": ^1.3.1
     "@backstage/theme": ^0.3.0
     "@emotion/react": ^11.11.0
@@ -3680,31 +3679,6 @@ __metadata:
     react-dom: ^16.13.1 || ^17.0.0
     react-router-dom: 6.0.0-beta.0 || ^6.3.0
   checksum: 67a2cbbdf61e592ed4e0a6ac24d68f5b64ff7dce5f6c0e166ce86c3bea22e0a1c4f1f3ba055c354f65f0cb7f987bdc77419c63f04440e78174edb8d4fec987df
-  languageName: node
-  linkType: hard
-
-"@backstage/plugin-pagerduty@npm:^0.5.11":
-  version: 0.5.11
-  resolution: "@backstage/plugin-pagerduty@npm:0.5.11"
-  dependencies:
-    "@backstage/catalog-model": ^1.3.0
-    "@backstage/core-components": ^0.13.1
-    "@backstage/core-plugin-api": ^1.5.1
-    "@backstage/errors": ^1.1.5
-    "@backstage/plugin-catalog-react": ^1.6.0
-    "@backstage/theme": ^0.3.0
-    "@material-ui/core": ^4.12.2
-    "@material-ui/icons": ^4.9.1
-    "@material-ui/lab": 4.0.0-alpha.61
-    "@types/react": ^16.13.1 || ^17.0.0
-    classnames: ^2.2.6
-    luxon: ^3.0.0
-    react-use: ^17.2.4
-  peerDependencies:
-    react: ^16.13.1 || ^17.0.0
-    react-dom: ^16.13.1 || ^17.0.0
-    react-router-dom: 6.0.0-beta.0 || ^6.3.0
-  checksum: 5c8e68230b3d6f94e48213c1645373d984eb42fbc9275f587c82ffff00264102c03fd86b539c3635265fffc863fd91410da4478487b2008ad1e5e5a826479333
   languageName: node
   linkType: hard
 

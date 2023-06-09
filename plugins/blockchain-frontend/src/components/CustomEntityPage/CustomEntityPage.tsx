@@ -49,10 +49,6 @@ import {
   RELATION_PART_OF,
   RELATION_PROVIDES_API,
 } from '@backstage/catalog-model';
-import {
-  isPluginApplicableToEntity as isPagerDutyAvailable,
-  EntityPagerDutyCard,
-} from '@backstage/plugin-pagerduty';
 import { BlockchainInsightsCard as EntityBlockchainInsightsCard } from '../BlockchainInsightsCard';
 
 // const cicdContent = (
@@ -124,13 +120,6 @@ const overviewContent = (
     <Grid item md={8} xs={12}>
       <EntityHasSubcomponentsCard variant="gridItem" />
     </Grid>
-    <EntitySwitch>
-      <EntitySwitch.Case if={isPagerDutyAvailable}>
-        <Grid item md={6}>
-          <EntityPagerDutyCard />
-        </Grid>
-      </EntitySwitch.Case>
-    </EntitySwitch>
     {isComponentType('contract') && blockchainContent}
   </Grid>
 );
@@ -271,13 +260,6 @@ const groupPage = (
         <Grid item xs={12}>
           <EntityMembersListCard />
         </Grid>
-        <EntitySwitch>
-          <EntitySwitch.Case if={isPagerDutyAvailable}>
-            <Grid item md={12}>
-              <EntityPagerDutyCard />
-            </Grid>
-          </EntitySwitch.Case>
-        </EntitySwitch>
       </Grid>
     </EntityLayout.Route>
   </EntityLayout>
@@ -306,13 +288,6 @@ const systemPage = (
         <Grid item md={6}>
           <EntityHasResourcesCard variant="gridItem" />
         </Grid>
-        <EntitySwitch>
-          <EntitySwitch.Case if={isPagerDutyAvailable}>
-            <Grid item md={12}>
-              <EntityPagerDutyCard />
-            </Grid>
-          </EntitySwitch.Case>
-        </EntitySwitch>
       </Grid>
     </EntityLayout.Route>
     <EntityLayout.Route path="/diagram" title="Diagram">
