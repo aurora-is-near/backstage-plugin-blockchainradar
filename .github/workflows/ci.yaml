@@ -25,6 +25,8 @@ jobs:
 
       - run: yarn install --immutable
 
+      - run: yarn prettier --check .
+
       - run: yarn lint:all
 
       - run: yarn tsc
