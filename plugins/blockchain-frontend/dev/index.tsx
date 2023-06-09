@@ -14,11 +14,9 @@ import { apiDocsPlugin } from '@backstage/plugin-api-docs';
 import { orgPlugin } from '@backstage/plugin-org';
 import { Grid, Typography } from '@material-ui/core';
 
-import {
-  blockchainPlugin,
-  BlockchainIndexPage,
-  BlockchainEntityPage,
-} from '../src/plugin';
+import { blockchainPlugin } from '../src/plugin';
+import { BlockchainIndexPage } from '../src/components/BlockchainIndexPage';
+import { BlockchainEntityPage } from '../src/components/BlockchainEntityPage';
 
 createDevApp()
   .registerPlugin(catalogPlugin)
