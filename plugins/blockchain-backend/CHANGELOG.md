@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 0.1.4
+
+### Patch Changes
+
+- b255410: build: remove unrelated plugins and cleanup
+
 ## 0.1.3
 
 ### Patch Changes
