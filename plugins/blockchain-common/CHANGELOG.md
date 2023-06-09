@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 0.1.5
+
+### Patch Changes
+
+- 0f0114d: chore: fix typo in entity specs
+
 ## 0.1.3
 
 ### Patch Changes

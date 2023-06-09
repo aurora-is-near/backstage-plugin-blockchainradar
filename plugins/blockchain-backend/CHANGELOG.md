@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 0.1.5
+
+### Patch Changes
+
+- 4da72cc: refactor: backend exports and cleanup
+- Updated dependencies [0f0114d]
+  - @aurora-is-near/backstage-plugin-blockchain-common@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
