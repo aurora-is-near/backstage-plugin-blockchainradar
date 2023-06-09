@@ -22,6 +22,13 @@ jobs:
 
       - name: Install Dependencies
         run: yarn --frozen-lockfile
+      - name: Creating .npmrc
+        run: |
+          cat << EOF > "$HOME/.npmrc"
+            //npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release Pull Request
         uses: changesets/action@v1
         with:
