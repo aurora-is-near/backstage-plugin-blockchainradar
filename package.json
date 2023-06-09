@@ -20,7 +20,7 @@
     "lint:all": "backstage-cli repo lint",
     "version": "changeset version",
     "release": "changeset publish",
-    "publish:github": "lerna publish from-package --yes",
+    "lerna:publish": "lerna publish from-package --yes",
     "prepare": "husky install",
     "postinstall": "husky install || true"
   },

@@ -2,8 +2,6 @@ name: on release
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
 
 jobs:
   publish-github-registry:
@@ -15,13 +13,13 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           registry-url: https://npm.pkg.github.com/
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - name: Build type declarations
         run: yarn tsc
       - name: Build packages
         run: yarn build
-      - run: yarn publish:github
+      - run: yarn lerna:publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

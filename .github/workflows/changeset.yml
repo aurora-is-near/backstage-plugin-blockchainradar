@@ -8,8 +8,8 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  create-release-pr:
-    name: Create Changeset PR
+  create-release-pr-or-publish:
+    name: Create Changeset PR or Publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
           registry-url: https://npm.pkg.github.com/
 
       - name: Install Dependencies
-        run: yarn --frozen-lockfile
+        run: yarn --immutable
       - name: Creating .npmrc
         run: |
           cat << EOF > "$HOME/.npmrc"
