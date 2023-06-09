@@ -211,7 +211,6 @@ export function isMultisigComponent(
   return isComponentEntity(entity) && entity.spec.type === 'multisig';
 }
 
-
 type BlockchainAddressSpec = (ApiEntity['spec'] | ResourceEntity['spec']) & {
   lifecycle: string;
   address: string;

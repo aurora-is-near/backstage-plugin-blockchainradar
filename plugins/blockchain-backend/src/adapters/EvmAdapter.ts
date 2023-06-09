@@ -1,7 +1,10 @@
 import Web3 from 'web3';
 import { BlockchainAdapter } from './BlockchainAdapter';
 import { ethers } from 'ethers';
-import { BackstageEtherscanProvider, EtherscanFetcher } from '../lib/EtherscanFetcher';
+import {
+  BackstageEtherscanProvider,
+  EtherscanFetcher,
+} from '../lib/EtherscanFetcher';
 import {
   ContractSourceSpec,
   ContractStateSpec,
