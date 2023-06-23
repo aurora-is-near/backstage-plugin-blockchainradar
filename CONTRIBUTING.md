@@ -13,6 +13,7 @@ This plugin is released under the CC 1.0 License, and original creations contrib
 So...feel ready to jump in? Let's do this. 👏🏻💯
 
 In the repository's root, write an app-config with data sources for the catalog (look at example usage), install plugin's dependencies and start the development server.
+
 ```bash
 # Modify app-config with entity data sources
 cp app-config.example.yaml app-config.local.yaml
@@ -55,4 +56,3 @@ For more information, check out [adding a changeset](https://github.com/atlassia
 ## Merging to Main
 
 For those contributors who have earned write access to the repository, when a pull request is approved, in general we prefer the author of the PR to perform the merge themselves. This allows them to own accountability for the change and they likely know best how or when to address pending fixes or additional follow-ups. In this way, we all help contribute to the project's successful outcomes.
-
