@@ -14,7 +14,7 @@ import { Config, JsonValue } from '@backstage/config';
 import { CatalogProcessorCache } from '@backstage/plugin-catalog-backend';
 import { Mutex } from 'async-mutex';
 import { TrackedRun } from '../lib/TrackedRun';
-import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchain-common';
+import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { PluginEndpointDiscovery } from '@backstage/backend-common';
 
 interface PluginEnvironment {

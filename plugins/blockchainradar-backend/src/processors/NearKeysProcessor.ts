@@ -12,7 +12,7 @@ import { NearKey } from '../entities/NearKey';
 import {
   isFullAccessKey,
   NearKeysSpec,
-} from '@aurora-is-near/backstage-plugin-blockchain-common';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { NearAdapter } from '../adapters/NearAdapter';
 import {
   isContractDeployment,

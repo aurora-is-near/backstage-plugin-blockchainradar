@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "concurrently \"yarn start\" \"yarn start-backend\"",
-    "start": "yarn workspace @aurora-is-near/backstage-plugin-blockchain-frontend start",
-    "start-backend": "yarn workspace @aurora-is-near/backstage-plugin-blockchain-backend start",
+    "start": "yarn workspace @aurora-is-near/backstage-plugin-blockchainradar-frontend start",
+    "start-backend": "yarn workspace @aurora-is-near/backstage-plugin-blockchainradar-backend start",
     "start:ci": "concurrently \"yarn start\" \"yarn start-backend:ci\"",
     "build": "backstage-cli repo build --all",
     "tsc": "tsc",

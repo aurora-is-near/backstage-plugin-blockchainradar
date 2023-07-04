@@ -1,12 +1,12 @@
 {
-  "name": "@aurora-is-near/backstage-plugin-blockchain-frontend",
+  "name": "@aurora-is-near/backstage-plugin-blockchainradar-frontend",
   "version": "0.1.5",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "license": "CC0-1.0",
   "publishConfig": {
     "access": "public",
-    "registry": "https://npm.pkg.github.com",
+    "registry": "https://registry.npmjs.org",
     "main": "dist/index.esm.js",
     "types": "dist/index.d.ts"
   },
@@ -47,7 +47,7 @@
     "react-use": "^17.2.4"
   },
   "peerDependencies": {
-    "@aurora-is-near/backstage-plugin-blockchain-common": "*",
+    "@aurora-is-near/backstage-plugin-blockchainradar-common": "*",
     "react": "^16.13.1 || ^17.0.0",
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0"

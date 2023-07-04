@@ -9,7 +9,7 @@ import { SafeClient } from '../lib/SafeClient';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { ContractComponent } from '../entities/ContractComponent';
-import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchain-common';
+import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import {
   BlockchainUser,
   isBlockchainUser,
