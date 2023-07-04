@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 0.1.7
+
+### Patch Changes
+
+- f9ee258: docs: update git repo links in packages
+
 ## 0.1.6
 
 ### Patch Changes
