@@ -14,7 +14,7 @@ import {
   ContractDeploymentSpec as DeploymentSpec,
   MultisigSpec,
   NearKeysSpec,
-} from '@aurora-is-near/backstage-plugin-blockchain-common';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 export interface NetworkInfo {
   name: string;

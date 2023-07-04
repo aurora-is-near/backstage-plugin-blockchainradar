@@ -98,9 +98,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aurora-is-near/backstage-plugin-blockchain-backend@workspace:plugins/blockchain-backend":
+"@aurora-is-near/backstage-plugin-blockchainradar-backend@workspace:plugins/blockchainradar-backend":
   version: 0.0.0-use.local
-  resolution: "@aurora-is-near/backstage-plugin-blockchain-backend@workspace:plugins/blockchain-backend"
+  resolution: "@aurora-is-near/backstage-plugin-blockchainradar-backend@workspace:plugins/blockchainradar-backend"
   dependencies:
     "@backstage/backend-common": ^0.18.5
     "@backstage/catalog-client": ^1.4.1
@@ -144,14 +144,14 @@ __metadata:
     web3-utils: ^1.8.1
     winston: ^3.7.2
   peerDependencies:
-    "@aurora-is-near/backstage-plugin-blockchain-common": "*"
+    "@aurora-is-near/backstage-plugin-blockchainradar-common": "*"
     react: ^16.13.1 || ^17.0.0
   languageName: unknown
   linkType: soft
 
-"@aurora-is-near/backstage-plugin-blockchain-common@workspace:plugins/blockchain-common":
+"@aurora-is-near/backstage-plugin-blockchainradar-common@workspace:plugins/blockchainradar-common":
   version: 0.0.0-use.local
-  resolution: "@aurora-is-near/backstage-plugin-blockchain-common@workspace:plugins/blockchain-common"
+  resolution: "@aurora-is-near/backstage-plugin-blockchainradar-common@workspace:plugins/blockchainradar-common"
   dependencies:
     "@backstage/cli": ^0.22.7
     "@backstage/core-app-api": ^1.8.0
@@ -163,9 +163,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@aurora-is-near/backstage-plugin-blockchain-frontend@workspace:plugins/blockchain-frontend":
+"@aurora-is-near/backstage-plugin-blockchainradar-frontend@workspace:plugins/blockchainradar-frontend":
   version: 0.0.0-use.local
-  resolution: "@aurora-is-near/backstage-plugin-blockchain-frontend@workspace:plugins/blockchain-frontend"
+  resolution: "@aurora-is-near/backstage-plugin-blockchainradar-frontend@workspace:plugins/blockchainradar-frontend"
   dependencies:
     "@backstage/catalog-model": ^1.3.0
     "@backstage/cli": ^0.22.7
@@ -197,7 +197,7 @@ __metadata:
     msw: ^0.35.0
     react-use: ^17.2.4
   peerDependencies:
-    "@aurora-is-near/backstage-plugin-blockchain-common": "*"
+    "@aurora-is-near/backstage-plugin-blockchainradar-common": "*"
     react: ^16.13.1 || ^17.0.0
     react-router: ^6.3.0
     react-router-dom: ^6.3.0

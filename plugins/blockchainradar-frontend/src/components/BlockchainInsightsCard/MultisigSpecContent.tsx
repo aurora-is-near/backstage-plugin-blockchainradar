@@ -1,6 +1,6 @@
 import { Entity } from '@backstage/catalog-model';
 import { Grid } from '@material-ui/core';
-import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchain-common';
+import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import React from 'react';
 
 import { DiscoveredStateField } from './DiscoveredStateField';

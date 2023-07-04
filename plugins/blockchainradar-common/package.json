@@ -1,5 +1,5 @@
 {
-  "name": "@aurora-is-near/backstage-plugin-blockchain-common",
+  "name": "@aurora-is-near/backstage-plugin-blockchainradar-common",
   "version": "0.1.5",
   "main": "src/index.ts",
   "types": "src/index.ts",
