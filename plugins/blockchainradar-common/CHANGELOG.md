@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 0.1.6
+
+### Patch Changes
+
+- 1d9f34a: chore: rebrand to blockchainradar
+
 ## 0.1.5
 
 ### Patch Changes
