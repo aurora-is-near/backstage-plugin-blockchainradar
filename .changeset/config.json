@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["@aurora-is-near/backstage-plugin-blockchain-*"]],
+  "linked": [["@aurora-is-near/backstage-plugin-blockchainradar-*"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
