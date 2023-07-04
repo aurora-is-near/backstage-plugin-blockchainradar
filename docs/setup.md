@@ -16,7 +16,7 @@ Add the plugin to your backend app:
 
 ```bash
 cd packages/backend
-yarn add @aurora-is-near/backstage-plugin-blockchain-common @aurora-is-near/backstage-plugin-blockchain-backend
+yarn add @aurora-is-near/backstage-plugin-blockchainradar-common @aurora-is-near/backstage-plugin-blockchainradar-backend
 ```
 
 Change `packages/backend/src/plugins/catalog.ts`:
@@ -28,7 +28,7 @@ import {
   SputnikProcessor,
   NearKeysProcessor,
   SecurityPolicyProcessor,
-} from '@aurora-is-near/backstage-plugin-blockchain-backend';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-backend';
 
 export default async function createPlugin(
   env: PluginEnvironment,
@@ -92,7 +92,7 @@ Add the plugin to your frontend app:
 
 ```bash
 cd packages/app
-yarn add @aurora-is-near/backstage-plugin-blockchain-common @aurora-is-near/backstage-plugin-blockchain-frontend
+yarn add @aurora-is-near/backstage-plugin-blockchainradar-common @aurora-is-near/backstage-plugin-blockchainradar-frontend
 ```
 
 Setup app instance and routes for catalog page components in `packages/app/src/App.tsx`:
@@ -102,7 +102,7 @@ import {
   blockchainPlugin,
   BlockchainIndexPage,
   BlockchainEntityPage,
-} from '@aurora-is-near/backstage-plugin-frontend';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-frontend';
 
 const app = createApp({
   // ...
@@ -135,7 +135,7 @@ const routes = (
 Alternatively, expose components into your custom pages: `packages/app/src/components/catalog/EntityPage.tsx`
 
 ```ts
-import { EntityBlockchainInsightsCard } from '@aurora-is-near/backstage-plugin-blockchain-frontend';
+import { EntityBlockchainInsightsCard } from '@aurora-is-near/backstage-plugin-blockchainradar-frontend';
 
 /// somewhere at the bottom of the page
 <Grid item xs={12}>
