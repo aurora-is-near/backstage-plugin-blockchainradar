@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 0.1.7
+
+### Patch Changes
+
+- f9ee258: docs: update git repo links in packages
+- Updated dependencies [f9ee258]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes
