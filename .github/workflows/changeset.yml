@@ -18,17 +18,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          registry-url: https://npm.pkg.github.com/
 
       - name: Install Dependencies
         run: yarn --immutable
       - name: Creating .npmrc
         run: |
           cat << EOF > "$HOME/.npmrc"
-            //npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
+            //registry.npmjs.org/:_authToken=$NPM_TOKEN
           EOF
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
@@ -36,5 +35,4 @@ jobs:
           publish: yarn release
           title: Version Packages - plugins
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
