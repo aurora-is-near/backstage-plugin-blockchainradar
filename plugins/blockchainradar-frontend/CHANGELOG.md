@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 0.1.8
+
+### Patch Changes
+
+- c2cc588: ci: build packages on release
+- Updated dependencies [c2cc588]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@0.1.8
+
 ## 0.1.7
 
 ### Patch Changes

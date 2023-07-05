@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 0.1.8
+
+### Patch Changes
+
+- c2cc588: ci: build packages on release
+
 ## 0.1.7
 
 ### Patch Changes
