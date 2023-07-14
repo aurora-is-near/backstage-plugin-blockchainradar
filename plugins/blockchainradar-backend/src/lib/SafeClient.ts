@@ -56,7 +56,7 @@ export class SafeClient {
     if (this.safeAddress.network === 'aurora') {
       subdomain = 'aurora';
     }
-    return `https://safe-transaction.${subdomain}.gnosis.io/api`;
+    return `https://safe-transaction-${subdomain}.safe.global/api`;
   }
 
   private astroDaoUrl() {
