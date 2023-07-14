@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 0.1.9
+
+### Patch Changes
+
+- 66846b4: fix: use new safe api domain
+
 ## 0.1.8
 
 ### Patch Changes
