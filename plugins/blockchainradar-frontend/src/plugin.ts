@@ -7,12 +7,11 @@ import {
 import { rootRouteRef } from './routes';
 
 /** @public */
-export { AboutContent, AboutField } from './components/BlockchainInsightsCard';
-export type {
-  BlockchainInsightsCardProps,
-  AboutContentProps,
-  AboutFieldProps,
-} from './components/BlockchainInsightsCard';
+export { AboutContent } from './components/AboutContent';
+export { AboutField } from './components/AboutField';
+export type { AboutContentProps } from './components/AboutContent';
+export type { AboutFieldProps } from './components/AboutField';
+export type { BlockchainInsightsCardProps } from './components/BlockchainInsightsCard';
 
 export const blockchainPlugin = createPlugin({
   id: 'blockchain-catalog',
@@ -23,6 +22,7 @@ export const blockchainPlugin = createPlugin({
 
 export const BlockchainIndexPage = blockchainPlugin.provide(
   createRoutableExtension({
+    name: 'BlockchainIndexPage',
     component: () =>
       import('./components/BlockchainIndexPage').then(
         m => m.BlockchainIndexPage,
@@ -30,10 +30,10 @@ export const BlockchainIndexPage = blockchainPlugin.provide(
     mountPoint: rootRouteRef,
   }),
 );
-export const CustomCatalogPage = BlockchainIndexPage;
 
 export const BlockchainEntityPage = blockchainPlugin.provide(
   createRoutableExtension({
+    name: 'BlockchainEntityPage',
     component: () =>
       import('./components/BlockchainEntityPage').then(
         m => m.BlockchainEntityPage,
@@ -41,7 +41,6 @@ export const BlockchainEntityPage = blockchainPlugin.provide(
     mountPoint: rootRouteRef,
   }),
 );
-export const CustomEntityPage = BlockchainEntityPage;
 
 export const EntityBlockchainContent = blockchainPlugin.provide(
   createComponentExtension({

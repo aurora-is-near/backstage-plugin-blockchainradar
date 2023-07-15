@@ -3,7 +3,7 @@ import { makeStyles, Typography } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { JsonViewer } from '@textea/json-viewer';
 import { FetchDateField } from './FetchDateField';
-import { AboutField } from './AboutField';
+import { AboutField } from '../AboutField';
 import { DiscoveredStateTable } from './DiscoveredStateTable';
 
 const useStyles = makeStyles({

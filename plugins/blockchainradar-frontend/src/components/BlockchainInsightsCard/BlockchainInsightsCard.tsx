@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 
 import React from 'react';
-import { AboutContent } from './AboutContent';
+import { AboutContent } from '../AboutContent';
 import { ContractSpecContent } from './ContractSpecContent';
 import { MultisigSpecContent } from './MultisigSpecContent';
 import { NearKeysContent } from './NearKeysContent';
