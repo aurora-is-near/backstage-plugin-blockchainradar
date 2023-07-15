@@ -2,7 +2,7 @@ import { Entity } from '@backstage/catalog-model';
 import { Grid } from '@material-ui/core';
 import { ContractDeploymentSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import React from 'react';
-import { AboutField } from './AboutField';
+import { AboutField } from '../AboutField';
 
 import { DiscoveredStateField } from './DiscoveredStateField';
 

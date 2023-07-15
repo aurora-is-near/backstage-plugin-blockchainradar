@@ -206,10 +206,6 @@ const DefaultEntityPage = () => (
     <EntityLayout.Route path="/" title="Overview">
       <EntityBlockchainContent />
     </EntityLayout.Route>
-
-    {/* <EntityLayout.Route path="/docs" title="Docs">
-      <EntityTechdocsContent />
-    </EntityLayout.Route> */}
   </EntityLayout>
 );
 
