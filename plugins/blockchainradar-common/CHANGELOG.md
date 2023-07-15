@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 0.1.10
+
+### Patch Changes
+
+- c843255: refactor: update backstage dependencies, cleanup component structure
+
 ## 0.1.8
 
 ### Patch Changes
