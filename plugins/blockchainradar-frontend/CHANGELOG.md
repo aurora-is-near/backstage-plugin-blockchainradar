@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 0.1.10
+
+### Patch Changes
+
+- c843255: refactor: update backstage dependencies, cleanup component structure
+- Updated dependencies [c843255]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@0.1.10
+
 ## 0.1.8
 
 ### Patch Changes
