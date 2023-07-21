@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 0.1.11
+
+### Patch Changes
+
+- ebd289c: feat: add SignerContent to BlockchainInsightsCard
+- Updated dependencies [a487982]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes
