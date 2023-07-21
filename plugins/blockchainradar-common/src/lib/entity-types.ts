@@ -1,3 +1,4 @@
+// eslint-disable-next-line @backstage/no-undeclared-imports
 import {
   ApiEntity,
   ComponentEntity,
