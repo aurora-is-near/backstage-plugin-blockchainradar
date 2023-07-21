@@ -126,7 +126,7 @@ export class MultisigProcessor extends BlockchainProcessor {
     );
     const lastTx = await evmAdapter.fetchLastTransaction(entity.spec.address);
     const lastSignatureTimestamp = lastTx?.timeStamp;
-    entity.spec.lastSigned = parseInt(lastSignatureTimestamp || "0") * 1000;
+    entity.spec.lastSigned = parseInt(lastSignatureTimestamp || '0') * 1000;
     return entity;
   }
 
