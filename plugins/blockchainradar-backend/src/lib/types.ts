@@ -299,6 +299,7 @@ export function isMultisigDeployment(
 
 type SignerSpec = Omit<BlockchainAddressEntity['spec'], 'type'> & {
   type: 'signer-address';
+  lastSigned: number;
 };
 
 export interface SignerEntity extends BlockchainAddressEntity {

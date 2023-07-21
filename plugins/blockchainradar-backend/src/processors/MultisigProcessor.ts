@@ -5,18 +5,21 @@ import {
 } from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
+import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { SafeClient } from '../lib/SafeClient';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { ContractComponent } from '../entities/ContractComponent';
-import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import {
   BlockchainUser,
   isBlockchainUser,
   isMultisigComponent,
   isMultisigDeployment,
+  isSigner,
   MultisigDeploymentEntity,
+  SignerEntity,
 } from '../lib/types';
+import { EvmAdapter } from '../adapters/EvmAdapter';
 
 export class MultisigProcessor extends BlockchainProcessor {
   async postProcessEntity?(
@@ -31,6 +34,8 @@ export class MultisigProcessor extends BlockchainProcessor {
       return this.processMultisigDeployment(entity, location, emit);
     } else if (isBlockchainUser(entity)) {
       return this.processBlockchainUser(entity, location, emit);
+    } else if (isSigner(entity) && entity.spec.network !== 'near') {
+      return this.processSigner(entity);
     }
     return entity;
   }
@@ -110,6 +115,18 @@ export class MultisigProcessor extends BlockchainProcessor {
       );
     }
     entity.spec.multisig = multisigSpec;
+    return entity;
+  }
+
+  async processSigner(entity: SignerEntity) {
+    const evmAdapter = new EvmAdapter(
+      this.config,
+      entity.spec.network,
+      entity.spec.networkType,
+    );
+    const lastTx = await evmAdapter.fetchLastTransaction(entity.spec.address);
+    const lastSignatureTimestamp = lastTx?.timeStamp;
+    entity.spec.lastSigned = parseInt(lastSignatureTimestamp || "0") * 1000;
     return entity;
   }
 

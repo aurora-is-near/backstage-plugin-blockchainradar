@@ -1,9 +1,6 @@
 import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
-import {
-  ContractSourceSpec,
-  ContractStateSpec,
-} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { ContractSourceSpec, ContractStateSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 export abstract class BlockchainAdapter {
   config: Config;

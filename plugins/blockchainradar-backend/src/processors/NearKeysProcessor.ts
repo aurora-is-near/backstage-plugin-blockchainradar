@@ -2,7 +2,7 @@ import {
   CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 
@@ -23,6 +23,7 @@ import {
   ContractDeploymentEntity,
   BlockchainUser,
 } from '../lib/types';
+import { NearBlocksClient } from '../lib/NearBlocksClient';
 import { AdapterFactory } from '../adapters/AdapterFactory';
 
 export class NearKeysProcessor extends BlockchainProcessor {
@@ -78,7 +79,9 @@ export class NearKeysProcessor extends BlockchainProcessor {
       if (this.isAcceptableNearAddress(entity)) {
         if (isContractDeployment(entity)) {
           await this.processContract(entity, cache, emit, location);
-        } else await this.processNonContract(entity, cache, emit, location);
+        } else {
+          return this.processNonContract(entity, cache, emit, location);
+        }
       }
     }
     return entity;
@@ -141,38 +144,54 @@ export class NearKeysProcessor extends BlockchainProcessor {
     emit: CatalogProcessorEmit,
     location: LocationSpec,
   ) {
+    if (isSigner(entity)) {
+      const nearBlocksClient = new NearBlocksClient(entity.spec.address);
+      const lastTx = await nearBlocksClient.getLastTransaction();
+      const lastSignatureTimestamp = Math.floor(
+        parseInt(lastTx.block_timestamp) / 10 ** 6,
+      );
+      entity.spec.lastSigned = lastSignatureTimestamp;
+    }
+
     const keysSpec = await this.fetchNearKeys(entity, cache);
-    if (!keysSpec) return;
+    if (keysSpec) {
+      entity.spec.nearKeys = keysSpec;
+      if (Object.keys(keysSpec.keys).length === 0)
+        this.appendTags(entity, 'locked');
 
-    entity.spec.nearKeys = keysSpec;
-    if (Object.keys(keysSpec.keys).length === 0)
-      this.appendTags(entity, 'locked');
+      for (const [publicKey, perms] of Object.entries(keysSpec.keys)) {
+        if (!isFullAccessKey(perms)) continue;
 
-    for (const [publicKey, perms] of Object.entries(keysSpec.keys)) {
-      if (!isFullAccessKey(perms)) continue;
-
-      if (isSigner(entity) && entity.metadata.namespace === 'default') {
-        const addr = await BlockchainFactory.fromEntity(this, entity, 'signer');
-        const owner = await this.catalogClient.getEntityByRef(
-          entity.spec.owner,
-        );
-        const nearKey = new NearKey(this, owner || addr.parent, publicKey);
-        const key = nearKey.toEntity();
-        const isDeprecated = addr.parent.metadata.tags?.includes('deprecated');
-        if (isDeprecated) {
-          this.appendTags(key, 'deprecated');
-        }
-        emit(processingResult.entity(location, key));
-        nearKey.emitActsOn(emit, entity);
-      } else {
-        const nearKey = new NearKey(this, entity, publicKey);
-        await nearKey.stubOrFind(this.catalogClient);
-        const key = nearKey.toEntity();
-        if (nearKey.stub) {
+        if (isSigner(entity) && entity.metadata.namespace === 'default') {
+          const addr = await BlockchainFactory.fromEntity(
+            this,
+            entity,
+            'signer',
+          );
+          const owner = await this.catalogClient.getEntityByRef(
+            entity.spec.owner,
+          );
+          const nearKey = new NearKey(this, owner || addr.parent, publicKey);
+          const key = nearKey.toEntity();
+          const isDeprecated =
+            addr.parent.metadata.tags?.includes('deprecated');
+          if (isDeprecated) {
+            this.appendTags(key, 'deprecated');
+          }
           emit(processingResult.entity(location, key));
+          nearKey.emitActsOn(emit, entity);
+        } else {
+          const nearKey = new NearKey(this, entity, publicKey);
+          await nearKey.stubOrFind(this.catalogClient);
+          const key = nearKey.toEntity();
+          if (nearKey.stub) {
+            emit(processingResult.entity(location, key));
+          }
+          nearKey.emitActsOn(emit, entity);
         }
-        nearKey.emitActsOn(emit, entity);
       }
     }
+
+    return entity;
   }
 }

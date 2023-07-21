@@ -113,4 +113,17 @@ export class EvmAdapter extends BlockchainAdapter {
     }
     return stateSpec;
   }
+
+  async fetchLastTransaction(address: string) {
+    const creds = this.etherscanCreds();
+    const fetcher = new EtherscanFetcher(creds.network, creds.apiKey);
+
+    try {
+      const { result } = await fetcher.fetchTransactions(address);
+      return result.length > 0 ? result[0] : undefined;
+    } catch (err) {
+      this.logger.warn(`unable to fetch transactions for ${address}`);
+      return undefined;
+    }
+  }
 }
