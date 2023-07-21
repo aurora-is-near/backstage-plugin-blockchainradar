@@ -56,8 +56,8 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
       const ownerRefs =
         multisigFromApi && multisigFromApi.relations
           ? multisigFromApi.relations
-            .filter(r => r.type === RELATION_OWNED_BY)
-            .map(r => parseEntityRef(r.targetRef))
+              .filter(r => r.type === RELATION_OWNED_BY)
+              .map(r => parseEntityRef(r.targetRef))
           : [];
       logger.debug(`${entity.metadata.name} owners: ${ownerRefs.length}`);
 
@@ -109,8 +109,8 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
       const consumerRefs =
         contractFromApi && contractFromApi.relations
           ? contractFromApi.relations
-            .filter(r => r.type === RELATION_API_CONSUMED_BY)
-            .map(r => parseEntityRef(r.targetRef))
+              .filter(r => r.type === RELATION_API_CONSUMED_BY)
+              .map(r => parseEntityRef(r.targetRef))
           : [];
       logger.debug(`${entity.metadata.name} consumers: ${consumerRefs.length}`);
 

@@ -1,7 +1,7 @@
 type EtherscanConfig = {
   network: string;
   apiKey: string;
-}
+};
 
 export interface Config {
   blockchain: {

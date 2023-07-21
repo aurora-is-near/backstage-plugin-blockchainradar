@@ -38,4 +38,4 @@ export type MultisigSpec = CacheableSpec & {
 
 export type SignerSpec = CacheableSpec & {
   lastSigned: number;
-}
+};

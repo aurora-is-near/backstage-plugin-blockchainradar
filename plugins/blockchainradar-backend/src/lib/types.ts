@@ -1,6 +1,9 @@
-import { Entity } from "@backstage/catalog-model";
-import { BlockchainAdapter } from "../adapters/BlockchainAdapter";
-import { BlockchainAddressEntity, isBlockchainAddress } from "@aurora-is-near/backstage-plugin-blockchainradar-common";
+import { Entity } from '@backstage/catalog-model';
+import { BlockchainAdapter } from '../adapters/BlockchainAdapter';
+import {
+  BlockchainAddressEntity,
+  isBlockchainAddress,
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 export interface NetworkInfo {
   name: string;
