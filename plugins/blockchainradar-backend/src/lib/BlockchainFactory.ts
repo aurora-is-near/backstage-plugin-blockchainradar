@@ -1,5 +1,8 @@
 import { Entity } from '@backstage/catalog-model';
-import { BlockchainAddressEntity, ContractDeploymentEntity } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import {
+  BlockchainAddressEntity,
+  ContractDeploymentEntity,
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { ContractDeployment } from '../entities/ContractDeployment';
