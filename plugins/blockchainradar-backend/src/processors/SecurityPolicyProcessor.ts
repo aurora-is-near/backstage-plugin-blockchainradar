@@ -1,7 +1,7 @@
 import {
   CatalogProcessorCache,
   CatalogProcessorEmit,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 import {
   Entity,
   isResourceEntity,
@@ -11,14 +11,14 @@ import {
   stringifyEntityRef,
 } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-
-import { BlockchainProcessor } from './BlockchainProcessor';
 import {
   isAccessKey,
   isContractDeployment,
   isCouncil,
   isSigner,
-} from '../lib/types';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
+import { BlockchainProcessor } from './BlockchainProcessor';
 
 export class SecurityPolicyProcessor extends BlockchainProcessor {
   async postProcessEntity?(

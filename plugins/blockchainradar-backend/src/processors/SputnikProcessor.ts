@@ -2,12 +2,13 @@ import {
   CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { Entity, isApiEntity } from '@backstage/catalog-model';
+import { ContractDeploymentEntity } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
-import { ContractDeploymentEntity } from '../lib/types';
 
 interface ISputnikRole {
   name: string;

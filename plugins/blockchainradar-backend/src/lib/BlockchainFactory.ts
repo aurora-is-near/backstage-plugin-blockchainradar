@@ -1,8 +1,11 @@
 import { Entity } from '@backstage/catalog-model';
+import {
+  BlockchainAddressEntity,
+  ContractDeploymentEntity,
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { ContractDeployment } from '../entities/ContractDeployment';
-import { BlockchainAddressEntity, ContractDeploymentEntity } from './types';
 import { AdapterFactory } from '../adapters/AdapterFactory';
 
 // https://stackoverflow.com/questions/29998343/limiting-the-times-that-split-splits-rather-than-truncating-the-resulting-ar

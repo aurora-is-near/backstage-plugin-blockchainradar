@@ -30,8 +30,3 @@ catalog:
     pullRequestBranchName: backstage-integration
   rules:
     - allow: [Component, System, API, Group, User, Resource, Location, Domain]
-
-events:
-  http:
-    topics:
-      - github

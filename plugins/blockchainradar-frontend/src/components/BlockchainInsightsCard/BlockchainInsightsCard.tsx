@@ -13,6 +13,7 @@ import { AboutContent } from '../AboutContent';
 import { ContractSpecContent } from './ContractSpecContent';
 import { MultisigSpecContent } from './MultisigSpecContent';
 import { NearKeysContent } from './NearKeysContent';
+import { SignerContent } from './SignerContent';
 
 const useStyles = makeStyles({
   gridItemCard: {
@@ -66,6 +67,7 @@ export function BlockchainInsightsCard(props: BlockchainInsightsCardProps) {
         <ContractSpecContent entity={entity} />
         <MultisigSpecContent entity={entity} />
         <NearKeysContent entity={entity} />
+        <SignerContent entity={entity} />
       </CardContent>
     </Card>
   );

@@ -83,6 +83,41 @@ export class EtherscanFetcher {
     return EtherscanFetcher.processResult(response.result[0]);
   }
 
+  async fetchTransactions(
+    address: string,
+    opts: FetchTransactionsOpts = {
+      page: 1,
+      offset: 10,
+      sort: 'desc',
+    },
+  ): Promise<EtherscanTxlistResponse> {
+    // not putting a try/catch around this; if it throws, we throw
+    await this.ready;
+    const responsePromise = axios.get<EtherscanTxlistResponse>(
+      this.determineUrl(),
+      {
+        params: {
+          module: 'account',
+          action: 'txlist',
+          address,
+          startblock: opts.startblock,
+          endblock: opts.endblock,
+          page: opts.page,
+          offset: opts.offset,
+          sort: opts.sort,
+          ...(this.networkName !== 'aurora' ? { apiKey: this.apiKey } : {}),
+        },
+        responseType: 'json',
+        maxRedirects: 50,
+      },
+    );
+    this.ready = makeTimer(this.delay);
+    const response = (await responsePromise).data;
+    if (response.status === '0') throw new Error(response.message);
+
+    return response;
+  }
+
   private async getSuccessfulResponse(
     address: string,
   ): Promise<EtherscanSuccess> {
@@ -347,3 +382,40 @@ interface EtherscanFailure {
   message: string;
   result: string;
 }
+
+type FetchTransactionsOpts = Partial<{
+  startblock: number;
+  endblock: number;
+  page: number;
+  offset: number;
+  sort: 'asc' | 'desc';
+}>;
+
+type EtherscanTxlistResponse = {
+  status: '0' | '1';
+  message: string;
+  result: EtherscanTx[];
+};
+
+type EtherscanTx = {
+  blockNumber: string;
+  timeStamp: string;
+  hash: string;
+  nonce: string;
+  blockHash: string;
+  transactionIndex: string;
+  from: string;
+  to: string;
+  value: string;
+  gas: string;
+  gasPrice: string;
+  isError: string;
+  txreceipt_status: string;
+  input: string;
+  contractAddress: string;
+  cumulativeGasUsed: string;
+  gasUsed: string;
+  confirmations: string;
+  methodId: string;
+  functionName: string;
+};
