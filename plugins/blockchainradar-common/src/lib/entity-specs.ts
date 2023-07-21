@@ -35,3 +35,7 @@ export type MultisigSpec = CacheableSpec & {
   };
   version?: string;
 };
+
+export type SignerSpec = CacheableSpec & {
+  lastSigned: number;
+}
