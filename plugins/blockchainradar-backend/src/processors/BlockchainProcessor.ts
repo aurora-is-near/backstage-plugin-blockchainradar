@@ -1,21 +1,20 @@
 import {
   CatalogProcessor,
+  CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-
 import { CatalogClient } from '@backstage/catalog-client';
-
-import { Logger } from 'winston';
 import { Config, JsonValue } from '@backstage/config';
-import { CatalogProcessorCache } from '@backstage/plugin-catalog-backend';
-import { Mutex } from 'async-mutex';
-import { TrackedRun } from '../lib/TrackedRun';
-import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { PluginEndpointDiscovery } from '@backstage/backend-common';
+import { Logger } from 'winston';
+import { Mutex } from 'async-mutex';
+import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
+import { TrackedRun } from '../lib/TrackedRun';
 
 interface PluginEnvironment {
   logger: Logger;

@@ -2,18 +2,18 @@ import {
   CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-
-import { ContractComponent } from '../entities/ContractComponent';
-import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { BlockchainProcessor } from './BlockchainProcessor';
 import {
   ContractDeploymentEntity,
   isContractComponent,
   isContractDeployment,
-} from '../lib/types';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
+import { ContractComponent } from '../entities/ContractComponent';
+import { BlockchainFactory } from '../lib/BlockchainFactory';
+import { BlockchainProcessor } from './BlockchainProcessor';
 
 export class ContractProcessor extends BlockchainProcessor {
   /**

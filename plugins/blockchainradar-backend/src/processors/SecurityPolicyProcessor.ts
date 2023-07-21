@@ -1,7 +1,7 @@
 import {
   CatalogProcessorCache,
   CatalogProcessorEmit,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 import {
   Entity,
   isResourceEntity,
@@ -11,14 +11,14 @@ import {
   stringifyEntityRef,
 } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-
-import { BlockchainProcessor } from './BlockchainProcessor';
 import {
   isAccessKey,
   isContractDeployment,
   isCouncil,
   isSigner,
-} from '../lib/types';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
+import { BlockchainProcessor } from './BlockchainProcessor';
 
 export class SecurityPolicyProcessor extends BlockchainProcessor {
   async postProcessEntity?(
@@ -56,8 +56,8 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
       const ownerRefs =
         multisigFromApi && multisigFromApi.relations
           ? multisigFromApi.relations
-              .filter(r => r.type === RELATION_OWNED_BY)
-              .map(r => parseEntityRef(r.targetRef))
+            .filter(r => r.type === RELATION_OWNED_BY)
+            .map(r => parseEntityRef(r.targetRef))
           : [];
       logger.debug(`${entity.metadata.name} owners: ${ownerRefs.length}`);
 
@@ -109,8 +109,8 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
       const consumerRefs =
         contractFromApi && contractFromApi.relations
           ? contractFromApi.relations
-              .filter(r => r.type === RELATION_API_CONSUMED_BY)
-              .map(r => parseEntityRef(r.targetRef))
+            .filter(r => r.type === RELATION_API_CONSUMED_BY)
+            .map(r => parseEntityRef(r.targetRef))
           : [];
       logger.debug(`${entity.metadata.name} consumers: ${consumerRefs.length}`);
 

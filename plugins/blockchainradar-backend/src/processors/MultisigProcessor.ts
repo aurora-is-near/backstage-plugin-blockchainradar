@@ -5,20 +5,21 @@ import {
 } from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { MultisigSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { SafeClient } from '../lib/SafeClient';
-import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { BlockchainProcessor } from './BlockchainProcessor';
-import { ContractComponent } from '../entities/ContractComponent';
 import {
   BlockchainUser,
+  MultisigSpec,
+  MultisigDeploymentEntity,
+  SignerEntity,
   isBlockchainUser,
   isMultisigComponent,
   isMultisigDeployment,
   isSigner,
-  MultisigDeploymentEntity,
-  SignerEntity,
-} from '../lib/types';
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
+import { BlockchainProcessor } from './BlockchainProcessor';
+import { SafeClient } from '../lib/SafeClient';
+import { BlockchainFactory } from '../lib/BlockchainFactory';
+import { ContractComponent } from '../entities/ContractComponent';
 import { EvmAdapter } from '../adapters/EvmAdapter';
 
 export class MultisigProcessor extends BlockchainProcessor {

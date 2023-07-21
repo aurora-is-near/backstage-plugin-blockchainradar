@@ -5,25 +5,23 @@ import {
 } from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-
-import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { BlockchainProcessor } from './BlockchainProcessor';
-import { NearKey } from '../entities/NearKey';
 import {
-  isFullAccessKey,
+  BlockchainAddressEntity,
+  BlockchainUser,
+  ContractDeploymentEntity,
   NearKeysSpec,
-} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { NearAdapter } from '../adapters/NearAdapter';
-import {
   isContractDeployment,
   isBlockchainUser,
   isSigner,
-  BlockchainAddressEntity,
-  isValidBlockchainAddress,
-  ContractDeploymentEntity,
-  BlockchainUser,
-} from '../lib/types';
+  isFullAccessKey,
+} from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+
+import { BlockchainProcessor } from './BlockchainProcessor';
+import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { NearBlocksClient } from '../lib/NearBlocksClient';
+import { isValidBlockchainAddress } from '../lib/types';
+import { NearKey } from '../entities/NearKey';
+import { NearAdapter } from '../adapters/NearAdapter';
 import { AdapterFactory } from '../adapters/AdapterFactory';
 
 export class NearKeysProcessor extends BlockchainProcessor {
