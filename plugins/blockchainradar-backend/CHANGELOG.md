@@ -1,5 +1,14 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 0.1.11
+
+### Patch Changes
+
+- 1318ef1: chore: add strong typed app-config
+- e9a7584: refactor: use common exported types, add SignerProcessor
+- Updated dependencies [a487982]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes

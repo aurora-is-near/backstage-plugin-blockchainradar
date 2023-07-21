@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 0.1.11
+
+### Patch Changes
+
+- a487982: refactor: add entity types and type narrowing functions
+
 ## 0.1.10
 
 ### Patch Changes
