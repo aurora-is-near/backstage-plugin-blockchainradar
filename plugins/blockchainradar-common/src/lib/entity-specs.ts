@@ -7,6 +7,11 @@ export type CacheableSpec = {
   fetchDate: number;
 };
 
+export type RbacSpec = CacheableSpec & {
+  roles?: Record<string, any>;
+  membership?: Array<any>;
+};
+
 export type ContractSourceSpec = CacheableSpec & {
   abi: string;
   sourceCodeVerified: boolean;
@@ -26,6 +31,7 @@ export type NearKeysSpec = CacheableSpec & {
 export type ContractDeploymentSpec = {
   source?: ContractSourceSpec;
   state?: ContractStateSpec;
+  rbac?: RbacSpec;
 };
 
 export type MultisigSpec = CacheableSpec & {

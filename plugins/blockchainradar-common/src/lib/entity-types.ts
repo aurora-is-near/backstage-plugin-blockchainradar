@@ -83,10 +83,10 @@ export function isBlockchainAddress(
 export interface ContractDeploymentEntity extends ApiEntity {
   spec: Literal<
     ApiEntity['spec'] &
-      BlockchainAddressEntity['spec'] & {
-        type: 'contract-deployment' | 'multisig-deployment';
-        deployment?: ContractDeploymentSpec;
-      }
+    BlockchainAddressEntity['spec'] & {
+      type: 'contract-deployment' | 'multisig-deployment';
+      deployment?: ContractDeploymentSpec;
+    }
   >;
 }
 
@@ -115,10 +115,10 @@ export interface MultisigDeploymentEntity extends Entity {
   kind: ApiEntity['kind'] | ResourceEntity['kind'];
   spec: Literal<
     ApiEntity['spec'] &
-      BlockchainAddressEntity['spec'] & {
-        type: 'multisig-deployment' | 'admin-address';
-        multisig?: MultisigSpec;
-      }
+    BlockchainAddressEntity['spec'] & {
+      type: 'multisig-deployment' | 'admin-address';
+      multisig?: MultisigSpec;
+    }
   >;
 }
 
@@ -134,11 +134,10 @@ export function isMultisigDeployment(
 export interface SignerEntity extends BlockchainAddressEntity {
   kind: ResourceEntity['kind'];
   spec: Literal<
-    Omit<BlockchainAddressEntity['spec'], 'type'> &
-      SignerSpec & {
-        type: 'signer-address';
-        lastSigned: number;
-      }
+    BlockchainAddressEntity['spec'] &
+    SignerSpec & {
+      type: 'signer-address';
+    }
   >;
 }
 
@@ -149,7 +148,7 @@ export function isSigner(entity: Entity): entity is SignerEntity {
 export interface CouncilEntity extends BlockchainAddressEntity {
   kind: ResourceEntity['kind'];
   spec: Literal<
-    Omit<BlockchainAddressEntity['spec'], 'type'> & {
+    BlockchainAddressEntity['spec'] & {
       type: 'council-address';
     }
   >;
@@ -162,7 +161,7 @@ export function isCouncil(entity: Entity): entity is CouncilEntity {
 export interface AccessKeyEntity extends BlockchainAddressEntity {
   kind: ResourceEntity['kind'];
   spec: Literal<
-    Omit<BlockchainAddressEntity['spec'], 'type'> & {
+    BlockchainAddressEntity['spec'] & {
       type: 'access-key';
     }
   >;
