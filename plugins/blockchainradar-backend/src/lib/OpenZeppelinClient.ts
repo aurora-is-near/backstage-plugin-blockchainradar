@@ -37,7 +37,7 @@ export class OpenZeppelinClient {
         address,
       },
     });
-    if (!data) {
+    if (!data.account) {
       this.logger.warn('unable to fetch account roles');
       return undefined;
     }

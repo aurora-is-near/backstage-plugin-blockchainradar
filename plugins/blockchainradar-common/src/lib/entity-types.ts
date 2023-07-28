@@ -83,10 +83,10 @@ export function isBlockchainAddress(
 export interface ContractDeploymentEntity extends ApiEntity {
   spec: Literal<
     ApiEntity['spec'] &
-    BlockchainAddressEntity['spec'] & {
-      type: 'contract-deployment' | 'multisig-deployment';
-      deployment?: ContractDeploymentSpec;
-    }
+      BlockchainAddressEntity['spec'] & {
+        type: 'contract-deployment' | 'multisig-deployment';
+        deployment?: ContractDeploymentSpec;
+      }
   >;
 }
 
@@ -115,10 +115,10 @@ export interface MultisigDeploymentEntity extends Entity {
   kind: ApiEntity['kind'] | ResourceEntity['kind'];
   spec: Literal<
     ApiEntity['spec'] &
-    BlockchainAddressEntity['spec'] & {
-      type: 'multisig-deployment' | 'admin-address';
-      multisig?: MultisigSpec;
-    }
+      BlockchainAddressEntity['spec'] & {
+        type: 'multisig-deployment' | 'admin-address';
+        multisig?: MultisigSpec;
+      }
   >;
 }
 
@@ -135,9 +135,9 @@ export interface SignerEntity extends BlockchainAddressEntity {
   kind: ResourceEntity['kind'];
   spec: Literal<
     BlockchainAddressEntity['spec'] &
-    SignerSpec & {
-      type: 'signer-address';
-    }
+      SignerSpec & {
+        type: 'signer-address';
+      }
   >;
 }
 
