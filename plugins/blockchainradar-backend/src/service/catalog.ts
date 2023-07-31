@@ -1,7 +1,5 @@
 /* eslint-disable @backstage/no-undeclared-imports */
-import {
-  CatalogBuilder,
-} from '@backstage/plugin-catalog-backend';
+import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
 import { EntityProvider } from '@backstage/plugin-catalog-node';
 import { GithubEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
 

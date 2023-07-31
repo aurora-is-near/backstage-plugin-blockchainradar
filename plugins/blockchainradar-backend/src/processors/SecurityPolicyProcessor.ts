@@ -107,7 +107,9 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
               .filter(r => r.type === RELATION_API_CONSUMED_BY)
               .map(r => parseEntityRef(r.targetRef))
           : [];
-      this.logger.debug(`${entity.metadata.name} consumers: ${consumerRefs.length}`);
+      this.logger.debug(
+        `${entity.metadata.name} consumers: ${consumerRefs.length}`,
+      );
 
       for (const [k, r] of consumerRefs.entries()) {
         const consumer = await this.catalogClient.getEntityByRef(r);

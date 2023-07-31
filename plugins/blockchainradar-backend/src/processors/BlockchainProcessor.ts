@@ -28,7 +28,9 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
   name: string;
 
   constructor(private readonly env: PluginEnvironment) {
-    this.catalogClient = new CatalogClient({ discoveryApi: this.env.discovery });
+    this.catalogClient = new CatalogClient({
+      discoveryApi: this.env.discovery,
+    });
     this.config = this.env.config.getConfig('blockchain');
     this.name = this.constructor.name;
     this.logger = this.env.logger.child({
