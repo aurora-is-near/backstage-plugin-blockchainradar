@@ -16,15 +16,15 @@ import { OpenZeppelinClient } from '../lib/OpenZeppelinClient';
 import { BlockchainProcessor } from './BlockchainProcessor';
 
 export class ContractProcessor extends BlockchainProcessor {
-  async postProcessEntity?(
+  async postProcessEntity(
     entity: Entity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
   ) {
     if (isContractComponent(entity)) {
-      await this.processContractComponent(entity, location, emit);
+      return this.processContractComponent(entity, location, emit);
     } else if (isContractDeployment(entity)) {
-      await this.processContractDeployment(entity, location, emit);
+      return this.processContractDeployment(entity, location, emit);
     }
     return entity;
   }
@@ -58,6 +58,7 @@ export class ContractProcessor extends BlockchainProcessor {
         await this.emitActsOn(targetAddr, location, emit);
       }
     }
+    return entity;
   }
 
   /**
@@ -130,6 +131,7 @@ export class ContractProcessor extends BlockchainProcessor {
               deployment.address,
             );
             if (accessControl?.roles || accountRoles?.membership) {
+              this.appendTags(entity, 'rbac');
               deploymentSpec.rbac = {
                 roles: accessControl?.roles,
                 membership: accountRoles?.membership,

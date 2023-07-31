@@ -4,6 +4,7 @@ import {
   ComponentEntity,
   ResourceEntity,
   UserEntity,
+  GroupEntity,
   Entity,
   isApiEntity,
   isResourceEntity,
@@ -20,6 +21,14 @@ import {
 type Literal<T> = {
   [K in keyof T]: T[K];
 };
+
+export interface BlockchainRoleGroup extends GroupEntity {
+  spec: Literal<
+    GroupEntity['spec'] & {
+      admins: string[] | undefined;
+    }
+  >;
+}
 
 export interface BlockchainUser extends UserEntity {
   spec: Literal<

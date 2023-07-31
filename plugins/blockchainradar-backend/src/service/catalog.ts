@@ -1,13 +1,11 @@
 /* eslint-disable @backstage/no-undeclared-imports */
 import {
   CatalogBuilder,
-  CatalogEnvironment,
 } from '@backstage/plugin-catalog-backend';
 import { EntityProvider } from '@backstage/plugin-catalog-node';
 import { GithubEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
-import { PluginEndpointDiscovery } from '@backstage/backend-common';
-import { PluginTaskScheduler } from '@backstage/backend-tasks';
 
+import { PluginEnvironment } from '../lib/types';
 import {
   ContractProcessor,
   MultisigProcessor,
@@ -15,11 +13,6 @@ import {
   SputnikProcessor,
   SecurityPolicyProcessor,
 } from '../processors';
-
-type PluginEnvironment = CatalogEnvironment & {
-  discovery: PluginEndpointDiscovery;
-  scheduler: PluginTaskScheduler;
-};
 
 export default async function createPlugin(
   env: PluginEnvironment,

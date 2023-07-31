@@ -3,7 +3,7 @@ import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
 import { Logger } from 'winston';
 
 const client = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/diegofigs/aurora-staking-oz',
+  uri: 'https://api.thegraph.com/subgraphs/name/openzeppelin/aurora',
   cache: new InMemoryCache(),
 });
 

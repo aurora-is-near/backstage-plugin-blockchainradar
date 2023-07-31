@@ -2,6 +2,7 @@ import { Entity } from '@backstage/catalog-model';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 import { BlockchainAddress } from './BlockchainAddress';
+import { ContractDeployment } from './ContractDeployment';
 
 export class ContractComponent {
   entity: Entity;
@@ -36,7 +37,7 @@ export class ContractComponent {
   async deployedAddresses() {
     return Promise.all(
       (this.entity.spec!.deployedAt as string[]).map(addressStr =>
-        BlockchainFactory.fromUserSpecifiedAddress(
+        BlockchainFactory.fromUserSpecifiedAddress<ContractDeployment>(
           this.processor,
           addressStr,
           this.entity,

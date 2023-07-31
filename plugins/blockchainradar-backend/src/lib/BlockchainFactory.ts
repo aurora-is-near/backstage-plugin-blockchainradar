@@ -32,7 +32,7 @@ export class BlockchainFactory {
    * It also detects if the address represents a contract or a normal account
    * @returns The contract deployment or blockchain address entity
    */
-  static async fromUserSpecifiedAddress(
+  static async fromUserSpecifiedAddress<T = BlockchainAddress>(
     processor: BlockchainProcessor,
     humanSpecifiedAddress: string,
     parent: Entity,
@@ -47,7 +47,7 @@ export class BlockchainFactory {
       address,
       network,
       networkType,
-    );
+    ) as T;
   }
 
   /**
@@ -91,9 +91,9 @@ export class BlockchainFactory {
     role: string,
     address: string,
     network: string,
-    type: string,
+    networkType: string,
   ): Promise<BlockchainAddress | ContractDeployment> {
-    const adapter = AdapterFactory.adapter(processor, network, type);
+    const adapter = AdapterFactory.adapter(processor, network, networkType);
 
     if (await adapter.isContract(address)) {
       return new ContractDeployment(
@@ -101,7 +101,7 @@ export class BlockchainFactory {
         parent,
         role,
         network,
-        type,
+        networkType,
         address,
       );
     }
@@ -110,7 +110,7 @@ export class BlockchainFactory {
       parent,
       role,
       network,
-      type,
+      networkType,
       address,
     );
   }

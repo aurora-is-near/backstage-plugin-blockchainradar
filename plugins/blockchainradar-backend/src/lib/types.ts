@@ -1,9 +1,18 @@
+/* eslint-disable @backstage/no-undeclared-imports */
+import { CatalogEnvironment } from '@backstage/plugin-catalog-backend';
 import { Entity } from '@backstage/catalog-model';
-import { BlockchainAdapter } from '../adapters/BlockchainAdapter';
 import {
   BlockchainAddressEntity,
   isBlockchainAddress,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { PluginEndpointDiscovery } from '@backstage/backend-common';
+import { PluginTaskScheduler } from '@backstage/backend-tasks';
+import { BlockchainAdapter } from '../adapters/BlockchainAdapter';
+
+export type PluginEnvironment = CatalogEnvironment & {
+  discovery: PluginEndpointDiscovery;
+  scheduler: PluginTaskScheduler;
+};
 
 export interface NetworkInfo {
   name: string;

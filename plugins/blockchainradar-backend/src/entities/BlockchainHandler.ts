@@ -11,12 +11,13 @@ import {
   RELATION_API_CONSUMED_BY,
   getCompoundEntityRef,
   parseEntityRef,
+  EntityMeta,
 } from '@backstage/catalog-model';
 
 import {
   CatalogProcessorEmit,
   processingResult,
-} from '@backstage/plugin-catalog-backend';
+} from '@backstage/plugin-catalog-node';
 
 import { getRootLogger } from '@backstage/backend-common';
 import { CatalogClient } from '@backstage/catalog-client';
@@ -167,7 +168,7 @@ export abstract class BlockchainHandler {
     this.emitRelationship(RELATION_OWNED_BY, emit, destination);
   }
 
-  ownerSpec(): string {
+  ownerSpec() {
     if (this.parent.spec!.owner) {
       const owner = parseEntityRef(this.parent.spec!.owner as string, {
         defaultKind: 'group',
@@ -208,7 +209,7 @@ export abstract class BlockchainHandler {
     };
   }
 
-  entitySpec() {
+  entitySpec(): Entity['spec'] {
     return {
       type: this.role,
       ...this.inheritedSpec(),
@@ -222,11 +223,11 @@ export abstract class BlockchainHandler {
     );
   }
 
-  entityTags(): string[] {
+  entityTags() {
     return this.inheritedTags();
   }
 
-  entityMetadata() {
+  entityMetadata(): EntityMeta {
     return {
       name: this.entityName(),
       namespace: this.entityNamespace(),
