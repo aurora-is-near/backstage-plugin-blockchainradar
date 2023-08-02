@@ -103,6 +103,7 @@ export class EvmAdapter extends BlockchainAdapter {
       } catch (e) {
         this.logger.debug(`error calling ${name}: ${(e as Error).message}`);
       }
+      await this.delayRequest();
     }
 
     for (const [name, def] of Object.entries(
