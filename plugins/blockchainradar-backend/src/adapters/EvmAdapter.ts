@@ -96,7 +96,8 @@ export class EvmAdapter extends BlockchainAdapter {
       try {
         if (def.constant && def.outputs?.length === 1) {
           const method = name.replace('()', '');
-          const fn: ethers.ContractFunction<string []> = contract.functions[method];
+          const fn: ethers.ContractFunction<string[]> =
+            contract.functions[method];
           const result = await fn();
           stateSpec.methods[method] = result[0];
         }
