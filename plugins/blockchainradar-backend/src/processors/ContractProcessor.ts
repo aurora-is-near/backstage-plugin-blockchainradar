@@ -92,7 +92,7 @@ export class ContractProcessor extends BlockchainProcessor {
                 deployment.address,
               );
             } catch (error) {
-              this.logger.warn('unable to fetch contract source');
+              this.logger.warn(`unable to fetch contract source for ${deployment.address}`);
             }
           },
         );
@@ -109,7 +109,7 @@ export class ContractProcessor extends BlockchainProcessor {
                 deploymentSpec.source!,
               );
             } catch (error) {
-              this.logger.warn('unable to fetch contract state');
+              this.logger.warn(`unable to fetch contract state for ${deployment.address}`);
             }
           },
         );
