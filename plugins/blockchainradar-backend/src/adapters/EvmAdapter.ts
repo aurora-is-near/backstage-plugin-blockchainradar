@@ -73,10 +73,10 @@ export class EvmAdapter extends BlockchainAdapter {
     }
 
     const creds = this.etherscanCreds();
-    const provider = new BackstageEtherscanProvider(
-      creds.network,
-      creds.apiKey,
-    );
+    const provider =
+      this.network === 'aurora'
+        ? new StaticJsonRpcProvider('https://mainnet.aurora.dev/api')
+        : new BackstageEtherscanProvider(creds.network, creds.apiKey);
 
     const contract = new ethers.Contract(address, sourceSpec.abi).connect(
       provider,
