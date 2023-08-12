@@ -1,5 +1,16 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.0
+
+### Minor Changes
+
+- 01c4fb1: add rbac support to contracts
+
+### Patch Changes
+
+- Updated dependencies [01c4fb1]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.0
+
 ## 0.1.11
 
 ### Patch Changes
