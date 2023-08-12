@@ -46,8 +46,6 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
 
   // @ts-ignore
   private async processMultisigDeployment(entity: Entity) {
-    const logger = this.logger.child({ component: 'multisig-check' });
-
     const owners = [];
     try {
       const multisigFromApi = await this.catalogClient.getEntityByRef(
@@ -59,19 +57,19 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
               .filter(r => r.type === RELATION_OWNED_BY)
               .map(r => parseEntityRef(r.targetRef))
           : [];
-      logger.debug(`${entity.metadata.name} owners: ${ownerRefs.length}`);
+      this.logger.debug(`${entity.metadata.name} owners: ${ownerRefs.length}`);
 
       for (const [k, r] of ownerRefs.entries()) {
         const owner = await this.catalogClient.getEntityByRef(r);
         if (owner && isResourceEntity(owner) && isSigner(owner)) {
-          logger.debug(
+          this.logger.debug(
             `${entity.metadata.name} owner ${k} => ${owner.metadata.namespace}`,
           );
           owners.push(owner);
         }
       }
     } catch (error) {
-      logger.warn(`${entity.metadata.name} failed to get owners`);
+      this.logger.warn(`${entity.metadata.name} failed to get owners`);
     }
 
     const hasAllowUnknown = entity.metadata.tags
@@ -83,7 +81,6 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
       const hasUnknown = owners.some(
         owner => owner?.metadata.namespace === 'stub',
       );
-      logger.info(`${entity.metadata.name} Policy Check => ${!hasUnknown}`);
       if (hasUnknown) {
         this.appendTags(entity, 'has-unknown');
       }
@@ -92,8 +89,6 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
   }
 
   private async processNearContract(entity: Entity) {
-    const logger = this.logger.child({ component: 'near-contract-check' });
-
     let hasAllowUnknown = false;
     const accessKeys = [];
     try {
@@ -112,19 +107,21 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
               .filter(r => r.type === RELATION_API_CONSUMED_BY)
               .map(r => parseEntityRef(r.targetRef))
           : [];
-      logger.debug(`${entity.metadata.name} consumers: ${consumerRefs.length}`);
+      this.logger.debug(
+        `${entity.metadata.name} consumers: ${consumerRefs.length}`,
+      );
 
       for (const [k, r] of consumerRefs.entries()) {
         const consumer = await this.catalogClient.getEntityByRef(r);
         if (consumer && isResourceEntity(consumer) && isAccessKey(consumer)) {
-          logger.debug(
+          this.logger.debug(
             `${entity.metadata.name} access-key ${k} => ${consumer.metadata.namespace}`,
           );
           accessKeys.push(consumer);
         }
       }
     } catch (error) {
-      logger.warn(`${entity.metadata.name} failed to get access keys`);
+      this.logger.warn(`${entity.metadata.name} failed to get access keys`);
     }
 
     const needsPolicyCheck = !hasAllowUnknown && accessKeys.length > 0;
@@ -132,7 +129,6 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
       const hasUnknown = accessKeys.some(
         accessKey => accessKey?.metadata.namespace === 'stub',
       );
-      logger.info(`${entity.metadata.name} Policy Check => ${!hasUnknown}`);
       if (hasUnknown) {
         this.appendTags(entity, 'has-unknown');
       }
@@ -141,10 +137,7 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
   }
 
   private async processSignerOrAccessKey(entity: Entity) {
-    const logger = this.logger.child({
-      component: 'signer-or-access-key-check',
-    });
-    logger.debug(
+    this.logger.debug(
       `${entity.metadata.name} namespace: ${entity.metadata.namespace}`,
     );
     try {
@@ -159,7 +152,7 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
         this.appendTags(entity, 'unknown');
       }
     } catch (e) {
-      logger.warn(`${entity.metadata.name} failed to get access keys`);
+      this.logger.warn(`${entity.metadata.name} failed to get access keys`);
     }
     return entity;
   }

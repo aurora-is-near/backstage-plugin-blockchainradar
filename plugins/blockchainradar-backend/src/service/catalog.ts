@@ -1,25 +1,19 @@
 /* eslint-disable @backstage/no-undeclared-imports */
-import {
-  CatalogBuilder,
-  CatalogEnvironment,
-} from '@backstage/plugin-catalog-backend';
+import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
 import { EntityProvider } from '@backstage/plugin-catalog-node';
 import { GithubEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
-import { PluginEndpointDiscovery } from '@backstage/backend-common';
-import { PluginTaskScheduler } from '@backstage/backend-tasks';
 
+import { PluginEnvironment } from '../lib/types';
 import {
   ContractProcessor,
   MultisigProcessor,
   NearKeysProcessor,
   SputnikProcessor,
   SecurityPolicyProcessor,
+  UserProcessor,
+  SignerProcessor,
+  RoleGroupProcessor,
 } from '../processors';
-
-type PluginEnvironment = CatalogEnvironment & {
-  discovery: PluginEndpointDiscovery;
-  scheduler: PluginTaskScheduler;
-};
 
 export default async function createPlugin(
   env: PluginEnvironment,
@@ -34,8 +28,11 @@ export default async function createPlugin(
     }),
   );
 
+  builder.addProcessor(new UserProcessor(env));
+  builder.addProcessor(new SignerProcessor(env));
   builder.addProcessor(new ContractProcessor(env));
   builder.addProcessor(new MultisigProcessor(env));
+  builder.addProcessor(new RoleGroupProcessor(env));
   builder.addProcessor(new SputnikProcessor(env));
   builder.addProcessor(new NearKeysProcessor(env));
   builder.addProcessor(new SecurityPolicyProcessor(env));

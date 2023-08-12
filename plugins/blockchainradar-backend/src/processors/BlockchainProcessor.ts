@@ -5,41 +5,35 @@ import {
   processingResult,
 } from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
-import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { CatalogClient } from '@backstage/catalog-client';
-import { Config, JsonValue } from '@backstage/config';
-import { PluginEndpointDiscovery } from '@backstage/backend-common';
+import { Config } from '@backstage/config';
+import { JsonValue } from '@backstage/types';
+import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { Logger } from 'winston';
 import { Mutex } from 'async-mutex';
-import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
+import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { TrackedRun } from '../lib/TrackedRun';
-
-interface PluginEnvironment {
-  logger: Logger;
-  config: Config;
-  discovery: PluginEndpointDiscovery;
-}
+import { PluginEnvironment } from '../lib/types';
 
 export abstract class BlockchainProcessor implements CatalogProcessor {
   static mutexes: Record<string, Mutex> = {};
   cacheTtlMinutes = 120;
   requestDelaySeconds = 1;
 
-  env: PluginEnvironment;
-  logger: Logger;
   catalogClient: CatalogClient;
   config: Config;
+  logger: Logger;
   name: string;
 
-  constructor(env: PluginEnvironment) {
-    this.env = env;
-
-    this.catalogClient = new CatalogClient({ discoveryApi: env.discovery });
+  constructor(private readonly env: PluginEnvironment) {
+    this.catalogClient = new CatalogClient({
+      discoveryApi: this.env.discovery,
+    });
     this.config = this.env.config.getConfig('blockchain');
     this.name = this.constructor.name;
-    this.logger = env.logger.child({
+    this.logger = this.env.logger.child({
       processor: this.name,
     });
   }
@@ -54,7 +48,8 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
     }
     entity.metadata.links.push(address.toLink());
   }
-  protected appendTags(entity: Entity, ...tags: any) {
+
+  protected appendTags(entity: Entity, ...tags: string[]) {
     if (!entity.metadata.tags) {
       entity.metadata.tags = [];
     }
@@ -74,7 +69,7 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
     let emitEntity = emitIfStubbed && address.stub;
 
     if (tags.length > 0) {
-      entity.metadata.tags!.push(...tags);
+      this.appendTags(entity, ...tags);
       emitEntity = true;
     }
 

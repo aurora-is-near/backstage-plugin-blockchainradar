@@ -1,5 +1,4 @@
 import {
-  CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
@@ -13,9 +12,27 @@ import {
 
 import { ContractComponent } from '../entities/ContractComponent';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
+import { OpenZeppelinClient } from '../lib/OpenZeppelinClient';
 import { BlockchainProcessor } from './BlockchainProcessor';
+import { RoleGroup } from '../entities/RoleGroup';
+
+const dashed = (camel: string) =>
+  camel.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
 
 export class ContractProcessor extends BlockchainProcessor {
+  async postProcessEntity(
+    entity: Entity,
+    location: LocationSpec,
+    emit: CatalogProcessorEmit,
+  ) {
+    if (isContractComponent(entity)) {
+      return this.processContractComponent(entity, location, emit);
+    } else if (isContractDeployment(entity)) {
+      return this.processContractDeployment(entity, location, emit);
+    }
+    return entity;
+  }
+
   /**
    * Emits deployments (API kind) from deployedAt/interactsWith specs
    * also appends etherscan links
@@ -45,6 +62,7 @@ export class ContractProcessor extends BlockchainProcessor {
         await this.emitActsOn(targetAddr, location, emit);
       }
     }
+    return entity;
   }
 
   /**
@@ -78,11 +96,14 @@ export class ContractProcessor extends BlockchainProcessor {
                 deployment.address,
               );
             } catch (error) {
-              this.logger.warn('unable to fetch contract source');
+              this.logger.warn(
+                `unable to fetch contract source for ${deployment.address}`,
+              );
             }
           },
         );
       }
+
       if (!this.isCacheUpToDate(deploymentSpec.state)) {
         await this.runExclusive(
           'deployment-state-fetch',
@@ -94,13 +115,50 @@ export class ContractProcessor extends BlockchainProcessor {
                 deploymentSpec.source!,
               );
             } catch (error) {
-              this.logger.warn('unable to fetch contract state');
+              this.logger.warn(
+                `unable to fetch contract state for ${deployment.address}`,
+              );
             }
           },
         );
       }
 
-      if (deploymentSpec.state?.interactsWith)
+      const ozClient = new OpenZeppelinClient(this.logger);
+      if (
+        entity.spec.network !== 'near' &&
+        !this.isCacheUpToDate(deploymentSpec.rbac)
+      ) {
+        await this.runExclusive(
+          'deployment-rbac-fetch',
+          deployment.address,
+          async _logger => {
+            const accessControl = await ozClient.getContractAccessControl(
+              deployment.address,
+            );
+            const accountRoles = await ozClient.getAccountRoles(
+              deployment.address,
+            );
+            if (accessControl?.roles || accountRoles?.membership) {
+              this.appendTags(entity, 'rbac');
+              deploymentSpec.rbac = {
+                roles: accessControl?.roles.map(role => ({
+                  id: role.role.id,
+                  admin: role.admin.role.id,
+                  adminOf: role.adminOf.map(r => r.role.id),
+                  members: role.members.map(r => r.account.id),
+                })),
+                membership: accountRoles?.membership.map(m => ({
+                  role: m.accesscontrolrole.role,
+                  contract: m.accesscontrolrole.contract,
+                })),
+                fetchDate: new Date().getTime(),
+              };
+            }
+          },
+        );
+      }
+
+      if (deploymentSpec.state?.interactsWith) {
         for (const [role, val] of Object.entries(
           deploymentSpec.state.interactsWith,
         )) {
@@ -108,7 +166,7 @@ export class ContractProcessor extends BlockchainProcessor {
             const intAddr = await BlockchainFactory.fromEntity(
               this,
               entity,
-              role,
+              dashed(role),
               val,
             );
             // No need to emit interactions with itself
@@ -120,26 +178,40 @@ export class ContractProcessor extends BlockchainProcessor {
             this.logger.debug(err);
           }
         }
+      }
 
-      entity.spec.deployment = deploymentSpec;
-      if (deploymentSpec.source?.abi)
-        entity.spec.definition = deploymentSpec.source.abi;
+      if (deploymentSpec.state?.methods && deploymentSpec.rbac?.roles) {
+        const stateRoles = Object.entries(
+          deploymentSpec?.state?.methods,
+        ).filter(([n]) => n.includes('ROLE'));
+        for (const [roleName, roleId] of stateRoles) {
+          const role = deploymentSpec.rbac?.roles?.find(
+            (r: any) => r.id === roleId,
+          );
+
+          const roleGroup = new RoleGroup(
+            this,
+            entity,
+            entity.spec.network,
+            entity.spec.networkType,
+            entity.spec.address,
+            roleId,
+          );
+          roleGroup.roleName = roleName;
+          roleGroup.admin = role.admin;
+          roleGroup.adminOf = role.adminOf;
+          roleGroup.members = role.members;
+          roleGroup.emitDependencyOf(emit);
+          emit(processingResult.entity(location, roleGroup.toEntity()));
+        }
+      }
     }
 
-    return entity;
-  }
-
-  async postProcessEntity?(
-    entity: Entity,
-    location: LocationSpec,
-    emit: CatalogProcessorEmit,
-    _cache: CatalogProcessorCache,
-  ): Promise<Entity> {
-    if (isContractComponent(entity)) {
-      await this.processContractComponent(entity, location, emit);
-    } else if (isContractDeployment(entity)) {
-      await this.processContractDeployment(entity, location, emit);
+    entity.spec.deployment = deploymentSpec;
+    if (entity.spec.deployment?.source?.abi) {
+      entity.spec.definition = entity.spec.deployment.source.abi;
     }
+
     return entity;
   }
 }

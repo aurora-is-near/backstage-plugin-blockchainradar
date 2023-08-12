@@ -1,4 +1,7 @@
-import { CatalogProcessorCache } from '@backstage/plugin-catalog-node';
+import {
+  CatalogProcessorCache,
+  CatalogProcessorEmit,
+} from '@backstage/plugin-catalog-node';
 import { Entity } from '@backstage/catalog-model';
 import {
   SignerEntity,
@@ -6,10 +9,13 @@ import {
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { EvmAdapter } from '../adapters/EvmAdapter';
+import { LocationSpec } from '@backstage/plugin-catalog-common';
 
 export class SignerProcessor extends BlockchainProcessor {
   async postProcessEntity(
     entity: Entity,
+    _location: LocationSpec,
+    _emit: CatalogProcessorEmit,
     cache: CatalogProcessorCache,
   ): Promise<Entity> {
     if (isSigner(entity) && entity.spec.network !== 'near') {

@@ -3,8 +3,17 @@ export function isFullAccessKey(permissions: string) {
   return permissions === '"FullAccess"';
 }
 
+export type SubgraphEntity = {
+  id: string;
+};
+
 export type CacheableSpec = {
   fetchDate: number;
+};
+
+export type RbacSpec = CacheableSpec & {
+  roles?: Record<string, any>;
+  membership?: Array<any>;
 };
 
 export type ContractSourceSpec = CacheableSpec & {
@@ -26,6 +35,7 @@ export type NearKeysSpec = CacheableSpec & {
 export type ContractDeploymentSpec = {
   source?: ContractSourceSpec;
   state?: ContractStateSpec;
+  rbac?: RbacSpec;
 };
 
 export type MultisigSpec = CacheableSpec & {

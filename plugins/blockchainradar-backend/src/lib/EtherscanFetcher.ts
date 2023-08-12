@@ -1,8 +1,9 @@
+import util from 'util';
 import Web3Utils from 'web3-utils';
+import { setTimeout } from 'timers';
 
 import { getRootLogger } from '@backstage/backend-common';
 import type * as Types from './types';
-import { makeFilename, makeTimer, removeLibraries } from './common';
 import { networksByName } from './networks';
 import axios from 'axios';
 import retry from 'async-retry';
@@ -14,6 +15,31 @@ const etherscanCommentHeader = `/**
  *Submitted for verification at Etherscan.io on 20XX-XX-XX
 */
 `; // note we include that final newline
+
+function makeFilename(name: string, extension: string = '.sol'): string {
+  if (!name) {
+    return `Contract${extension}`;
+  }
+  if (name.endsWith(extension)) {
+    return name;
+  }
+  return name + extension;
+}
+
+const makeTimer: (milliseconds: number) => Promise<void> =
+  util.promisify(setTimeout);
+
+function removeLibraries(
+  settings: Types.SolcSettings,
+  alsoRemoveCompilationTarget: boolean = false,
+): Types.SolcSettings {
+  const copySettings: Types.SolcSettings = { ...settings };
+  delete copySettings.libraries;
+  if (alsoRemoveCompilationTarget) {
+    delete copySettings.compilationTarget;
+  }
+  return copySettings;
+}
 
 // this looks awkward but the TS docs actually suggest this :P
 export class EtherscanFetcher {
@@ -56,8 +82,8 @@ export class EtherscanFetcher {
     'testnet-cronos': 'api-testnet.cronoscan.com',
     bttc: 'api.bttcscan.com',
     'donau-bttc': 'api-testnet.bttcscan.com',
-    aurora: 'explorer.aurora.dev',
-    'testnet-aurora': 'testnet.aurora.dev',
+    aurora: 'explorer.mainnet.aurora.dev',
+    'testnet-aurora': 'explorer.testnet.aurora.dev',
     celo: 'api.celoscan.xyz',
     'alfajores-celo': 'api-alfajores.celoscan.xyz',
     clover: 'api.clvscan.com',
@@ -80,6 +106,26 @@ export class EtherscanFetcher {
     address: string,
   ): Promise<Types.SourceInfo | null> {
     const response = await this.getSuccessfulResponse(address);
+    if (response.result[0].Proxy || response.result[0].IsProxy) {
+      const implementationAddress =
+        response.result[0].Implementation ||
+        response.result[0].ImplementationAddress;
+      if (implementationAddress) {
+        const impResponse = await this.getSuccessfulResponse(
+          implementationAddress,
+        );
+        const proxyResult = EtherscanFetcher.processResult(response.result[0]);
+        const impResult = EtherscanFetcher.processResult(impResponse.result[0]);
+        return {
+          ...proxyResult,
+          sources: {
+            ...proxyResult?.sources,
+            ...impResult?.sources,
+          },
+          etherScanResult: impResult?.etherScanResult,
+        } as any;
+      }
+    }
     return EtherscanFetcher.processResult(response.result[0]);
   }
 
@@ -302,8 +348,12 @@ export class EtherscanFetcher {
     const evmVersion =
       result.EVMVersion === 'Default' ? undefined : result.EVMVersion;
     const optimizer = {
-      enabled: result.OptimizationUsed === '1',
-      runs: parseInt(result.Runs),
+      enabled:
+        result.OptimizationUsed === '1' || result.OptimizationUsed === 'true',
+      runs:
+        result.OptimizationRuns !== undefined
+          ? parseInt(result.OptimizationRuns)
+          : parseInt(result.Runs),
     };
     // old version got libraries here, but we don't actually want that!
     if (evmVersion !== undefined) {
@@ -318,10 +368,10 @@ export class EtherscanFetcher {
   }
 
   private static processLibraries(
-    librariesString: string,
+    librariesString: string | undefined,
   ): Types.LibrarySettings {
     let libraries: Types.Libraries;
-    if (librariesString === '') {
+    if (!librariesString || librariesString === '') {
       libraries = {};
     } else {
       libraries = Object.assign(

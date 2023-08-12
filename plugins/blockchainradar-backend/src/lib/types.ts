@@ -1,9 +1,18 @@
+/* eslint-disable @backstage/no-undeclared-imports */
+import { CatalogEnvironment } from '@backstage/plugin-catalog-backend';
 import { Entity } from '@backstage/catalog-model';
-import { BlockchainAdapter } from '../adapters/BlockchainAdapter';
 import {
   BlockchainAddressEntity,
   isBlockchainAddress,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { PluginEndpointDiscovery } from '@backstage/backend-common';
+import { PluginTaskScheduler } from '@backstage/backend-tasks';
+import { BlockchainAdapter } from '../adapters/BlockchainAdapter';
+
+export type PluginEnvironment = CatalogEnvironment & {
+  discovery: PluginEndpointDiscovery;
+  scheduler: PluginTaskScheduler;
+};
 
 export interface NetworkInfo {
   name: string;
@@ -20,12 +29,15 @@ export interface EtherscanResult {
   CompilerVersion: string;
   OptimizationUsed: string; // really: a number used as a boolean
   Runs: string; // really: a number
+  OptimizationRuns?: string; // equivalent of Runs for Blockscout
   ConstructorArguments: string; // encoded as hex string, no 0x in front
   EVMVersion: string;
-  Library: string; // semicolon-delimited list of colon-delimited name-address pairs (addresses lack 0x in front)
+  Library?: string; // semicolon-delimited list of colon-delimited name-address pairs (addresses lack 0x in front)
   LicenseType: string; // ignored
-  Proxy: string; // no clue what this is [ignored]
-  Implementation: string; // or this [ignored]
+  Proxy?: string; // boolean; used to signify that this contract is a proxy for another contract
+  IsProxy?: string; // equivalent of Proxy for Blockscout
+  Implementation?: string; // address; implementation only available if contract is proxy
+  ImplementationAddress?: string; // equivalent of Implementation for Blockscout
   SwarmSource: string; // ignored
 }
 

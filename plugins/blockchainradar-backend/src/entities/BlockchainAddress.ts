@@ -1,4 +1,4 @@
-import { Entity } from '@backstage/catalog-model';
+import { Entity, EntityLink, EntityMeta } from '@backstage/catalog-model';
 import { BlockchainAdapter } from '../adapters/BlockchainAdapter';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 
@@ -63,8 +63,6 @@ export class BlockchainAddress extends BlockchainHandler {
     return name;
   }
 
-  entityTitleParts() {}
-
   entityTitle() {
     const parts = [];
 
@@ -90,16 +88,22 @@ export class BlockchainAddress extends BlockchainHandler {
 
   linkPrefix() {
     if (this.network === 'ethereum') {
-      return 'https://etherscan.io/address/';
+      return `https://${
+        this.networkType === 'goerli' ? 'goerli.' : ''
+      }etherscan.io/address/`;
     } else if (this.network === 'near') {
-      return 'https://explorer.near.org/accounts/';
+      return `https://explorer.${
+        this.networkType === 'testnet' ? 'testnet.' : ''
+      }near.org/accounts/`;
     } else if (this.network === 'aurora') {
-      return 'https://explorer.aurora.dev/address/';
+      return `https://explorer.${
+        this.networkType === 'testnet' ? 'testnet.' : ''
+      }aurora.dev/address/`;
     }
     throw new Error(`unknown network ${this.network}`); // todo emit
   }
 
-  toLink() {
+  toLink(): EntityLink {
     return {
       url: this.linkPrefix() + this.address,
       title: ['Explorer:', this.network, this.networkType, this.role].join(' '),
@@ -109,7 +113,7 @@ export class BlockchainAddress extends BlockchainHandler {
   // we show to emit spec.address explicitly because it can't be derived from
   // entity name - it could be hashed + bs58-encoded
   // emitting role/network as well for consistency
-  entitySpec() {
+  entitySpec(): Entity['spec'] {
     return {
       type: `${this.role}-address`,
       address: this.address,
@@ -130,7 +134,7 @@ export class BlockchainAddress extends BlockchainHandler {
     ];
   }
 
-  entityMetadata() {
+  entityMetadata(): EntityMeta {
     return {
       ...super.entityMetadata(),
       description: `${this.address} (${this.role} address)`,

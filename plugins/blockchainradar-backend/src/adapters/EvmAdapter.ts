@@ -73,10 +73,10 @@ export class EvmAdapter extends BlockchainAdapter {
     }
 
     const creds = this.etherscanCreds();
-    const provider = new BackstageEtherscanProvider(
-      creds.network,
-      creds.apiKey,
-    );
+    const provider =
+      this.network === 'aurora'
+        ? new StaticJsonRpcProvider('https://mainnet.aurora.dev/api')
+        : new BackstageEtherscanProvider(creds.network, creds.apiKey);
 
     const contract = new ethers.Contract(address, sourceSpec.abi).connect(
       provider,
@@ -88,7 +88,28 @@ export class EvmAdapter extends BlockchainAdapter {
       interactsWith: {},
     };
 
-    for (const [name, def] of Object.entries(contract.interface.functions)) {
+    for (const [name, def] of Object.entries(
+      contract.interface.functions,
+    ).filter(([n]) => n.includes('ROLE'))) {
+      if (def.inputs.length !== 0) continue;
+
+      try {
+        if (def.constant && def.outputs?.length === 1) {
+          const method = name.replace('()', '');
+          const fn: ethers.ContractFunction<string[]> =
+            contract.functions[method];
+          const result = await fn();
+          stateSpec.methods[method] = result[0];
+        }
+      } catch (e) {
+        this.logger.debug(`error calling ${name}: ${(e as Error).message}`);
+      }
+      await this.delayRequest();
+    }
+
+    for (const [name, def] of Object.entries(
+      contract.interface.functions,
+    ).filter(([n]) => !n.includes('ROLE'))) {
       if (def.inputs.length !== 0) continue;
 
       try {
