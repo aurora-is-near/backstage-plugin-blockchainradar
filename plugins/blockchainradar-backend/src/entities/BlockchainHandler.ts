@@ -9,6 +9,8 @@ import {
   RELATION_OWNER_OF,
   RELATION_CONSUMES_API,
   RELATION_API_CONSUMED_BY,
+  RELATION_HAS_MEMBER,
+  RELATION_MEMBER_OF,
   getCompoundEntityRef,
   parseEntityRef,
   EntityMeta,
@@ -130,6 +132,7 @@ export abstract class BlockchainHandler {
       [RELATION_API_PROVIDED_BY, RELATION_PROVIDES_API],
       [RELATION_DEPENDS_ON, RELATION_DEPENDENCY_OF],
       [RELATION_CONSUMES_API, RELATION_API_CONSUMED_BY],
+      [RELATION_HAS_MEMBER, RELATION_MEMBER_OF],
     ];
 
     if (destination === undefined) destination = this.parent;
@@ -166,6 +169,22 @@ export abstract class BlockchainHandler {
 
   emitOwnedBy(emit: CatalogProcessorEmit, destination?: Entity) {
     this.emitRelationship(RELATION_OWNED_BY, emit, destination);
+  }
+
+  emitDependencyOf(emit: CatalogProcessorEmit, destination?: Entity) {
+    this.emitRelationship(RELATION_DEPENDENCY_OF, emit, destination);
+  }
+
+  emitDependencyOn(emit: CatalogProcessorEmit, destination?: Entity) {
+    this.emitRelationship(RELATION_DEPENDS_ON, emit, destination);
+  }
+
+  emitHasMember(emit: CatalogProcessorEmit, destination?: Entity) {
+    this.emitRelationship(RELATION_HAS_MEMBER, emit, destination);
+  }
+
+  emitMemberOf(emit: CatalogProcessorEmit, destination?: Entity) {
+    this.emitRelationship(RELATION_MEMBER_OF, emit, destination);
   }
 
   ownerSpec() {
