@@ -1,6 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
 import { Logger } from 'winston';
+import { SubgraphEntity } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
 
 const client = new ApolloClient({
   uri: 'https://api.thegraph.com/subgraphs/name/openzeppelin/aurora',
@@ -45,10 +46,6 @@ export class OpenZeppelinClient {
   }
 }
 
-type SubgraphEntity = {
-  id: string;
-};
-
 type ContractAccessControlResponse = {
   accessControl: {
     roles: Array<{
@@ -58,13 +55,14 @@ type ContractAccessControlResponse = {
       };
       adminOf: {
         role: SubgraphEntity;
-      };
+      }[];
       members: {
         account: SubgraphEntity;
-      };
+      }[];
     }>;
   } | null;
 };
+
 
 type AccountRolesResponse = {
   account: {
@@ -76,3 +74,4 @@ type AccountRolesResponse = {
     }>;
   } | null;
 };
+

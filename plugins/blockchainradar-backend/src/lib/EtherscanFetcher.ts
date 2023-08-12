@@ -1,8 +1,9 @@
+import util from 'util';
 import Web3Utils from 'web3-utils';
+import { setTimeout } from 'timers';
 
 import { getRootLogger } from '@backstage/backend-common';
 import type * as Types from './types';
-import { makeFilename, makeTimer, removeLibraries } from './common';
 import { networksByName } from './networks';
 import axios from 'axios';
 import retry from 'async-retry';
@@ -14,6 +15,31 @@ const etherscanCommentHeader = `/**
  *Submitted for verification at Etherscan.io on 20XX-XX-XX
 */
 `; // note we include that final newline
+
+function makeFilename(name: string, extension: string = '.sol'): string {
+  if (!name) {
+    return `Contract${extension}`;
+  }
+  if (name.endsWith(extension)) {
+    return name;
+  }
+  return name + extension;
+}
+
+const makeTimer: (milliseconds: number) => Promise<void> =
+  util.promisify(setTimeout);
+
+function removeLibraries(
+  settings: Types.SolcSettings,
+  alsoRemoveCompilationTarget: boolean = false,
+): Types.SolcSettings {
+  const copySettings: Types.SolcSettings = { ...settings };
+  delete copySettings.libraries;
+  if (alsoRemoveCompilationTarget) {
+    delete copySettings.compilationTarget;
+  }
+  return copySettings;
+}
 
 // this looks awkward but the TS docs actually suggest this :P
 export class EtherscanFetcher {
@@ -84,7 +110,6 @@ export class EtherscanFetcher {
       const implementationAddress =
         response.result[0].Implementation ||
         response.result[0].ImplementationAddress;
-      this.logger.info(implementationAddress);
       if (implementationAddress) {
         const impResponse = await this.getSuccessfulResponse(
           implementationAddress,
