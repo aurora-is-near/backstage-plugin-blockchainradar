@@ -45,7 +45,9 @@ import {
   RELATION_CONSUMES_API,
   RELATION_DEPENDENCY_OF,
   RELATION_DEPENDS_ON,
+  RELATION_HAS_MEMBER,
   RELATION_HAS_PART,
+  RELATION_MEMBER_OF,
   RELATION_PART_OF,
   RELATION_PROVIDES_API,
 } from '@backstage/catalog-model';
@@ -300,6 +302,8 @@ const SystemPage = () => (
           RELATION_PROVIDES_API,
           RELATION_DEPENDENCY_OF,
           RELATION_DEPENDS_ON,
+          RELATION_HAS_MEMBER,
+          RELATION_MEMBER_OF,
         ]}
         unidirectional={false}
       />

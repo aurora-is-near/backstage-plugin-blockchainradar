@@ -63,7 +63,6 @@ type ContractAccessControlResponse = {
   } | null;
 };
 
-
 type AccountRolesResponse = {
   account: {
     membership: Array<{
@@ -74,4 +73,3 @@ type AccountRolesResponse = {
     }>;
   } | null;
 };
-

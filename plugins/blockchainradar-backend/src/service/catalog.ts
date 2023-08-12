@@ -10,6 +10,9 @@ import {
   NearKeysProcessor,
   SputnikProcessor,
   SecurityPolicyProcessor,
+  UserProcessor,
+  SignerProcessor,
+  RoleGroupProcessor,
 } from '../processors';
 
 export default async function createPlugin(
@@ -25,8 +28,11 @@ export default async function createPlugin(
     }),
   );
 
+  builder.addProcessor(new UserProcessor(env));
+  builder.addProcessor(new SignerProcessor(env));
   builder.addProcessor(new ContractProcessor(env));
   builder.addProcessor(new MultisigProcessor(env));
+  builder.addProcessor(new RoleGroupProcessor(env));
   builder.addProcessor(new SputnikProcessor(env));
   builder.addProcessor(new NearKeysProcessor(env));
   builder.addProcessor(new SecurityPolicyProcessor(env));

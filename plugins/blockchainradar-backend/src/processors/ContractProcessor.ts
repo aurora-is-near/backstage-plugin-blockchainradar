@@ -14,6 +14,10 @@ import { ContractComponent } from '../entities/ContractComponent';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { OpenZeppelinClient } from '../lib/OpenZeppelinClient';
 import { BlockchainProcessor } from './BlockchainProcessor';
+import { RoleGroup } from '../entities/RoleGroup';
+
+const dashed = (camel: string) =>
+  camel.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
 
 export class ContractProcessor extends BlockchainProcessor {
   async postProcessEntity(
@@ -137,8 +141,16 @@ export class ContractProcessor extends BlockchainProcessor {
             if (accessControl?.roles || accountRoles?.membership) {
               this.appendTags(entity, 'rbac');
               deploymentSpec.rbac = {
-                roles: accessControl?.roles,
-                membership: accountRoles?.membership,
+                roles: accessControl?.roles.map(role => ({
+                  id: role.role.id,
+                  admin: role.admin.role.id,
+                  adminOf: role.adminOf.map(r => r.role.id),
+                  members: role.members.map(r => r.account.id),
+                })),
+                membership: accountRoles?.membership.map(m => ({
+                  role: m.accesscontrolrole.role,
+                  contract: m.accesscontrolrole.contract,
+                })),
                 fetchDate: new Date().getTime(),
               };
             }
@@ -154,7 +166,7 @@ export class ContractProcessor extends BlockchainProcessor {
             const intAddr = await BlockchainFactory.fromEntity(
               this,
               entity,
-              role,
+              dashed(role),
               val,
             );
             // No need to emit interactions with itself
@@ -165,6 +177,32 @@ export class ContractProcessor extends BlockchainProcessor {
           } catch (err) {
             this.logger.debug(err);
           }
+        }
+      }
+
+      if (deploymentSpec.state?.methods && deploymentSpec.rbac?.roles) {
+        const stateRoles = Object.entries(
+          deploymentSpec?.state?.methods,
+        ).filter(([n]) => n.includes('ROLE'));
+        for (const [roleName, roleId] of stateRoles) {
+          const role = deploymentSpec.rbac?.roles?.find(
+            (r: any) => r.id === roleId,
+          );
+
+          const roleGroup = new RoleGroup(
+            this,
+            entity,
+            entity.spec.network,
+            entity.spec.networkType,
+            entity.spec.address,
+            roleId,
+          );
+          roleGroup.roleName = roleName;
+          roleGroup.admin = role.admin;
+          roleGroup.adminOf = role.adminOf;
+          roleGroup.members = role.members;
+          roleGroup.emitDependencyOf(emit);
+          emit(processingResult.entity(location, roleGroup.toEntity()));
         }
       }
     }
