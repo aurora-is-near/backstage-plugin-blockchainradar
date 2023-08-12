@@ -3,6 +3,10 @@ export function isFullAccessKey(permissions: string) {
   return permissions === '"FullAccess"';
 }
 
+export type SubgraphEntity = {
+  id: string;
+};
+
 export type CacheableSpec = {
   fetchDate: number;
 };

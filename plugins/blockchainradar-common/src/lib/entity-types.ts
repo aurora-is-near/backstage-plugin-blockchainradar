@@ -179,3 +179,24 @@ export interface AccessKeyEntity extends BlockchainAddressEntity {
 export function isAccessKey(entity: Entity): entity is AccessKeyEntity {
   return isResourceEntity(entity) && entity.spec.type === 'access-key';
 }
+
+export interface RoleGroupEntity extends ApiEntity {
+  spec: Literal<
+    ApiEntity['spec'] & {
+      type: 'role-group';
+      lifecycle: string;
+      address: string;
+      network: string;
+      networkType: string;
+      roleId: string;
+      roleName: string;
+      admin: string;
+      adminOf: string[];
+      members: string[];
+    }
+  >;
+}
+
+export function isRoleGroup(entity: Entity): entity is RoleGroupEntity {
+  return isApiEntity(entity) && entity.spec.type === 'role-group';
+}
