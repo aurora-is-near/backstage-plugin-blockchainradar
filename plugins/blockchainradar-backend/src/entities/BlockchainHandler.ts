@@ -88,19 +88,18 @@ export abstract class BlockchainHandler {
    */
   async stubOrFind(catalogClient: CatalogClient): Promise<Entity> {
     const stubRole = this.role;
-    let isStub = true;
     for (const findRole of ['api', 'contract', 'resource']) {
       this.role = findRole;
       const entity = await catalogClient.getEntityByRef(this.entityRef());
       if (entity) {
-        isStub = false;
+        this.stub = false;
         this.logger.debug(`found ${entity.metadata.name} in the catalog`);
         return entity;
       }
       // need to keep the stub role if entity is not defined somewhere else
       this.role = stubRole;
     }
-    this.stub = isStub;
+    this.stub = true;
     return this.toEntity();
   }
 
@@ -112,7 +111,10 @@ export abstract class BlockchainHandler {
   }
 
   entityRef() {
-    const kind = this.role === 'contract' ? 'api' : 'resource';
+    const kind =
+      this.role === 'contract' || this.role === 'role-group'
+        ? 'api'
+        : 'resource';
     return `${kind}:${this.entityNamespace()}/${this.entityName()}`;
   }
 
