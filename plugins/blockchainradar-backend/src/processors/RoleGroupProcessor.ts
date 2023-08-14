@@ -51,7 +51,7 @@ export class RoleGroupProcessor extends BlockchainProcessor {
           network,
           networkType,
         );
-        blockchainAddress.stubOrFind(this.catalogClient);
+        await blockchainAddress.stubOrFind(this.catalogClient);
         blockchainAddress.emitMemberOf(emit);
         if (blockchainAddress.stub) {
           emit(processingResult.entity(location, blockchainAddress.toEntity()));

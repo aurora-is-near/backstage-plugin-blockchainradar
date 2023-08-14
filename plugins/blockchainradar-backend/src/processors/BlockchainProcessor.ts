@@ -66,14 +66,13 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
     const entity = await address.stubOrFind(this.catalogClient);
     address.emitActsOn(emit);
 
-    let emitEntity = emitIfStubbed && address.stub;
+    if (emitIfStubbed && address.stub) {
+      if (tags.length > 0) {
+        this.appendTags(entity, ...tags);
+      }
 
-    if (tags.length > 0) {
-      this.appendTags(entity, ...tags);
-      emitEntity = true;
+      emit(processingResult.entity(location, entity));
     }
-
-    if (emitEntity) emit(processingResult.entity(location, entity));
   }
 
   protected async fetchCachedSpec<T extends JsonValue>(
