@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 1.0.1
+
+### Patch Changes
+
+- c7beba0: build: update backstage version
+
 ## 1.0.0
 
 ### Minor Changes
