@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 1.0.1
+
+### Patch Changes
+
+- c7beba0: build: update backstage version
+- Updated dependencies [c7beba0]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.1
+
 ## 1.0.0
 
 ### Patch Changes

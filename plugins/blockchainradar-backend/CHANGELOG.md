@@ -1,5 +1,14 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.1
+
+### Patch Changes
+
+- 173bf9c: fix: unintended relation emit
+- c7beba0: build: update backstage version
+- Updated dependencies [c7beba0]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes
