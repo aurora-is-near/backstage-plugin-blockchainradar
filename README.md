@@ -1,12 +1,16 @@
-# Blockchain Plugins for Backstage
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/imgs/logos/header-logo-green.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/imgs/logos/header-logo-black.svg">
+  <img alt="Blockchain Radar Plugin for Backstage" src="docs/imgs/logos/header-logo-green.svg">
+</picture>
+
+Blockchain Radar for Backstage is a collection of plugins that aims to solve asset management on EVM chains and on [NEAR](https://near.org/).
 
 [![Project license](https://img.shields.io/badge/License-Public%20Domain-blue.svg)](https://creativecommons.org/publicdomain/zero/1.0/)
 [![CI](https://github.com/aurora-is-near/backstage-plugin-blockchain/actions/workflows/ci.yaml/badge.svg)](https://github.com/aurora-is-near/backstage-plugin-blockchainradar/actions/workflows/ci.yaml)
 [![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/aurora-is-near/backstage-plugin-blockchainradar?label=backend&filename=plugins%2Fblockchainradar-backend%2Fpackage.json)](https://www.npmjs.com/package/@aurora-is-near/backstage-plugin-blockchainradar-backend)
 [![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/aurora-is-near/backstage-plugin-blockchainradar?label=common&filename=plugins%2Fblockchainradar-common%2Fpackage.json)](https://www.npmjs.com/package/@aurora-is-near/backstage-plugin-blockchainradar-common)
 [![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/aurora-is-near/backstage-plugin-blockchainradar?label=frontend&filename=plugins%2Fblockchainradar-frontend%2Fpackage.json)](https://www.npmjs.com/package/@aurora-is-near/backstage-plugin-blockchainradar-frontend)
-
-The Blockchain Plugins for Backstage is a collection of plugins that aims to solve asset management on EVM chains and on [NEAR](https://near.org/).
 
 ## Goals
 
