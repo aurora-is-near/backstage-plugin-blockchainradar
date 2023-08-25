@@ -18,7 +18,7 @@ export class RoleGroupProcessor extends BlockchainProcessor {
     location: LocationSpec,
     emit: CatalogProcessorEmit,
   ): Promise<Entity> {
-    if (isRoleGroup(entity) && entity.spec.network !== 'near') {
+    if (isRoleGroup(entity)) {
       return this.processRoleGroup(entity, location, emit);
     }
     return entity;

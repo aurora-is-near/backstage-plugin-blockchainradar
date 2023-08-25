@@ -123,7 +123,6 @@ export class ContractProcessor extends BlockchainProcessor {
         );
       }
 
-      const ozClient = new OpenZeppelinClient(this.logger);
       if (
         entity.spec.network !== 'near' &&
         !this.isCacheUpToDate(deploymentSpec.rbac)
@@ -132,6 +131,7 @@ export class ContractProcessor extends BlockchainProcessor {
           'deployment-rbac-fetch',
           deployment.address,
           async _logger => {
+            const ozClient = new OpenZeppelinClient(this.logger);
             const accessControl = await ozClient.getContractAccessControl(
               deployment.address,
             );
@@ -156,6 +156,27 @@ export class ContractProcessor extends BlockchainProcessor {
             }
           },
         );
+      } else if (entity.spec.network === 'near'  && deploymentSpec.state?.methods.acl_get_permissioned_accounts) {
+        type NearPluginsAclConfig = {
+          super_admins: string[],
+          roles: Record<string, {admins: string[], grantees: string[]}>,
+        }
+        const nearPluginsACLConfig: NearPluginsAclConfig = JSON.parse(deploymentSpec.state.methods.acl_get_permissioned_accounts)
+        this.appendTags(entity, 'rbac');
+        const roles = Object.entries(nearPluginsACLConfig.roles)
+        deploymentSpec.rbac = {
+          roles: roles.map(([roleName, roleConfig]) => ({
+            id: roleName,
+            admin: 'super_admins',
+            adminOf: [],
+            members: roleConfig.grantees
+          })),
+          membership: roles.map(([roleName, _]) => ({
+            role: roleName,
+            contract: entity.spec.address,
+          })),
+          fetchDate: new Date().getTime(),
+        };
       }
 
       if (deploymentSpec.state?.interactsWith) {
@@ -181,6 +202,7 @@ export class ContractProcessor extends BlockchainProcessor {
       }
 
       if (deploymentSpec.state?.methods && deploymentSpec.rbac?.roles) {
+        // TODO move this to the ETH-specific discovery
         const stateRoles = Object.entries(
           deploymentSpec?.state?.methods,
         ).filter(([n]) => n.includes('ROLE'));
