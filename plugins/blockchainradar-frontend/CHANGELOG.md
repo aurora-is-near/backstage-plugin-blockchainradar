@@ -1,5 +1,12 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 1.0.2
+
+### Patch Changes
+
+- 8834a46: feat: add namespace filter
+- 62b465b: feat: add rbac spec to contract content
+
 ## 1.0.1
 
 ### Patch Changes
