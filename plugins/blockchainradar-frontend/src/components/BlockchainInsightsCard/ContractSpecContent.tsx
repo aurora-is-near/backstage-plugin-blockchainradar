@@ -52,10 +52,27 @@ export function ContractSpecContent(props: ContractSpecContentProps) {
         {deployment?.state && (
           <DiscoveredStateField
             label="Contract state"
-            gridSizes={{ xs: 12 }}
+            gridSizes={{ xs: 12, md: 6 }}
             description="Extracted by calling read-only methods"
             state={deployment.state.methods}
             date={deployment.state.fetchDate}
+            asJson
+            renderCallback={(method, value) => (
+              <p>
+                <strong>{method}</strong>
+                <div>{value}</div>
+              </p>
+            )}
+          />
+        )}
+
+        {deployment?.rbac?.roles && (
+          <DiscoveredStateField
+            label="Access Control"
+            gridSizes={{ xs: 12, md: 6 }}
+            description="Extracted by calling OZ Subgraph / Near Plugins APIs"
+            state={deployment.rbac.roles.map((role: any) => role.id)}
+            date={deployment.rbac.fetchDate}
             asJson
             renderCallback={(method, value) => (
               <p>
