@@ -131,7 +131,10 @@ export class ContractProcessor extends BlockchainProcessor {
           'deployment-rbac-fetch',
           deployment.address,
           async _logger => {
-            const ozClient = new OpenZeppelinClient(this.logger);
+            const ozClient = new OpenZeppelinClient(
+              this.logger,
+              entity.spec.network,
+            );
             const accessControl = await ozClient.getContractAccessControl(
               deployment.address,
             );

@@ -11,6 +11,7 @@ import {
   CatalogFilterLayout,
   EntityKindPicker,
   EntityListProvider,
+  EntityNamespacePicker,
   EntityTagPicker,
   EntityTypePicker,
   UserListPicker,
@@ -57,6 +58,7 @@ export const BlockchainIndexPage = ({
               <EntityTypePicker />
               <UserListPicker initialFilter={initiallySelectedFilter} />
               <EntitySecurityTierPicker />
+              <EntityNamespacePicker />
               <EntityTagPicker />
             </CatalogFilterLayout.Filters>
             <CatalogFilterLayout.Content>

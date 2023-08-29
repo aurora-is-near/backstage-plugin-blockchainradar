@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.2
+
+### Patch Changes
+
+- 48266a1: feat: add eth rbac support
+
 ## 1.0.1
 
 ### Patch Changes
