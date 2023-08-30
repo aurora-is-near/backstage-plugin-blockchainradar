@@ -18,7 +18,6 @@ import {
 
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { NearBlocksClient } from '../lib/NearBlocksClient';
 import { isValidBlockchainAddress } from '../lib/types';
 import { NearKey } from '../entities/NearKey';
 import { NearAdapter } from '../adapters/NearAdapter';
@@ -60,7 +59,7 @@ export class NearKeysProcessor extends BlockchainProcessor {
     return (
       isValidBlockchainAddress(
         entity,
-        AdapterFactory.adapter(this, 'near', 'default'),
+        AdapterFactory.adapter(this, 'near', 'mainnet'),
       ) && entity.spec.network === 'near'
     );
   }
@@ -95,10 +94,9 @@ export class NearKeysProcessor extends BlockchainProcessor {
       const nearKeys = entity.spec.keys.map(
         (k: string) => new NearKey(this, entity, k),
       );
-      // TODO: Filter after deserializing to avoid leaking imp details
       const deprecatedNearKeys = deprecated
-        .filter(ref => ref.includes('ed25519'))
         .map((k: string) => new NearKey(this, entity, k))
+        .filter(key => key.publicKey.includes('ed25519'))
         .reduce((acc, s) => ({ ...acc, [s.publicKey]: true }), {});
       const isRetired = entity.metadata.tags?.includes('retired');
       for (const nearKey of nearKeys) {
@@ -142,15 +140,6 @@ export class NearKeysProcessor extends BlockchainProcessor {
     emit: CatalogProcessorEmit,
     location: LocationSpec,
   ) {
-    if (isSigner(entity)) {
-      const nearBlocksClient = new NearBlocksClient(entity.spec.address);
-      const lastTx = await nearBlocksClient.getLastTransaction();
-      const lastSignatureTimestamp = Math.floor(
-        parseInt(lastTx.block_timestamp) / 10 ** 6,
-      );
-      entity.spec.lastSigned = lastSignatureTimestamp;
-    }
-
     const keysSpec = await this.fetchNearKeys(entity, cache);
     if (keysSpec) {
       entity.spec.nearKeys = keysSpec;

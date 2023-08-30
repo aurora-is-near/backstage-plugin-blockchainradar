@@ -1,15 +1,7 @@
 import axios from 'axios';
-import { getRootLogger } from '@backstage/backend-common';
+import { NearTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { Logger } from 'winston';
 
-type NearTx = {
-  receipt_id: string;
-  predecessor_account_id: string;
-  receiver_account_id: string;
-  transaction_hash: string;
-  included_in_block_hash: string;
-  block_timestamp: string;
-  block: { block_height: number };
-};
 type TxnsResponse = {
   txns: NearTx[];
 };
@@ -24,19 +16,19 @@ const instance = axios.create({
     Authorization: `Bearer ${NEAR_BLOCKS_API_KEY}`,
   },
 });
-export class NearBlocksClient {
-  accountId: string;
-  private logger = getRootLogger();
 
-  constructor(accountId: string) {
-    this.accountId = accountId;
+export class NearBlocksClient {
+  private logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger.child({ class: this.constructor.name });
   }
 
-  public async getAccountTransactions(opts?: TxnsParams) {
+  public async getAccountTransactions(address: string, opts?: TxnsParams) {
     try {
       const params = new URLSearchParams(opts || defaultTxnsParams);
       const response = await instance.get<TxnsResponse>(
-        `account/${this.accountId}/txns?${params.toString()}`,
+        `account/${address}/txns?${params.toString()}`,
       );
       return response.data;
     } catch (error) {
@@ -48,8 +40,8 @@ export class NearBlocksClient {
     }
   }
 
-  public async getLastTransaction() {
-    const { txns } = await this.getAccountTransactions({
+  public async getLastTransaction(address: string) {
+    const { txns } = await this.getAccountTransactions(address, {
       ...defaultTxnsParams,
       per_page: '1',
     });

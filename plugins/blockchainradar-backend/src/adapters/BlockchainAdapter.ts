@@ -3,23 +3,31 @@ import { Config } from '@backstage/config';
 import {
   ContractSourceSpec,
   ContractStateSpec,
+  EtherscanTx,
+  NearTx,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { Logger } from 'winston';
 
 export abstract class BlockchainAdapter {
   config: Config;
   network: string;
   networkType: string;
-  logger = getRootLogger();
+  logger: Logger;
   requestDelaySeconds = 1;
   // is it possible to guess what that contract does
   // by reading its blockchain address?
   isHumanReadable = false;
 
-  constructor(config: Config, network: string, networkType: string) {
+  constructor(
+    config: Config,
+    network: string,
+    networkType: string,
+    logger = getRootLogger(),
+  ) {
     this.config = config;
     this.network = network;
     this.networkType = networkType;
-    this.logger = this.logger.child({ adapter: this.constructor.name });
+    this.logger = logger.child({ adapter: this.constructor.name });
   }
 
   abstract isValidAddress(address: string): boolean;
@@ -45,6 +53,10 @@ export abstract class BlockchainAdapter {
     address: string,
     sourceSpec: ContractSourceSpec,
   ): Promise<ContractStateSpec | undefined>;
+
+  abstract fetchLastTransaction(
+    address: string,
+  ): Promise<EtherscanTx | NearTx | undefined>;
 
   abstract isContract(address: string): Promise<boolean>;
 

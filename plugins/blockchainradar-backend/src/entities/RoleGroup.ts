@@ -43,9 +43,8 @@ export class RoleGroup extends BlockchainAddress {
   }
 
   entityName() {
-    let name = [this.address, this.roleId].join('-');
-    if (name.length > 63)
-      name = base58EncodeSha256(`${this.address}-${this.roleId}`);
+    const name = [this.network, this.address, this.roleId].join('-');
+    if (name.length > 63) return base58EncodeSha256(name);
 
     return name;
   }
@@ -70,7 +69,6 @@ export class RoleGroup extends BlockchainAddress {
     };
   }
 
-  // TODO highlight multisigs somehow
   entityTitle() {
     return `${super.entityTitle()} ${this.roleName}`;
   }

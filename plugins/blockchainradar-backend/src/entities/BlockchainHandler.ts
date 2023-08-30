@@ -21,8 +21,8 @@ import {
   processingResult,
 } from '@backstage/plugin-catalog-node';
 
-import { getRootLogger } from '@backstage/backend-common';
 import { CatalogClient } from '@backstage/catalog-client';
+import { Logger } from 'winston';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 
 /**
@@ -60,12 +60,13 @@ export abstract class BlockchainHandler {
    *  explicitly defined entities in the catalog.
    */
   stub = false;
-  logger = getRootLogger();
+  logger: Logger;
 
   constructor(processor: BlockchainProcessor, parent: Entity, role: string) {
     this.processor = processor;
     this.parent = parent;
     this.role = role;
+    this.logger = processor.logger.child({ handler: this.constructor.name });
   }
 
   /**

@@ -12,7 +12,7 @@ export type CacheableSpec = {
 };
 
 export type RbacSpec = CacheableSpec & {
-  roles?: Record<string, any>;
+  roles?: Array<any>;
   membership?: Array<any>;
 };
 
