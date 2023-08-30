@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 1.0.3
+
+### Patch Changes
+
+- 9570e7d: feat: use role names for rbac content
+- Updated dependencies [8fc8521]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes
