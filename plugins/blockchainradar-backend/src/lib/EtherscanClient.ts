@@ -10,6 +10,7 @@ import retry from 'async-retry';
 import { EtherscanResult } from './types';
 import { ethers } from 'ethers';
 import type { Networkish } from '@ethersproject/providers';
+import { EtherscanTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 const etherscanCommentHeader = `/**
  *Submitted for verification at Etherscan.io on 20XX-XX-XX
@@ -42,9 +43,9 @@ function removeLibraries(
 }
 
 // this looks awkward but the TS docs actually suggest this :P
-export class EtherscanFetcher {
+export class EtherscanClient {
   static logger = getRootLogger().child({ class: 'EtherscanFetcher' });
-  logger = EtherscanFetcher.logger;
+  logger = EtherscanClient.logger;
 
   private readonly networkName: string;
 
@@ -90,7 +91,7 @@ export class EtherscanFetcher {
   };
 
   constructor(networkName: string, apiKey: string = '') {
-    if (!(networkName in EtherscanFetcher.apiDomainsByNetworkName)) {
+    if (!(networkName in EtherscanClient.apiDomainsByNetworkName)) {
       throw new Error(`Invalid network ${networkName}`);
     }
     this.networkName = networkName;
@@ -114,8 +115,8 @@ export class EtherscanFetcher {
         const impResponse = await this.getSuccessfulResponse(
           implementationAddress,
         );
-        const proxyResult = EtherscanFetcher.processResult(response.result[0]);
-        const impResult = EtherscanFetcher.processResult(impResponse.result[0]);
+        const proxyResult = EtherscanClient.processResult(response.result[0]);
+        const impResult = EtherscanClient.processResult(impResponse.result[0]);
         return {
           ...proxyResult,
           sources: {
@@ -126,7 +127,7 @@ export class EtherscanFetcher {
         } as any;
       }
     }
-    return EtherscanFetcher.processResult(response.result[0]);
+    return EtherscanClient.processResult(response.result[0]);
   }
 
   async fetchTransactions(
@@ -175,7 +176,7 @@ export class EtherscanFetcher {
   }
 
   private determineUrl() {
-    const domain = EtherscanFetcher.apiDomainsByNetworkName[this.networkName];
+    const domain = EtherscanClient.apiDomainsByNetworkName[this.networkName];
     return `https://${domain}/api`;
   }
 
@@ -414,7 +415,7 @@ export class BackstageEtherscanProvider extends ethers.providers
   }
 
   getBaseUrl(): string {
-    const domain = EtherscanFetcher.apiDomainsByNetworkName[this.network.name];
+    const domain = EtherscanClient.apiDomainsByNetworkName[this.network.name];
     return `https://${domain}`;
   }
 }
@@ -445,27 +446,4 @@ type EtherscanTxlistResponse = {
   status: '0' | '1';
   message: string;
   result: EtherscanTx[];
-};
-
-type EtherscanTx = {
-  blockNumber: string;
-  timeStamp: string;
-  hash: string;
-  nonce: string;
-  blockHash: string;
-  transactionIndex: string;
-  from: string;
-  to: string;
-  value: string;
-  gas: string;
-  gasPrice: string;
-  isError: string;
-  txreceipt_status: string;
-  input: string;
-  contractAddress: string;
-  cumulativeGasUsed: string;
-  gasUsed: string;
-  confirmations: string;
-  methodId: string;
-  functionName: string;
 };

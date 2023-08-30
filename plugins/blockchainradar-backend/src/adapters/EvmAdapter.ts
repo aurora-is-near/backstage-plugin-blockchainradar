@@ -3,8 +3,8 @@ import { BlockchainAdapter } from './BlockchainAdapter';
 import { ethers } from 'ethers';
 import {
   BackstageEtherscanProvider,
-  EtherscanFetcher,
-} from '../lib/EtherscanFetcher';
+  EtherscanClient,
+} from '../lib/EtherscanClient';
 import {
   ContractSourceSpec,
   ContractStateSpec,
@@ -47,7 +47,7 @@ export class EvmAdapter extends BlockchainAdapter {
 
   async fetchSourceSpec(address: string) {
     const creds = this.etherscanCreds();
-    const fetcher = new EtherscanFetcher(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
     const result = await fetcher.fetchSourcesForAddress(address);
 
     if (result) {
@@ -137,7 +137,7 @@ export class EvmAdapter extends BlockchainAdapter {
 
   async fetchLastTransaction(address: string) {
     const creds = this.etherscanCreds();
-    const fetcher = new EtherscanFetcher(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
 
     try {
       const { result } = await fetcher.fetchTransactions(address);
