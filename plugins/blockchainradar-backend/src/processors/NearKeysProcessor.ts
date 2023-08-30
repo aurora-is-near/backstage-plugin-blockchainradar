@@ -59,7 +59,7 @@ export class NearKeysProcessor extends BlockchainProcessor {
     return (
       isValidBlockchainAddress(
         entity,
-        AdapterFactory.adapter(this, 'near', 'default'),
+        AdapterFactory.adapter(this, 'near', 'mainnet'),
       ) && entity.spec.network === 'near'
     );
   }

@@ -69,7 +69,6 @@ export class RoleGroup extends BlockchainAddress {
     };
   }
 
-  // TODO highlight multisigs somehow
   entityTitle() {
     return `${super.entityTitle()} ${this.roleName}`;
   }

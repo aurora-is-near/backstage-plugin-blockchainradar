@@ -39,6 +39,7 @@ export class RoleGroupProcessor extends BlockchainProcessor {
         address,
         roleId,
       );
+      this.logger.debug(`RoleGroup admin (${entity.spec.roleName}): ${roleId}`);
       roleGroup.emitDependencyOf(emit);
     }
     if (entity.spec.members) {
@@ -54,6 +55,9 @@ export class RoleGroupProcessor extends BlockchainProcessor {
         await blockchainAddress.stubOrFind(this.catalogClient);
         blockchainAddress.emitMemberOf(emit);
         if (blockchainAddress.stub) {
+          this.logger.debug(
+            `RoleGroup member (${entity.spec.roleName}): ${blockchainAddress.address}`,
+          );
           emit(processingResult.entity(location, blockchainAddress.toEntity()));
         }
       }

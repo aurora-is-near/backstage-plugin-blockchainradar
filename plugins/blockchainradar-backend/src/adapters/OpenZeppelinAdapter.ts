@@ -12,7 +12,9 @@ export class OpenZeppelinAdapter extends RoleGroupAdapter {
   ): Promise<RbacSpec | undefined> {
     const client = new OpenZeppelinClient(this.network, this.logger);
     const parsedRoles = await client.getContractAccessControl(address);
-    const stateRoles = Object.entries(stateSpec.methods);
+    const stateRoles = Object.entries(stateSpec.methods).filter(([method]) =>
+      method.includes('ROLE'),
+    );
 
     if (parsedRoles && stateRoles.length > 0) {
       const roles = parsedRoles.map(parsedRole => {

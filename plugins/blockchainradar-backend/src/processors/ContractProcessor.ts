@@ -71,7 +71,7 @@ export class ContractProcessor extends BlockchainProcessor {
    * Also processes multisig contracts - needs to fetch the policy
    * from the on-chain state
    *
-   * TODO uses one shared mutex for both source code and state fetching
+   * TODO uses one shared mutex for source code, state and rbac fetching
    * the upstream class needs to support multiple mutexes per processor
    */
   async processContractDeployment(
@@ -95,6 +95,7 @@ export class ContractProcessor extends BlockchainProcessor {
               deploymentSpec.source = await deployment.adapter.fetchSourceSpec(
                 deployment.address,
               );
+              this.logger.debug(`Source spec found for ${entity.metadata.name}`)
             } catch (error) {
               this.logger.warn(
                 `unable to fetch contract source for ${deployment.address}`,
@@ -114,6 +115,7 @@ export class ContractProcessor extends BlockchainProcessor {
                 deployment.address,
                 deploymentSpec.source!,
               );
+              this.logger.debug(`State spec found for ${entity.metadata.name}`)
             } catch (error) {
               this.logger.warn(
                 `unable to fetch contract state for ${deployment.address}`,
@@ -139,6 +141,7 @@ export class ContractProcessor extends BlockchainProcessor {
                 entity.spec.deployment.state,
               );
               if (spec) {
+                this.logger.debug(`Rbac spec found for ${entity.metadata.name}`)
                 this.appendTags(entity, 'rbac');
                 deploymentSpec.rbac = spec;
               }
@@ -180,10 +183,13 @@ export class ContractProcessor extends BlockchainProcessor {
             entity.spec.address,
             role.id,
           );
-          roleGroup.roleName = role.roleName;
+          roleGroup.roleName = role.roleName || role.id;
           roleGroup.admin = role.admin;
           roleGroup.adminOf = role.adminOf;
           roleGroup.members = role.members;
+          this.logger.debug(
+            `RoleGroup (${entity.metadata.name}): ${roleGroup.roleName}`,
+          );
           roleGroup.emitDependencyOf(emit);
           emit(processingResult.entity(location, roleGroup.toEntity()));
         }
