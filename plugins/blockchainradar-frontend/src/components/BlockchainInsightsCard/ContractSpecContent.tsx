@@ -71,7 +71,7 @@ export function ContractSpecContent(props: ContractSpecContentProps) {
             label="Access Control"
             gridSizes={{ xs: 12, md: 6 }}
             description="Extracted by calling OZ Subgraph / Near Plugins APIs"
-            state={deployment.rbac.roles.map((role: any) => role.id)}
+            state={deployment.rbac.roles.map((role: any) => role.roleName)}
             date={deployment.rbac.fetchDate}
             asJson
             renderCallback={(method, value) => (
