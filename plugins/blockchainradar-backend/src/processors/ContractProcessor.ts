@@ -12,9 +12,9 @@ import {
 
 import { ContractComponent } from '../entities/ContractComponent';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { OpenZeppelinClient } from '../lib/OpenZeppelinClient';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { RoleGroup } from '../entities/RoleGroup';
+import { AdapterFactory } from '../adapters/AdapterFactory';
 
 const dashed = (camel: string) =>
   camel.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
@@ -123,63 +123,28 @@ export class ContractProcessor extends BlockchainProcessor {
         );
       }
 
-      if (
-        entity.spec.network !== 'near' &&
-        !this.isCacheUpToDate(deploymentSpec.rbac)
-      ) {
+      if (!this.isCacheUpToDate(deploymentSpec.rbac)) {
         await this.runExclusive(
           'deployment-rbac-fetch',
           deployment.address,
           async _logger => {
-            const ozClient = new OpenZeppelinClient(
-              this.logger,
+            const roleGroupAdapter = AdapterFactory.roleGroupAdapter(
+              this,
               entity.spec.network,
+              entity.spec.networkType,
             );
-            const accessControl = await ozClient.getContractAccessControl(
-              deployment.address,
-            );
-            const accountRoles = await ozClient.getAccountRoles(
-              deployment.address,
-            );
-            if (accessControl?.roles || accountRoles?.membership) {
-              this.appendTags(entity, 'rbac');
-              deploymentSpec.rbac = {
-                roles: accessControl?.roles.map(role => ({
-                  id: role.role.id,
-                  admin: role.admin.role.id,
-                  adminOf: role.adminOf.map(r => r.role.id),
-                  members: role.members.map(r => r.account.id),
-                })),
-                membership: accountRoles?.membership.map(m => ({
-                  role: m.accesscontrolrole.role,
-                  contract: m.accesscontrolrole.contract,
-                })),
-                fetchDate: new Date().getTime(),
-              };
+            if (entity.spec.deployment?.state) {
+              const spec = await roleGroupAdapter.fetchRbacSpec(
+                entity.spec.address,
+                entity.spec.deployment.state,
+              );
+              if (spec) {
+                this.appendTags(entity, 'rbac');
+                deploymentSpec.rbac = spec;
+              }
             }
           },
         );
-      } else if (entity.spec.network === 'near'  && deploymentSpec.state?.methods.acl_get_permissioned_accounts) {
-        type NearPluginsAclConfig = {
-          super_admins: string[],
-          roles: Record<string, {admins: string[], grantees: string[]}>,
-        }
-        const nearPluginsACLConfig: NearPluginsAclConfig = JSON.parse(deploymentSpec.state.methods.acl_get_permissioned_accounts)
-        this.appendTags(entity, 'rbac');
-        const roles = Object.entries(nearPluginsACLConfig.roles)
-        deploymentSpec.rbac = {
-          roles: roles.map(([roleName, roleConfig]) => ({
-            id: roleName,
-            admin: 'super_admins',
-            adminOf: [],
-            members: roleConfig.grantees
-          })),
-          membership: roles.map(([roleName, _]) => ({
-            role: roleName,
-            contract: entity.spec.address,
-          })),
-          fetchDate: new Date().getTime(),
-        };
       }
 
       if (deploymentSpec.state?.interactsWith) {
@@ -204,25 +169,18 @@ export class ContractProcessor extends BlockchainProcessor {
         }
       }
 
-      if (deploymentSpec.state?.methods && deploymentSpec.rbac?.roles) {
+      if (deploymentSpec.rbac?.roles) {
         // TODO move this to the ETH-specific discovery
-        const stateRoles = Object.entries(
-          deploymentSpec?.state?.methods,
-        ).filter(([n]) => n.includes('ROLE'));
-        for (const [roleName, roleId] of stateRoles) {
-          const role = deploymentSpec.rbac?.roles?.find(
-            (r: any) => r.id === roleId,
-          );
-
+        for (const role of deploymentSpec.rbac.roles) {
           const roleGroup = new RoleGroup(
             this,
             entity,
             entity.spec.network,
             entity.spec.networkType,
             entity.spec.address,
-            roleId,
+            role.id,
           );
-          roleGroup.roleName = roleName;
+          roleGroup.roleName = role.roleName;
           roleGroup.admin = role.admin;
           roleGroup.adminOf = role.adminOf;
           roleGroup.members = role.members;
