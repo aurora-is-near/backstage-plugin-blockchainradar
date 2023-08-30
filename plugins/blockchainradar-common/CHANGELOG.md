@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 1.0.3
+
+### Patch Changes
+
+- 8fc8521: feat: enable unified rbac and tx fetching with adapters
+
 ## 1.0.1
 
 ### Patch Changes
