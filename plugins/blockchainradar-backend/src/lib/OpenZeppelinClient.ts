@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { Logger } from 'winston';
 import { SubgraphEntity } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
+import { getRootLogger } from '@backstage/backend-common';
 
 const AURORA_ENDPOINT =
   'https://api.thegraph.com/subgraphs/name/openzeppelin/aurora';
@@ -12,8 +12,8 @@ export class OpenZeppelinClient {
   private logger;
   private client;
 
-  constructor(logger: Logger, network: string) {
-    this.logger = logger.child({ component: 'OpenZeppelinClient' });
+  constructor(network: string, logger = getRootLogger()) {
+    this.logger = logger.child({ class: this.constructor.name, network });
     this.client = new ApolloClient({
       uri: network === 'aurora' ? AURORA_ENDPOINT : MAINNET_ENDPOINT,
       cache: new InMemoryCache(),
@@ -32,7 +32,12 @@ export class OpenZeppelinClient {
       this.logger.warn('unable to fetch contract rbac');
       return undefined;
     }
-    return data.accessControl;
+    return data.accessControl.roles.map(role => ({
+      id: role.role.id,
+      admin: role.admin.role.id,
+      adminOf: role.adminOf.map(r => r.role.id),
+      members: role.members.map(r => r.account.id),
+    }));
   }
 
   public async getAccountRoles(address: string) {
@@ -47,7 +52,10 @@ export class OpenZeppelinClient {
       this.logger.warn('unable to fetch account roles');
       return undefined;
     }
-    return data.account;
+    return data.account.membership.map(m => ({
+      role: m.accesscontrolrole.role.id,
+      contract: m.accesscontrolrole.contract.id,
+    }));
   }
 }
 
