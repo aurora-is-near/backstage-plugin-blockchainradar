@@ -6,6 +6,7 @@ import {
   ContractStateSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { CodeResult } from 'near-api-js/lib/providers/provider';
+import { NearBlocksClient } from '../lib/NearBlocksClient';
 
 type ViewCodeNear = {
   block_hash: string;
@@ -142,5 +143,10 @@ export class NearAdapter extends BlockchainAdapter {
       }
     }
     return stateSpec;
+  }
+
+  public async fetchLastTransaction(address: string) {
+    const nearBlocksClient = new NearBlocksClient(this.logger);
+    return nearBlocksClient.getLastTransaction(address);
   }
 }
