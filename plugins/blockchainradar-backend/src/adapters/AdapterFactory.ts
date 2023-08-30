@@ -13,9 +13,19 @@ export class AdapterFactory {
     networkType: string,
   ): BlockchainAdapter {
     if (network === 'near') {
-      return new NearAdapter(processor.config, network, networkType, processor.logger);
+      return new NearAdapter(
+        processor.config,
+        network,
+        networkType,
+        processor.logger,
+      );
     }
-    return new EvmAdapter(processor.config, network, networkType, processor.logger);
+    return new EvmAdapter(
+      processor.config,
+      network,
+      networkType,
+      processor.logger,
+    );
   }
 
   static roleGroupAdapter(

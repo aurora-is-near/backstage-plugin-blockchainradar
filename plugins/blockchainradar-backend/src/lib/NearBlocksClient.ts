@@ -21,7 +21,7 @@ export class NearBlocksClient {
   private logger;
 
   constructor(logger: Logger) {
-    this.logger = logger.child({ class: this.constructor.name })
+    this.logger = logger.child({ class: this.constructor.name });
   }
 
   public async getAccountTransactions(address: string, opts?: TxnsParams) {

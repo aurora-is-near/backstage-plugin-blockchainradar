@@ -18,7 +18,12 @@ export abstract class BlockchainAdapter {
   // by reading its blockchain address?
   isHumanReadable = false;
 
-  constructor(config: Config, network: string, networkType: string, logger = getRootLogger()) {
+  constructor(
+    config: Config,
+    network: string,
+    networkType: string,
+    logger = getRootLogger(),
+  ) {
     this.config = config;
     this.network = network;
     this.networkType = networkType;
