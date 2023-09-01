@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 1.0.4
+
+### Patch Changes
+
+- ee36905: Improve responsive layout for BlockchainEntityPage
+
 ## 1.0.3
 
 ### Patch Changes
