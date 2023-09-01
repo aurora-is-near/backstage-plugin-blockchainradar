@@ -26,7 +26,11 @@ Blockchain Radar for Backstage is a collection of plugins that aims to solve ass
   - Policy & configuration tracking
   - Mapping of the signers to the User entities
 - NEAR accounts & EVM EOA addresses management
-- Unknown & deprecated access keys tracking
+- Role-Based Access Control monitoring
+  - [Near Plugins](https://github.com/aurora-is-near/near-plugins) AccessControllable
+  - [OpenZeppelin Access Control](https://docs.openzeppelin.com/contracts/2.x/api/access) via [Subgraph indexing](https://thegraph.com/hosted-service)
+- Unknown & deprecated access keys tracking on NEAR
+- Time since last transaction tracking (e.g. to monitor inactive ledgers)
 - Security tiering
 - Exporting data
   - Handlebars templates
@@ -36,6 +40,7 @@ Blockchain Radar for Backstage is a collection of plugins that aims to solve ass
 
 - [Plugin setup](docs/setup.md)
 - [Usage examples](docs/usage.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## How does it work?
 
@@ -49,6 +54,7 @@ keep things simple:
 - Multisig safe deployment: `kind: API`, `type: multisig-deployment`
 - NEAR Account / EVM EOA address: `kind: Resource`, `type: signer-address`
 - NEAR AccessKey: `kind: Resource`, `type: access-key`
+- RBAC Role: `kind: API`, `type: role-group`
 
 It uses `deployedAt` and `interactsWith` attributes in the spec (e.g. like [here](https://github.com/aurora-is-near/rainbow-token-connector/blob/589e6f5ece013f9747b37e64e793dc373591b1fb/erc20-connector/.catalog-info.yaml#L21)) to start tracking on-chain state and establishing relationships with other entities.
 
@@ -74,7 +80,5 @@ Additionally, you can find examples of how to send blockchain metrics to Datadog
 
 ## Roadmap
 
-- Key/signer inactivity discovery
 - Support for multiple SputnikDAO groups
-- Support for near-plugins introspection
-- Support for OpenZeppelin RBAC & Proxy introspection
+- Support for OpenZeppelin Proxy introspection
