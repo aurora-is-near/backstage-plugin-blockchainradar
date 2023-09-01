@@ -17,6 +17,12 @@ In the repository's root, write an app-config with data sources for the catalog 
 ```bash
 # Modify app-config with entity data sources
 cp app-config.example.yaml app-config.local.yaml
+# Add necessary secrets
+cp .env.example .env
+# Optional but recommended: install nix and start devshell
+sh <(curl -L https://nixos.org/nix/install)
+nix develop --impure
+# Install dependencies
 yarn install
 yarn dev
 ```

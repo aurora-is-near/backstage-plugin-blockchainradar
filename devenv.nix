@@ -1,5 +1,6 @@
 # Docs: https://devenv.sh/basics/
 {pkgs, ...}: {
+  dotenv.enable = true;
   languages = {
     # Docs: https://devenv.sh/languages/
     nix.enable = true;

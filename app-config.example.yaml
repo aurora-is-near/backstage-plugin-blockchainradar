@@ -9,36 +9,11 @@ blockchain:
     aurora-mainnet:
       network: aurora
       apiKey: ${AURORASCAN_API_KEY}
-
 catalog:
-  # Backstage example components
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-components.yaml
-
-  # Backstage example systems
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-systems.yaml
-
-  # Backstage example APIs
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-apis.yaml
-
-  # Backstage example organization groups
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml
-
-  # Backstage example domains
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-domains.yaml
-
-  # Backstage example resources
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-resources.yaml
-
-  # The backstage demo deployment (this)
-  - type: url
-    target: https://github.com/backstage/demo/blob/master/catalog-info.yaml
-
-  # The backstage library repository
-  - type: url
-    target: https://github.com/backstage/backstage/blob/master/catalog-info.yaml
+  locations:
+    # Aurora Engine components
+    - type: url
+      target: https://github.com/aurora-is-near/aurora-engine/blob/develop/.catalog-info.yaml
+    # Fast Bridge components
+    - type: url
+      target: https://github.com/aurora-is-near/fast-bridge-protocol/blob/master/.catalog-info.yaml
