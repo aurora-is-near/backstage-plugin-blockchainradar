@@ -1,14 +1,7 @@
 # Setup
 
-## Prerequisites
-
-The plugins are published on Github, so you need to set the registry in `.yarnrc.yml`:
-
-```yml
-npmScopes:
-  '@aurora-is-near':
-    npmRegistryServer: 'https://npm.pkg.github.com'
-```
+Blockchain Radar provides packages for backend and frontend. You will need to
+install both to make it work.
 
 ## Backend
 
@@ -19,22 +12,33 @@ cd packages/backend
 yarn add @aurora-is-near/backstage-plugin-blockchainradar-common @aurora-is-near/backstage-plugin-blockchainradar-backend
 ```
 
-Change `packages/backend/src/plugins/catalog.ts`:
+Add blockchain processors to `packages/backend/src/plugins/catalog.ts` :
 
 ```ts
+import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
+import { EntityProvider } from '@backstage/plugin-catalog-node';
+import { Router } from 'express';
+import { PluginEnvironment } from '../types';
+
+import { GithubEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
+
 import {
+  UserProcessor,
+  SignerProcessor,
   ContractProcessor,
   MultisigProcessor,
+  RoleGroupProcessor,
+  SecurityPolicyProcessor,
+  // You can skip the ones below if you don't use NEAR network
   SputnikProcessor,
   NearKeysProcessor,
-  SecurityPolicyProcessor,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-backend';
 
 export default async function createPlugin(
   env: PluginEnvironment,
   providers?: Array<EntityProvider>,
 ): Promise<Router> {
-  const builder = await CatalogBuilder.create(env);
+  const builder = CatalogBuilder.create(env);
 
   builder.addEntityProvider(
     GithubEntityProvider.fromConfig(env.config, {
@@ -44,8 +48,11 @@ export default async function createPlugin(
   );
 
   // ... other processors
+  builder.addProcessor(new UserProcessor(env));
+  builder.addProcessor(new SignerProcessor(env));
   builder.addProcessor(new ContractProcessor(env));
   builder.addProcessor(new MultisigProcessor(env));
+  builder.addProcessor(new RoleGroupProcessor(env));
   builder.addProcessor(new SputnikProcessor(env));
   builder.addProcessor(new NearKeysProcessor(env));
   builder.addProcessor(new SecurityPolicyProcessor(env));
