@@ -76,7 +76,9 @@ export class NearKeysProcessor extends BlockchainProcessor {
       if (this.isAcceptableNearAddress(entity)) {
         if (isContractDeployment(entity)) {
           await this.processContract(entity, cache, emit, location);
-        } else if (isRoleGroup(entity)) { /* empty */ } else {
+        } else if (isRoleGroup(entity)) {
+          /* empty */
+        } else {
           return this.processNonContract(entity, cache, emit, location);
         }
       }
