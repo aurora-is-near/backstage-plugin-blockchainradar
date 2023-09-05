@@ -4,9 +4,9 @@ import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
 import { getRootLogger } from '@backstage/backend-common';
 
 const AURORA_ENDPOINT =
-  'https://api.thegraph.com/subgraphs/name/openzeppelin/aurora';
+  'https://api.thegraph.com/subgraphs/name/aurora-is-near/aurora-oz';
 const MAINNET_ENDPOINT =
-  'https://api.thegraph.com/subgraphs/name/diegofigs/aurora-eth-oz';
+  'https://api.thegraph.com/subgraphs/name/aurora-is-near/ethereum-oz';
 
 export class OpenZeppelinClient {
   private logger;
