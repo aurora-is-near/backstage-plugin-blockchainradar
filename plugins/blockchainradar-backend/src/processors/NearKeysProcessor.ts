@@ -3,7 +3,7 @@ import {
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
-import { Entity } from '@backstage/catalog-model';
+import { DEFAULT_NAMESPACE, Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import {
   BlockchainAddressEntity,
@@ -12,8 +12,8 @@ import {
   NearKeysSpec,
   isContractDeployment,
   isBlockchainUser,
-  isSigner,
   isFullAccessKey,
+  isRoleGroup,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 import { BlockchainProcessor } from './BlockchainProcessor';
@@ -76,7 +76,7 @@ export class NearKeysProcessor extends BlockchainProcessor {
       if (this.isAcceptableNearAddress(entity)) {
         if (isContractDeployment(entity)) {
           await this.processContract(entity, cache, emit, location);
-        } else {
+        } else if (isRoleGroup(entity)) { /* empty */ } else {
           return this.processNonContract(entity, cache, emit, location);
         }
       }
@@ -149,7 +149,7 @@ export class NearKeysProcessor extends BlockchainProcessor {
       for (const [publicKey, perms] of Object.entries(keysSpec.keys)) {
         if (!isFullAccessKey(perms)) continue;
 
-        if (isSigner(entity) && entity.metadata.namespace === 'default') {
+        if (entity.metadata.namespace === DEFAULT_NAMESPACE) {
           const addr = await BlockchainFactory.fromEntity(
             this,
             entity,
