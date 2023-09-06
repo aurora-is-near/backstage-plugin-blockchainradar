@@ -1,5 +1,12 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.5
+
+### Patch Changes
+
+- 9180aff: refactor: change oz subgraph endpoints
+- 57cd8d1: fix: remove ak relations from role-groups
+
 ## 1.0.3
 
 ### Patch Changes
