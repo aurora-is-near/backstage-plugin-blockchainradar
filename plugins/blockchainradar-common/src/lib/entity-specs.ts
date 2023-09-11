@@ -21,6 +21,7 @@ export type ContractSourceSpec = CacheableSpec & {
   sourceCodeVerified: boolean;
   contractName: string;
   sourceFiles: string[];
+  startBlock: number; // block height of creation transaction
 };
 
 export type ContractStateSpec = CacheableSpec & {
