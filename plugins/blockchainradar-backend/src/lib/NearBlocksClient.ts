@@ -40,6 +40,16 @@ export class NearBlocksClient {
     }
   }
 
+  public async getFirstTransaction(address: string) {
+    const { txns } = await this.getAccountTransactions(address, {
+      ...defaultTxnsParams,
+      per_page: '1',
+      order: 'asc',
+    });
+    const [firstTx] = txns;
+    return firstTx;
+  }
+
   public async getLastTransaction(address: string) {
     const { txns } = await this.getAccountTransactions(address, {
       ...defaultTxnsParams,
