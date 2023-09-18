@@ -93,12 +93,15 @@ export class NearAdapter extends BlockchainAdapter {
       });
     const parsedContract = parseContract(codeResponse.code_base64);
 
+    const nearBlocksClient = new NearBlocksClient(this.logger);
+    const firstTx = await nearBlocksClient.getFirstTransaction(address);
     const sourceSpec: ContractSourceSpec = {
       sourceCodeVerified: false,
       fetchDate: Date.now(),
       contractName: address,
       sourceFiles: [],
       abi: JSON.stringify(parsedContract.byMethod, null, 2),
+      startBlock: firstTx.block.block_height,
     };
     return sourceSpec;
   }

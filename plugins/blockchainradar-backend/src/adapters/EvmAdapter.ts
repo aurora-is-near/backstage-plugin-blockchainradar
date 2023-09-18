@@ -49,6 +49,7 @@ export class EvmAdapter extends BlockchainAdapter {
     const creds = this.etherscanCreds();
     const fetcher = new EtherscanClient(creds.network, creds.apiKey);
     const result = await fetcher.fetchSourcesForAddress(address);
+    const firstTx = await this.fetchFirstTransaction(address);
 
     if (result) {
       return {
@@ -57,6 +58,7 @@ export class EvmAdapter extends BlockchainAdapter {
         contractName: result.etherScanResult.ContractName,
         sourceFiles: Object.keys(result.sources),
         abi: JSON.stringify(JSON.parse(result.etherScanResult.ABI), null, 2),
+        startBlock: firstTx?.blockNumber ? parseInt(firstTx.blockNumber) : 0,
       };
     }
     this.logger.warn(`unable to fetch abi for ${address}`);
@@ -141,6 +143,23 @@ export class EvmAdapter extends BlockchainAdapter {
 
     try {
       const { result } = await fetcher.fetchTransactions(address);
+      return result.length > 0 ? result[0] : undefined;
+    } catch (err) {
+      this.logger.warn(`unable to fetch transactions for ${address}`);
+      return undefined;
+    }
+  }
+
+  public async fetchFirstTransaction(address: string) {
+    const creds = this.etherscanCreds();
+    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+
+    try {
+      const { result } = await fetcher.fetchTransactions(address, {
+        page: 1,
+        offset: 1,
+        sort: 'asc',
+      });
       return result.length > 0 ? result[0] : undefined;
     } catch (err) {
       this.logger.warn(`unable to fetch transactions for ${address}`);

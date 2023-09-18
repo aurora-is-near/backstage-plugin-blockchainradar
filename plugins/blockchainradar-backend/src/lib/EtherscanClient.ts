@@ -140,6 +140,7 @@ export class EtherscanClient {
   ): Promise<EtherscanTxlistResponse> {
     // not putting a try/catch around this; if it throws, we throw
     await this.ready;
+    const { page = 1, offset = 10, sort = 'desc' } = opts;
     const responsePromise = axios.get<EtherscanTxlistResponse>(
       this.determineUrl(),
       {
@@ -149,9 +150,9 @@ export class EtherscanClient {
           address,
           startblock: opts.startblock,
           endblock: opts.endblock,
-          page: opts.page,
-          offset: opts.offset,
-          sort: opts.sort,
+          page,
+          offset,
+          sort,
           ...(this.networkName !== 'aurora' ? { apiKey: this.apiKey } : {}),
         },
         responseType: 'json',
