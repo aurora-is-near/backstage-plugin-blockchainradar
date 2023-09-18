@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.6
+
+### Patch Changes
+
+- 5fb2ce3: feat: add startBlock to contract deployments
+- Updated dependencies [5fb2ce3]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.6
+
 ## 1.0.5
 
 ### Patch Changes
