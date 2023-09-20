@@ -36,7 +36,7 @@ export class EvmAdapter extends BlockchainAdapter {
     );
     if (this.network === 'aurora') {
       const auroraProvider = new StaticJsonRpcProvider(
-        'https://mainnet.aurora.dev/api',
+        `https://${this.networkType}.aurora.dev/api`,
       );
       const code = await auroraProvider.getCode(address);
       return code !== '0x';
@@ -45,7 +45,7 @@ export class EvmAdapter extends BlockchainAdapter {
     return bytecode !== '0x';
   }
 
-  async fetchSourceSpec(address: string) {
+  public async fetchSourceSpec(address: string) {
     const creds = this.etherscanCreds();
     const fetcher = new EtherscanClient(creds.network, creds.apiKey);
     const result = await fetcher.fetchSourcesForAddress(address);
@@ -65,7 +65,7 @@ export class EvmAdapter extends BlockchainAdapter {
     return undefined;
   }
 
-  async fetchStateSpec(
+  public async fetchStateSpec(
     address: string,
     sourceSpec: ContractSourceSpec,
   ): Promise<ContractStateSpec | undefined> {
@@ -77,7 +77,9 @@ export class EvmAdapter extends BlockchainAdapter {
     const creds = this.etherscanCreds();
     const provider =
       this.network === 'aurora'
-        ? new StaticJsonRpcProvider('https://mainnet.aurora.dev/api')
+        ? new StaticJsonRpcProvider(
+            `https://${this.networkType}.aurora.dev/api`,
+          )
         : new BackstageEtherscanProvider(creds.network, creds.apiKey);
 
     const contract = new ethers.Contract(address, sourceSpec.abi).connect(
@@ -137,7 +139,7 @@ export class EvmAdapter extends BlockchainAdapter {
     return stateSpec;
   }
 
-  async fetchLastTransaction(address: string) {
+  public async fetchLastTransaction(address: string) {
     const creds = this.etherscanCreds();
     const fetcher = new EtherscanClient(creds.network, creds.apiKey);
 

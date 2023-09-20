@@ -7,6 +7,8 @@ import {
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { CodeResult } from 'near-api-js/lib/providers/provider';
 import { NearBlocksClient } from '../lib/NearBlocksClient';
+import { getRootLogger } from '@backstage/backend-common';
+import { Config } from '@backstage/config';
 
 type ViewCodeNear = {
   block_hash: string;
@@ -14,16 +16,24 @@ type ViewCodeNear = {
   code_base64: string;
 };
 export class NearAdapter extends BlockchainAdapter {
-  static nearConfig: nearAPI.ConnectConfig = {
-    networkId: 'mainnet',
-    keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
-    nodeUrl: 'https://rpc.mainnet.near.org',
-    walletUrl: 'https://wallet.mainnet.near.org',
-    helperUrl: 'https://helper.mainnet.near.org',
-    headers: {},
-    // explorerUrl: "https://explorer.mainnet.near.org",
-  };
-
+  constructor(
+    config: Config,
+    network: string,
+    networkType: string,
+    logger = getRootLogger(),
+  ) {
+    super(config, network, networkType, logger);
+    this.nearConfig = {
+      networkId: networkType,
+      keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
+      nodeUrl: `https://rpc.${networkType}.near.org`,
+      walletUrl: `https://wallet.${networkType}.near.org`,
+      helperUrl: `https://helper.${networkType}.near.org`,
+      headers: {},
+      // explorerUrl: "https://explorer.mainnet.near.org",
+    };
+  }
+  nearConfig: nearAPI.ConnectConfig;
   isHumanReadable = true;
 
   private near?: nearAPI.Near;
@@ -35,7 +45,7 @@ export class NearAdapter extends BlockchainAdapter {
 
   public async connectApi() {
     if (this.near) return this.near;
-    this.near = await nearAPI.connect(NearAdapter.nearConfig);
+    this.near = await nearAPI.connect(this.nearConfig);
     return this.near;
   }
 
@@ -63,6 +73,7 @@ export class NearAdapter extends BlockchainAdapter {
   isValidAddress(address: string): boolean {
     return (
       !!address.match(/\.near$/) ||
+      !!address.match(/\.testnet$/) ||
       !!address.match(/^[0-9a-fA-F]{64}$/) ||
       address === 'aurora'
     );
@@ -72,7 +83,7 @@ export class NearAdapter extends BlockchainAdapter {
     return address.toLowerCase();
   }
 
-  async fetchSourceSpec(address: string) {
+  public async fetchSourceSpec(address: string) {
     // const account = await this.near!.account(this.address);
     // // logger.debug('account: ' + JSON.stringify(account, null, 2));
     // const details = await account.getAccountDetails();
@@ -93,8 +104,7 @@ export class NearAdapter extends BlockchainAdapter {
       });
     const parsedContract = parseContract(codeResponse.code_base64);
 
-    const nearBlocksClient = new NearBlocksClient(this.logger);
-    const firstTx = await nearBlocksClient.getFirstTransaction(address);
+    const firstTx = await this.fetchFirstTransaction(address);
     const sourceSpec: ContractSourceSpec = {
       sourceCodeVerified: false,
       fetchDate: Date.now(),
@@ -106,7 +116,7 @@ export class NearAdapter extends BlockchainAdapter {
     return sourceSpec;
   }
 
-  async fetchStateSpec(address: string, sourceSpec: ContractSourceSpec) {
+  public async fetchStateSpec(address: string, sourceSpec: ContractSourceSpec) {
     const stateSpec: ContractStateSpec = {
       fetchDate: Date.now(),
       methods: {},
@@ -146,6 +156,11 @@ export class NearAdapter extends BlockchainAdapter {
       }
     }
     return stateSpec;
+  }
+
+  public async fetchFirstTransaction(address: string) {
+    const nearBlocksClient = new NearBlocksClient(this.logger);
+    return nearBlocksClient.getFirstTransaction(address);
   }
 
   public async fetchLastTransaction(address: string) {
