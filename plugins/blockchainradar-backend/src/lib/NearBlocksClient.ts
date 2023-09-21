@@ -20,7 +20,10 @@ export class NearBlocksClient {
     });
   }
 
-  public async getAccountTransactions(address: string, opts = defaultTxnsParams) {
+  public async getAccountTransactions(
+    address: string,
+    opts = defaultTxnsParams,
+  ) {
     try {
       const params = new URLSearchParams(opts || defaultTxnsParams);
       const response = await this.axios.get<TxnsResponse>(
