@@ -8,11 +8,6 @@ export class ContractDeployment extends BlockchainAddress {
       type: `${this.role === 'multisig' ? this.role : 'contract'}-deployment`,
       deployment: {},
       definition: 'none', // required by the API spec, overriden by ContractProcessor
-      ...(this.role === 'multisig'
-        ? {
-            multisig: {},
-          }
-        : {}),
     };
   }
 
@@ -30,30 +25,11 @@ export class ContractDeployment extends BlockchainAddress {
 
     if (!['contract', 'multisig'].includes(this.role)) parts.push(this.role);
 
-    if (['multisig'].includes(this.role)) parts.push(this.network);
-
     return parts.join(' ');
-  }
-
-  private getSafeLink() {
-    const safeLink = { title: '', url: '' };
-    if (this.network === 'near') {
-      safeLink.title = 'Safe (AstroDao)';
-      safeLink.url = `https://app.astrodao.com/dao/${this.address}`;
-    } else {
-      safeLink.title = 'Safe (Gnosis)';
-      safeLink.url = `https://app.safe.global/${
-        this.network === 'ethereum' ? 'eth' : this.network
-      }:${this.address}`;
-    }
-    return safeLink;
   }
 
   entityMetadata() {
     const links = [super.toLink()];
-    if (this.role === 'multisig') {
-      links.push(this.getSafeLink());
-    }
     return {
       ...super.entityMetadata(),
       description: `${this.address} (${this.role} address)`,

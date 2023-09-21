@@ -45,7 +45,7 @@ export class NearKey extends BlockchainHandler {
     };
   }
 
-  toEntity() {
+  toEntity(): Entity {
     return {
       apiVersion: 'backstage.io/v1alpha1',
       kind: 'Resource',
