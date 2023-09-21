@@ -27,7 +27,11 @@ export abstract class BlockchainAdapter {
     this.config = config;
     this.network = network;
     this.networkType = networkType;
-    this.logger = logger.child({ adapter: this.constructor.name });
+    this.logger = logger.child({
+      adapter: this.constructor.name,
+      network,
+      networkType,
+    });
   }
 
   abstract isValidAddress(address: string): boolean;
@@ -53,6 +57,10 @@ export abstract class BlockchainAdapter {
     address: string,
     sourceSpec: ContractSourceSpec,
   ): Promise<ContractStateSpec | undefined>;
+
+  abstract fetchFirstTransaction(
+    address: string,
+  ): Promise<EtherscanTx | NearTx | undefined>;
 
   abstract fetchLastTransaction(
     address: string,
