@@ -15,6 +15,7 @@ import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { RoleGroup } from '../entities/RoleGroup';
 import { AdapterFactory } from '../adapters/AdapterFactory';
+import { ContractDeployment } from '../entities/ContractDeployment';
 
 const dashed = (camel: string) =>
   camel.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
@@ -79,7 +80,7 @@ export class ContractProcessor extends BlockchainProcessor {
     location: LocationSpec,
     emit: CatalogProcessorEmit,
   ) {
-    const deployment = await BlockchainFactory.fromEntity(
+    const deployment = await BlockchainFactory.fromEntity<ContractDeployment>(
       this,
       entity,
       'contract',

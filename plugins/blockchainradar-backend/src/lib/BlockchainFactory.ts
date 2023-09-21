@@ -3,10 +3,11 @@ import {
   BlockchainAddressEntity,
   ContractDeploymentEntity,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { AdapterFactory } from '../adapters/AdapterFactory';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { ContractDeployment } from '../entities/ContractDeployment';
-import { AdapterFactory } from '../adapters/AdapterFactory';
+import { MultisigDeployment } from '../entities/MultisigDeployment';
 
 // https://stackoverflow.com/questions/29998343/limiting-the-times-that-split-splits-rather-than-truncating-the-resulting-ar
 // function javaSplit(string: string, separator: string, n: number) {
@@ -53,7 +54,7 @@ export class BlockchainFactory {
   /**
    * Will automatically detect if the address is a contract or a normal account
    */
-  static async fromEntity(
+  static async fromEntity<T = BlockchainAddress>(
     processor: BlockchainProcessor,
     parent: BlockchainAddressEntity | ContractDeploymentEntity,
     role = 'admin',
@@ -66,7 +67,7 @@ export class BlockchainFactory {
       newAddress || parent.spec.address,
       parent.spec.network,
       parent.spec.networkType,
-    );
+    ) as T;
   }
 
   static async fromBlockchainAddress(
@@ -92,10 +93,20 @@ export class BlockchainFactory {
     address: string,
     network: string,
     networkType: string,
-  ): Promise<BlockchainAddress | ContractDeployment> {
+  ): Promise<BlockchainAddress | ContractDeployment | MultisigDeployment> {
     const adapter = AdapterFactory.adapter(processor, network, networkType);
 
     if (await adapter.isContract(address)) {
+      if (role === 'multisig') {
+        return new MultisigDeployment(
+          processor,
+          parent,
+          role,
+          network,
+          networkType,
+          address,
+        );
+      }
       return new ContractDeployment(
         processor,
         parent,
