@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 1.0.7
+
+### Patch Changes
+
+- f7dfec1: feat: generate multisig spec from chain
+
 ## 1.0.6
 
 ### Patch Changes
