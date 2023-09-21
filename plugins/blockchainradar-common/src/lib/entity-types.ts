@@ -124,7 +124,7 @@ export interface MultisigDeploymentEntity extends Entity {
   kind: ApiEntity['kind'] | ResourceEntity['kind'];
   spec: Literal<
     ApiEntity['spec'] &
-      BlockchainAddressEntity['spec'] & {
+      ContractDeploymentEntity['spec'] & {
         type: 'multisig-deployment' | 'admin-address';
         multisig?: MultisigSpec;
       }
