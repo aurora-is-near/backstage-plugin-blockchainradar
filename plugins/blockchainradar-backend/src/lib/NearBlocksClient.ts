@@ -1,33 +1,32 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { NearTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { Logger } from 'winston';
-
-type TxnsResponse = {
-  txns: NearTx[];
-};
+import { getRootLogger } from '@backstage/backend-common';
 
 const defaultTxnsParams = { page: '1', per_page: '10', order: 'desc' };
-type TxnsParams = typeof defaultTxnsParams;
-const NEAR_BLOCKS_URL = 'https://api.nearblocks.io/v1';
 const NEAR_BLOCKS_API_KEY = process.env.NEAR_BLOCKS_API_KEY;
-const instance = axios.create({
-  baseURL: NEAR_BLOCKS_URL,
-  headers: {
-    Authorization: `Bearer ${NEAR_BLOCKS_API_KEY}`,
-  },
-});
 
 export class NearBlocksClient {
-  private logger;
+  logger: Logger;
+  axios: AxiosInstance;
 
-  constructor(logger: Logger) {
-    this.logger = logger.child({ class: this.constructor.name });
+  constructor(networkType: string, logger = getRootLogger()) {
+    this.logger = logger.child({ class: this.constructor.name, networkType });
+    this.axios = axios.create({
+      baseURL: this.getBaseUrl(networkType),
+      headers: {
+        Authorization: `Bearer ${NEAR_BLOCKS_API_KEY}`,
+      },
+    });
   }
 
-  public async getAccountTransactions(address: string, opts?: TxnsParams) {
+  public async getAccountTransactions(
+    address: string,
+    opts = defaultTxnsParams,
+  ) {
     try {
       const params = new URLSearchParams(opts || defaultTxnsParams);
-      const response = await instance.get<TxnsResponse>(
+      const response = await this.axios.get<TxnsResponse>(
         `account/${address}/txns?${params.toString()}`,
       );
       return response.data;
@@ -58,4 +57,14 @@ export class NearBlocksClient {
     const [lastTx] = txns;
     return lastTx;
   }
+
+  private getBaseUrl(networkType: string) {
+    return `https://api${
+      networkType === 'testnet' ? '-testnet' : ''
+    }.nearblocks.io/v1`;
+  }
 }
+
+type TxnsResponse = {
+  txns: NearTx[];
+};
