@@ -1,5 +1,16 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.7
+
+### Patch Changes
+
+- b0628cf: feat: use correct near testnet multisig links
+- f86a735: feat: add near testnet support
+- 1c07664: feat: add testnet support in near api connectors
+- f7dfec1: feat: generate multisig spec from chain
+- Updated dependencies [f7dfec1]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.7
+
 ## 1.0.6
 
 ### Patch Changes
