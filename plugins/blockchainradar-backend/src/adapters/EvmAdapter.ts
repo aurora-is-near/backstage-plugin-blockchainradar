@@ -58,7 +58,7 @@ export class EvmAdapter extends BlockchainAdapter {
         contractName: result.etherScanResult.ContractName,
         sourceFiles: Object.keys(result.sources),
         abi: JSON.stringify(JSON.parse(result.etherScanResult.ABI), null, 2),
-        startBlock: firstTx?.blockNumber ? parseInt(firstTx.blockNumber) : 0,
+        startBlock: firstTx ? parseInt(firstTx.blockNumber) : 0,
       };
     }
     this.logger.warn(`unable to fetch abi for ${address}`);

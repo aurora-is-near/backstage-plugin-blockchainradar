@@ -35,7 +35,7 @@ export class NearBlocksClient {
         this.logger.warn('error message: ', error.message);
       }
       this.logger.error('unexpected error: ', error);
-      throw error;
+      return { txns: [] };
     }
   }
 
@@ -45,6 +45,9 @@ export class NearBlocksClient {
       per_page: '1',
       order: 'asc',
     });
+    if (!txns.length) {
+      return undefined;
+    }
     const [firstTx] = txns;
     return firstTx;
   }
@@ -54,6 +57,9 @@ export class NearBlocksClient {
       ...defaultTxnsParams,
       per_page: '1',
     });
+    if (!txns.length) {
+      return undefined;
+    }
     const [lastTx] = txns;
     return lastTx;
   }

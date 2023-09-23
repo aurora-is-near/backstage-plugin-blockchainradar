@@ -1,7 +1,27 @@
 import { Entity } from '@backstage/catalog-model';
 import { BlockchainAddress } from './BlockchainAddress';
+import { RoleGroupAdapter } from '../adapters/RoleGroupAdapter';
+import { BlockchainProcessor } from '../processors/BlockchainProcessor';
+import { AdapterFactory } from '../adapters/AdapterFactory';
 
 export class ContractDeployment extends BlockchainAddress {
+  roleGroupAdapter: RoleGroupAdapter;
+  constructor(
+    processor: BlockchainProcessor,
+    parent: Entity,
+    role: string,
+    network: string,
+    networkType: string,
+    address: string,
+  ) {
+    super(processor, parent, role, network, networkType, address);
+    this.roleGroupAdapter = AdapterFactory.roleGroupAdapter(
+      processor,
+      network,
+      networkType,
+    );
+  }
+
   entitySpec() {
     return {
       ...super.entitySpec(),

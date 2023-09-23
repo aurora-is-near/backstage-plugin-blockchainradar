@@ -15,7 +15,6 @@ import { BlockchainProcessor } from './BlockchainProcessor';
 import { ContractComponent } from '../entities/ContractComponent';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { MultisigDeployment } from '../entities/MultisigDeployment';
-import { AdapterFactory } from '../adapters/AdapterFactory';
 
 export class MultisigProcessor extends BlockchainProcessor {
   async postProcessEntity?(
@@ -53,20 +52,14 @@ export class MultisigProcessor extends BlockchainProcessor {
     location: LocationSpec,
     emit: CatalogProcessorEmit,
   ) {
-    this.logger.info(JSON.stringify(entity.spec.deployment));
-    this.logger.debug(`${entity.metadata.name} fetching safe owners`);
-
     const multisig = await BlockchainFactory.fromEntity<MultisigDeployment>(
       this,
       entity,
       'multisig',
     );
-    const policyAdapter = AdapterFactory.policyAdapter(
-      this,
-      entity.spec.network,
-      entity.spec.networkType,
-    );
-    const owners = await policyAdapter.fetchMultisigOwners(
+
+    this.logger.debug(`${entity.metadata.name} fetching safe owners`);
+    const owners = await multisig.policyAdapter.fetchMultisigOwners(
       entity.spec.address,
       entity.spec.deployment?.state,
     );
@@ -100,7 +93,6 @@ export class MultisigProcessor extends BlockchainProcessor {
     const hasAllowUnknown = tags
       ? tags.some(tag => tag === 'allow-unknown')
       : false;
-    this.logger.info(`${entity.metadata.name} Policy Check => ${!hasUnknown}`);
     if (hasUnknown && !hasAllowUnknown) {
       this.appendTags(entity, 'has-unknown');
     }
@@ -112,7 +104,7 @@ export class MultisigProcessor extends BlockchainProcessor {
         multisig.address,
         async logger => {
           try {
-            multisigSpec = await policyAdapter.fetchMultisigSpec(
+            multisigSpec = await multisig.policyAdapter.fetchMultisigSpec(
               entity.spec.address,
               entity.spec.deployment?.state,
             );
