@@ -2,6 +2,7 @@ import { Entity } from '@backstage/catalog-model';
 import {
   BlockchainAddressEntity,
   ContractDeploymentEntity,
+  MultisigDeploymentEntity,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { AdapterFactory } from '../adapters/AdapterFactory';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
@@ -56,7 +57,7 @@ export class BlockchainFactory {
    */
   static async fromEntity<T = BlockchainAddress>(
     processor: BlockchainProcessor,
-    parent: BlockchainAddressEntity | ContractDeploymentEntity,
+    parent: BlockchainAddressEntity | ContractDeploymentEntity | MultisigDeploymentEntity,
     role = 'admin',
     newAddress?: string,
   ) {

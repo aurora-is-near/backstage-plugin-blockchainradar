@@ -14,7 +14,6 @@ import { ContractComponent } from '../entities/ContractComponent';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { RoleGroup } from '../entities/RoleGroup';
-import { AdapterFactory } from '../adapters/AdapterFactory';
 import { ContractDeployment } from '../entities/ContractDeployment';
 
 const dashed = (camel: string) =>
@@ -133,13 +132,8 @@ export class ContractProcessor extends BlockchainProcessor {
           'deployment-rbac-fetch',
           deployment.address,
           async _logger => {
-            const roleGroupAdapter = AdapterFactory.roleGroupAdapter(
-              this,
-              entity.spec.network,
-              entity.spec.networkType,
-            );
             if (entity.spec.deployment?.state) {
-              const spec = await roleGroupAdapter.fetchRbacSpec(
+              const spec = await deployment.roleGroupAdapter.fetchRbacSpec(
                 entity.spec.address,
                 entity.spec.deployment.state,
               );

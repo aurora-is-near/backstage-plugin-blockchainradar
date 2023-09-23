@@ -111,7 +111,7 @@ export class NearAdapter extends BlockchainAdapter {
       contractName: address,
       sourceFiles: [],
       abi: JSON.stringify(parsedContract.byMethod, null, 2),
-      startBlock: firstTx.block.block_height,
+      startBlock: firstTx ? firstTx.block.block_height : 0,
     };
     return sourceSpec;
   }
