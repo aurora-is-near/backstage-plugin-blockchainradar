@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.8
+
+### Patch Changes
+
+- 5db5491: fix: near source spec discovery
+
 ## 1.0.7
 
 ### Patch Changes
