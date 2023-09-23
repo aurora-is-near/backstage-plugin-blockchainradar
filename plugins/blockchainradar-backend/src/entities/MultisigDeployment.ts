@@ -15,7 +15,11 @@ export class MultisigDeployment extends ContractDeployment {
     address: string,
   ) {
     super(processor, parent, role, network, networkType, address);
-    this.policyAdapter = AdapterFactory.policyAdapter(processor, network, networkType);
+    this.policyAdapter = AdapterFactory.policyAdapter(
+      processor,
+      network,
+      networkType,
+    );
   }
   entitySpec() {
     return {

@@ -57,7 +57,10 @@ export class BlockchainFactory {
    */
   static async fromEntity<T = BlockchainAddress>(
     processor: BlockchainProcessor,
-    parent: BlockchainAddressEntity | ContractDeploymentEntity | MultisigDeploymentEntity,
+    parent:
+      | BlockchainAddressEntity
+      | ContractDeploymentEntity
+      | MultisigDeploymentEntity,
     role = 'admin',
     newAddress?: string,
   ) {

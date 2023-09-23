@@ -15,7 +15,11 @@ export class ContractDeployment extends BlockchainAddress {
     address: string,
   ) {
     super(processor, parent, role, network, networkType, address);
-    this.roleGroupAdapter = AdapterFactory.roleGroupAdapter(processor, network, networkType);
+    this.roleGroupAdapter = AdapterFactory.roleGroupAdapter(
+      processor,
+      network,
+      networkType,
+    );
   }
 
   entitySpec() {
