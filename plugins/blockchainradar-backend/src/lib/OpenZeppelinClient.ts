@@ -7,15 +7,17 @@ const AURORA_ENDPOINT =
   'https://api.thegraph.com/subgraphs/name/aurora-is-near/aurora-oz';
 const MAINNET_ENDPOINT =
   'https://api.thegraph.com/subgraphs/name/aurora-is-near/ethereum-oz';
+const GOERLI_ENDPOINT =
+  'https://api.thegraph.com/subgraphs/name/aurora-is-near/goerli-oz';
 
 export class OpenZeppelinClient {
   private logger;
   private client;
 
-  constructor(network: string, logger = getRootLogger()) {
+  constructor(network: string, networkType: string, logger = getRootLogger()) {
     this.logger = logger.child({ class: this.constructor.name, network });
     this.client = new ApolloClient({
-      uri: network === 'aurora' ? AURORA_ENDPOINT : MAINNET_ENDPOINT,
+      uri: getEndpoint(network, networkType),
       cache: new InMemoryCache(),
     });
   }
@@ -56,6 +58,17 @@ export class OpenZeppelinClient {
       role: m.accesscontrolrole.role.id,
       contract: m.accesscontrolrole.contract.id,
     }));
+  }
+}
+
+function getEndpoint(network: string, networkType: string) {
+  switch (network) {
+    case 'ethereum':
+      return networkType === 'goerli' ? GOERLI_ENDPOINT : MAINNET_ENDPOINT;
+    case 'aurora':
+      return AURORA_ENDPOINT;
+    default:
+      return '';
   }
 }
 
