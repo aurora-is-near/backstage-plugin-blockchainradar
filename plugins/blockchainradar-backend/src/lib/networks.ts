@@ -1,5 +1,3 @@
-import type * as Types from './types';
-
 export const networkNamesById: { [id: number]: string } = {
   1: 'mainnet',
   3: 'ropsten',
@@ -55,7 +53,17 @@ export const networkNamesById: { [id: number]: string } = {
   1024: 'clover',
 };
 
-export const networksByName: Types.SupportedNetworks = Object.fromEntries(
+export interface NetworkInfo {
+  name: string;
+  networkId: number;
+  chainId: number;
+}
+
+export interface SupportedNetworks {
+  [name: string]: NetworkInfo;
+}
+
+export const networksByName: SupportedNetworks = Object.fromEntries(
   Object.entries(networkNamesById).map(
     ([id, name]) => [
       name,

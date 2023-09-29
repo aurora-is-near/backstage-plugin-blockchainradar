@@ -39,18 +39,20 @@ export default async function createPlugin(
   builder.setProcessingIntervalSeconds(600); // github api rate limit
 
   builder.addEntityProvider(providers ?? []);
-  builder.addEntityProvider(
-    GithubEntityProvider.fromConfig(env.config, {
-      logger: env.logger,
-      // optional: alternatively, use scheduler with schedule defined in app-config.yaml
-      schedule: env.scheduler.createScheduledTaskRunner({
-        frequency: { minutes: 30 },
-        timeout: { minutes: 3 },
+  if (env.scheduler) {
+    builder.addEntityProvider(
+      GithubEntityProvider.fromConfig(env.config, {
+        logger: env.logger,
+        // optional: alternatively, use scheduler with schedule defined in app-config.yaml
+        schedule: env.scheduler.createScheduledTaskRunner({
+          frequency: { minutes: 30 },
+          timeout: { minutes: 3 },
+        }),
+        // optional: alternatively, use schedule
+        scheduler: env.scheduler,
       }),
-      // optional: alternatively, use schedule
-      scheduler: env.scheduler,
-    }),
-  );
+    );
+  }
 
   const { processingEngine, router } = await builder.build();
   await processingEngine.start();

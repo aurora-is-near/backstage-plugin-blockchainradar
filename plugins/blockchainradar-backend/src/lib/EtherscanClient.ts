@@ -3,14 +3,12 @@ import Web3Utils from 'web3-utils';
 import { setTimeout } from 'timers';
 
 import { getRootLogger } from '@backstage/backend-common';
-import type * as Types from './types';
-import { networksByName } from './networks';
 import axios from 'axios';
 import retry from 'async-retry';
-import { EtherscanResult } from './types';
 import { ethers } from 'ethers';
 import type { Networkish } from '@ethersproject/providers';
 import { EtherscanTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
+import { networksByName } from './networks';
 
 const etherscanCommentHeader = `/**
  *Submitted for verification at Etherscan.io on 20XX-XX-XX
@@ -31,10 +29,10 @@ const makeTimer: (milliseconds: number) => Promise<void> =
   util.promisify(setTimeout);
 
 function removeLibraries(
-  settings: Types.SolcSettings,
+  settings: SolcSettings,
   alsoRemoveCompilationTarget: boolean = false,
-): Types.SolcSettings {
-  const copySettings: Types.SolcSettings = { ...settings };
+): SolcSettings {
+  const copySettings: SolcSettings = { ...settings };
   delete copySettings.libraries;
   if (alsoRemoveCompilationTarget) {
     delete copySettings.compilationTarget;
@@ -44,7 +42,7 @@ function removeLibraries(
 
 // this looks awkward but the TS docs actually suggest this :P
 export class EtherscanClient {
-  static logger = getRootLogger().child({ class: 'EtherscanFetcher' });
+  static logger = getRootLogger().child({ class: this.constructor.name });
   logger = EtherscanClient.logger;
 
   private readonly networkName: string;
@@ -103,20 +101,16 @@ export class EtherscanClient {
     this.ready = makeTimer(0); // at start, it's ready to go immediately
   }
 
-  async fetchSourcesForAddress(
-    address: string,
-  ): Promise<Types.SourceInfo | null> {
-    const response = await this.getSuccessfulResponse(address);
+  async fetchSourcesForAddress(address: string): Promise<SourceInfo | null> {
+    const response = await this.fetchWithRetry(address);
     if (response.result[0].Proxy || response.result[0].IsProxy) {
       const implementationAddress =
         response.result[0].Implementation ||
         response.result[0].ImplementationAddress;
       if (implementationAddress) {
-        const impResponse = await this.getSuccessfulResponse(
-          implementationAddress,
-        );
-        const proxyResult = EtherscanClient.processResult(response.result[0]);
-        const impResult = EtherscanClient.processResult(impResponse.result[0]);
+        const impResponse = await this.fetchWithRetry(implementationAddress);
+        const proxyResult = this.processResult(response.result[0]);
+        const impResult = this.processResult(impResponse.result[0]);
         return {
           ...proxyResult,
           sources: {
@@ -127,7 +121,7 @@ export class EtherscanClient {
         } as any;
       }
     }
-    return EtherscanClient.processResult(response.result[0]);
+    return this.processResult(response.result[0]);
   }
 
   async fetchTransactions(
@@ -166,9 +160,7 @@ export class EtherscanClient {
     return response;
   }
 
-  private async getSuccessfulResponse(
-    address: string,
-  ): Promise<EtherscanSuccess> {
+  private async fetchWithRetry(address: string): Promise<EtherscanSuccess> {
     const initialTimeoutFactor = 1.5;
     return await retry(async () => await this.makeRequest(address), {
       retries: 3,
@@ -195,15 +187,15 @@ export class EtherscanClient {
       maxRedirects: 50,
     });
     this.ready = makeTimer(this.delay);
-    const response: EtherscanResponse = (await responsePromise).data;
+    const response: EtherscanSuccess | EtherscanFailure = (
+      await responsePromise
+    ).data;
     if (response.status === '0') throw new Error(response.result);
 
     return response;
   }
 
-  private static processResult(
-    result: EtherscanResult,
-  ): Types.SourceInfo | null {
+  private processResult(result: EtherscanResult): SourceInfo | null {
     // we have 5 cases here.
     // case 1: the address doesn't exist
     if (
@@ -216,7 +208,7 @@ export class EtherscanClient {
     if (result.CompilerVersion.startsWith('vyper:')) {
       return this.processVyperResult(result);
     }
-    let multifileJson: Types.SolcSources;
+    let multifileJson: SolcSources;
     try {
       // try to parse the source JSON.  if it succeeds,
       // we're in the multi-file case.
@@ -229,7 +221,7 @@ export class EtherscanClient {
         result.SourceCode.endsWith('}')
       ) {
         const trimmedSource = result.SourceCode.slice(1).slice(0, -1); // remove braces
-        let fullJson: Types.SolcInput;
+        let fullJson: SolcInput;
         try {
           fullJson = JSON.parse(trimmedSource);
         } catch (__) {
@@ -251,9 +243,7 @@ export class EtherscanClient {
     return this.processMultiResult(result, multifileJson);
   }
 
-  private static processSingleResult(
-    result: EtherscanResult,
-  ): Types.SourceInfo {
+  private processSingleResult(result: EtherscanResult): SourceInfo {
     const filename = makeFilename(result.ContractName);
     return {
       etherScanResult: result,
@@ -276,10 +266,10 @@ export class EtherscanClient {
     };
   }
 
-  private static processMultiResult(
+  private processMultiResult(
     result: EtherscanResult,
-    sources: Types.SolcSources,
-  ): Types.SourceInfo {
+    sources: SolcSources,
+  ): SourceInfo {
     return {
       etherScanResult: result,
       contractName: result.ContractName,
@@ -296,10 +286,10 @@ export class EtherscanClient {
     };
   }
 
-  private static processJsonResult(
+  private processJsonResult(
     result: EtherscanResult,
-    jsonInput: Types.SolcInput,
-  ): Types.SourceInfo {
+    jsonInput: SolcInput,
+  ): SourceInfo {
     return {
       etherScanResult: result,
       contractName: result.ContractName,
@@ -316,7 +306,7 @@ export class EtherscanClient {
     };
   }
 
-  private static processVyperResult(result: EtherscanResult): Types.SourceInfo {
+  private processVyperResult(result: EtherscanResult): SourceInfo {
     const filename = makeFilename(result.ContractName, '.vy');
     // note: this means filename will always be Vyper_contract.vy
     return {
@@ -335,9 +325,7 @@ export class EtherscanClient {
     };
   }
 
-  private static processSources(
-    sources: Types.SolcSources,
-  ): Types.SourcesByPath {
+  private processSources(sources: SolcSources): SourcesByPath {
     return Object.assign(
       {},
       ...Object.entries(sources).map(([path, { content: source }]) => ({
@@ -346,7 +334,7 @@ export class EtherscanClient {
     );
   }
 
-  private static extractSettings(result: EtherscanResult): Types.SolcSettings {
+  private extractSettings(result: EtherscanResult): SolcSettings {
     const evmVersion =
       result.EVMVersion === 'Default' ? undefined : result.EVMVersion;
     const optimizer = {
@@ -369,10 +357,10 @@ export class EtherscanClient {
     };
   }
 
-  private static processLibraries(
+  private processLibraries(
     librariesString: string | undefined,
-  ): Types.LibrarySettings {
-    let libraries: Types.Libraries;
+  ): LibrarySettings {
+    let libraries: Libraries;
     if (!librariesString || librariesString === '') {
       libraries = {};
     } else {
@@ -387,9 +375,7 @@ export class EtherscanClient {
     return { '': libraries }; // empty string as key means it applies to all contracts
   }
 
-  private static extractVyperSettings(
-    result: EtherscanResult,
-  ): Types.VyperSettings {
+  private extractVyperSettings(result: EtherscanResult): VyperSettings {
     const evmVersion =
       result.EVMVersion === 'Default' ? undefined : result.EVMVersion;
     // the optimize flag is not currently supported by etherscan;
@@ -421,7 +407,141 @@ export class BackstageEtherscanProvider extends ethers.providers
   }
 }
 
-type EtherscanResponse = EtherscanSuccess | EtherscanFailure;
+export interface SourceInfo {
+  contractName?: string;
+  sources: SourcesByPath;
+  options: CompilerOptions;
+  etherScanResult: EtherscanResult;
+}
+
+// apologies for this being stringly-typed, but that's how
+// Etherscan does it
+interface EtherscanResult {
+  SourceCode: string; // really: string | SolcSources | SolcInput
+  ABI: string; // really: it's the ABI [we won't use this]
+  ContractName: string;
+  CompilerVersion: string;
+  OptimizationUsed: string; // really: a number used as a boolean
+  Runs: string; // really: a number
+  OptimizationRuns?: string; // equivalent of Runs for Blockscout
+  ConstructorArguments: string; // encoded as hex string, no 0x in front
+  EVMVersion: string;
+  Library?: string; // semicolon-delimited list of colon-delimited name-address pairs (addresses lack 0x in front)
+  LicenseType: string; // ignored
+  Proxy?: string; // boolean; used to signify that this contract is a proxy for another contract
+  IsProxy?: string; // equivalent of Proxy for Blockscout
+  Implementation?: string; // address; implementation only available if contract is proxy
+  ImplementationAddress?: string; // equivalent of Implementation for Blockscout
+  SwarmSource: string; // ignored
+}
+
+interface SourcesByPath {
+  [sourcePath: string]: string;
+}
+
+// apologies if reinventing the wheel here
+type CompilerOptions = SolcOptions | VyperOptions; // note: only Solidity really supported atm
+
+interface SolcOptions {
+  language: 'Solidity' | 'Yul'; // again, only Solidity really supported atm
+  version: string;
+  settings: SolcSettings;
+  specializations: SolcSpecializations;
+}
+
+interface VyperOptions {
+  language: 'Vyper';
+  version: string;
+  settings: VyperSettings;
+  specializations: VyperSpecializations;
+}
+
+// only including settings that would alter compiled result
+// (no outputSelection, no modelChecker once that exists, no stopAfter)
+interface SolcSettings {
+  remappings?: string[];
+  optimizer?: OptimizerSettings;
+  evmVersion?: string; // not gonna enumerate these
+  debug?: DebugSettings;
+  metadata?: MetadataSettings;
+  viaIR?: boolean;
+  libraries?: LibrarySettings; // note: we don't actually want to return this!
+  compilationTarget?: {
+    // not actually a valid compiler setting, but rather where the
+    // contract name is stored! (as the lone value, the lone key being the source
+    // where it's defined)
+    [sourcePath: string]: string;
+  };
+}
+
+interface VyperSettings {
+  evmVersion?: string; // not gonna enumerate these
+  optimize?: boolean; // warning: the Vyper compiler treats this as true if it's not specified!
+  // also Etherscan currently doesn't support this flag; any Vyper contract currently
+  // verified on Etherscan necessarily has this field unspecified (and thus effectively true)
+}
+
+interface SolcSpecializations {
+  libraries?: LibrarySettings;
+  constructorArguments?: string; // encoded, as hex string, w/o 0x in front
+}
+
+interface VyperSpecializations {
+  constructorArguments?: string; // encoded, as hex string, w/o 0x in front
+}
+
+interface SolcSources {
+  [sourcePath: string]: {
+    keccak256?: string;
+    content?: string; // for Etherscan we assume this exists
+    urls?: string;
+  };
+}
+
+interface SolcInput {
+  language: 'Solidity';
+  sources: SolcSources;
+  settings: SolcSettings;
+}
+
+interface LibrarySettings {
+  [contractPath: string]: Libraries;
+}
+
+interface Libraries {
+  [libraryName: string]: string;
+}
+
+interface MetadataSettings {
+  useLiteralContent?: boolean;
+  bytecodeHash?: 'none' | 'ipfs' | 'bzzr1';
+}
+
+interface DebugSettings {
+  revertStrings?: 'default' | 'strip' | 'debug' | 'verboseDebug';
+}
+
+interface OptimizerSettings {
+  enabled?: boolean;
+  runs?: number;
+  details?: OptimizerDetails;
+}
+
+interface OptimizerDetails {
+  peephole?: boolean;
+  jumpdestRemover?: boolean;
+  orderLiterals?: boolean;
+  deduplicate?: boolean;
+  cse?: boolean;
+  constantOptimizer?: boolean;
+  yul?: boolean;
+  yulDetails?: YulDetails;
+}
+
+interface YulDetails {
+  stackAllocation?: boolean;
+  optimizerSteps?: string;
+}
 
 interface EtherscanSuccess {
   status: '1';
