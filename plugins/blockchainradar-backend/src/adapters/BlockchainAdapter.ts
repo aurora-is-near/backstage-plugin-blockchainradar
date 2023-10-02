@@ -66,6 +66,10 @@ export abstract class BlockchainAdapter {
     address: string,
   ): Promise<EtherscanTx | NearTx | undefined>;
 
+  abstract fetchCreationTransaction(
+    address: string,
+  ): Promise<EtherscanTx | NearTx | undefined>;
+
   abstract isContract(address: string): Promise<boolean>;
 
   protected async delayRequest(seconds?: number) {

@@ -173,4 +173,12 @@ export class NearAdapter extends BlockchainAdapter {
     );
     return nearBlocksClient.getLastTransaction(address);
   }
+
+  public async fetchCreationTransaction(address: string) {
+    const nearBlocksClient = new NearBlocksClient(
+      this.networkType,
+      this.logger,
+    );
+    return nearBlocksClient.getFirstTransaction(address);
+  }
 }

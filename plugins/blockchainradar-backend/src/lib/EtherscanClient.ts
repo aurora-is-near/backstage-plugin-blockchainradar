@@ -160,6 +160,37 @@ export class EtherscanClient {
     return response;
   }
 
+  async fetchCreationTransaction(
+    address: string,
+  ): Promise<EtherscanTxInfoResponse> {
+    // not putting a try/catch around this; if it throws, we throw
+    await this.ready;
+    const creationTxPromise = axios.get<BlockscoutV2AddressResponse>(
+      `${this.determineUrl()}/v2/addresses/${address}`,
+    );
+    this.ready = makeTimer(this.delay);
+    const { data: addressData } = await creationTxPromise;
+
+    await this.ready;
+    const txInfoPromise = axios.get<EtherscanTxInfoResponse>(
+      this.determineUrl(),
+      {
+        headers: {
+          module: 'transaction',
+          action: 'gettxinfo',
+          txhash: addressData.creation_tx_hash,
+        },
+        responseType: 'json',
+        maxRedirects: 50,
+      },
+    );
+    this.ready = makeTimer(this.delay);
+    const { data: txInfo } = await txInfoPromise;
+    if (txInfo.message !== 'OK') throw new Error(txInfo.message);
+
+    return txInfo;
+  }
+
   private async fetchWithRetry(address: string): Promise<EtherscanSuccess> {
     const initialTimeoutFactor = 1.5;
     return await retry(async () => await this.makeRequest(address), {
@@ -567,4 +598,14 @@ type EtherscanTxlistResponse = {
   status: '0' | '1';
   message: string;
   result: EtherscanTx[];
+};
+
+type EtherscanTxInfoResponse = {
+  message: string;
+  result: EtherscanTx;
+};
+
+type BlockscoutV2AddressResponse = {
+  creation_tx_hash: string;
+  creator_address_hash: string;
 };
