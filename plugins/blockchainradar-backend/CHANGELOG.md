@@ -1,5 +1,14 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.9
+
+### Patch Changes
+
+- c427e7b: feat: add goerli rbac support
+- 83127d9: fix: goerli rbac subgraph endpoint
+- 1ebcce4: refactor: cleanup etherscan types
+- 567f4f3: fix: near signer last signature invalid timestamp
+
 ## 1.0.8
 
 ### Patch Changes
