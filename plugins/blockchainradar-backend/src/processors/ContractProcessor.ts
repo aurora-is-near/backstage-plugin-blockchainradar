@@ -92,10 +92,7 @@ export class ContractProcessor extends BlockchainProcessor {
     );
     const deploymentSpec = entity.spec.deployment;
     if (deploymentSpec) {
-      if (
-        !deploymentSpec.source ||
-        !this.isCacheUpToDate(deploymentSpec.source)
-      ) {
+      if (!this.isCacheUpToDate(deploymentSpec.source)) {
         await this.runExclusive(
           DEPLOYMENT_SOURCE_RUN_ID,
           deployment.address,
@@ -125,14 +122,11 @@ export class ContractProcessor extends BlockchainProcessor {
         await this.setScopedCachedSpec(
           DEPLOYMENT_SOURCE_RUN_ID,
           cache,
-          deploymentSpec.source,
+          deploymentSpec.source!,
         );
       }
 
-      if (
-        !deploymentSpec.state ||
-        !this.isCacheUpToDate(deploymentSpec.state)
-      ) {
+      if (!this.isCacheUpToDate(deploymentSpec.state)) {
         await this.runExclusive(
           DEPLOYMENT_STATE_RUN_ID,
           deployment.address,
@@ -163,11 +157,11 @@ export class ContractProcessor extends BlockchainProcessor {
         await this.setScopedCachedSpec(
           DEPLOYMENT_STATE_RUN_ID,
           cache,
-          deploymentSpec.state,
+          deploymentSpec.state!,
         );
       }
 
-      if (!deploymentSpec.rbac || !this.isCacheUpToDate(deploymentSpec.rbac)) {
+      if (!this.isCacheUpToDate(deploymentSpec.rbac)) {
         await this.runExclusive(
           DEPLOYMENT_RBAC_RUN_ID,
           deployment.address,
@@ -196,7 +190,7 @@ export class ContractProcessor extends BlockchainProcessor {
         await this.setScopedCachedSpec(
           DEPLOYMENT_RBAC_RUN_ID,
           cache,
-          deploymentSpec.rbac,
+          deploymentSpec.rbac!,
         );
       }
 

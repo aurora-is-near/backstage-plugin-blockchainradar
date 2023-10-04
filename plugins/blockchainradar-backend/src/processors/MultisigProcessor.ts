@@ -66,7 +66,7 @@ export class MultisigProcessor extends BlockchainProcessor {
       cache,
       MULTISIG_OWNERS_RUN_ID,
     );
-    if (!ownerSpec || !this.isCacheUpToDate(ownerSpec)) {
+    if (!this.isCacheUpToDate(ownerSpec)) {
       await this.runExclusive(
         MULTISIG_OWNERS_RUN_ID,
         multisig.address,
@@ -90,7 +90,7 @@ export class MultisigProcessor extends BlockchainProcessor {
         },
       );
     } else {
-      await this.setScopedCachedSpec(MULTISIG_OWNERS_RUN_ID, cache, ownerSpec);
+      await this.setScopedCachedSpec(MULTISIG_OWNERS_RUN_ID, cache, ownerSpec!);
     }
 
     if (ownerSpec?.owners) {
