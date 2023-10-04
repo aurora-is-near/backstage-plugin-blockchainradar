@@ -35,9 +35,11 @@ export class NearKeysProcessor extends BlockchainProcessor {
         'near-keys-fetch',
         blockchainAddress.address,
         async logger => {
-          const rawKeys = await (blockchainAddress.adapter as NearAdapter).keys(
-            blockchainAddress.address,
-          );
+          const rawKeys = await AdapterFactory.adapter<NearAdapter>(
+            this,
+            entity.spec.network,
+            entity.spec.networkType,
+          ).keys(blockchainAddress.address);
           logger.debug(`fetched ${rawKeys.length} keys`);
           keysSpec = { fetchDate: Date.now(), keys: {} };
 
