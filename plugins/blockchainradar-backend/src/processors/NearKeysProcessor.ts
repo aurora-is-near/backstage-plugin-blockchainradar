@@ -14,11 +14,11 @@ import {
   isBlockchainUser,
   isFullAccessKey,
   isRoleGroup,
+  isBlockchainAddress,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 import { BlockchainProcessor } from './BlockchainProcessor';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { isValidBlockchainAddress } from '../lib/types';
 import { NearKey } from '../entities/NearKey';
 import { NearAdapter } from '../adapters/NearAdapter';
 import { AdapterFactory } from '../adapters/AdapterFactory';
@@ -57,10 +57,13 @@ export class NearKeysProcessor extends BlockchainProcessor {
     entity: Entity,
   ): entity is BlockchainAddressEntity {
     return (
-      isValidBlockchainAddress(
-        entity,
-        AdapterFactory.adapter(this, 'near', 'mainnet'),
-      ) && entity.spec.network === 'near'
+      isBlockchainAddress(entity) &&
+      entity.spec.network === 'near' &&
+      AdapterFactory.adapter(
+        this,
+        entity.spec.network,
+        entity.spec.networkType,
+      ).isValidAddress(entity.spec.address)
     );
   }
 
