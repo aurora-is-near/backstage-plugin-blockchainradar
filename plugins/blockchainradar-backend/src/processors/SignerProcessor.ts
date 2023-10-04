@@ -45,7 +45,7 @@ export class SignerProcessor extends BlockchainProcessor {
               } else if (lastTx && 'block_timestamp' in lastTx) {
                 const lastSignatureTimestamp = lastTx?.block_timestamp;
                 spec.lastSigned =
-                  parseInt(lastSignatureTimestamp || '0') * 1000;
+                  parseInt(lastSignatureTimestamp || '0') / 1_000_000;
               }
               spec.fetchDate = new Date().valueOf();
               this.setCachedSpec(cache, spec);
