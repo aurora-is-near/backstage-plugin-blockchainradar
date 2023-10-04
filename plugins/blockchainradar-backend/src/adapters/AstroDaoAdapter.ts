@@ -52,9 +52,9 @@ export class AstroDaoAdapter extends PolicyAdapter {
         councilRole && typeof councilRole.kind !== 'string'
           ? councilRole.kind.Group
           : [];
-      return owners;
+      return { owners, fetchDate: new Date().getTime() };
     }
-    return [];
+    return undefined;
   }
 
   private isValidCouncilRole(

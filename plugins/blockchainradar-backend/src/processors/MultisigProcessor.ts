@@ -15,18 +15,21 @@ import { BlockchainProcessor } from './BlockchainProcessor';
 import { ContractComponent } from '../entities/ContractComponent';
 import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { MultisigDeployment } from '../entities/MultisigDeployment';
+import { OwnerSpec } from '../lib/types';
+
+const MULTISIG_OWNERS_RUN_ID = 'multisig-owners-fetch';
 
 export class MultisigProcessor extends BlockchainProcessor {
   async postProcessEntity?(
     entity: Entity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
-    _cache: CatalogProcessorCache,
+    cache: CatalogProcessorCache,
   ): Promise<Entity> {
     if (isMultisigComponent(entity)) {
       return this.processContractComponent(entity, location, emit);
     } else if (isMultisigDeployment(entity)) {
-      return this.processMultisigDeployment(entity, location, emit);
+      return this.processMultisigDeployment(entity, location, emit, cache);
     }
     return entity;
   }
@@ -51,6 +54,7 @@ export class MultisigProcessor extends BlockchainProcessor {
     entity: MultisigDeploymentEntity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
+    cache: CatalogProcessorCache,
   ) {
     const multisig = await BlockchainFactory.fromEntity<MultisigDeployment>(
       this,
@@ -58,43 +62,70 @@ export class MultisigProcessor extends BlockchainProcessor {
       'multisig',
     );
 
-    this.logger.debug(`${entity.metadata.name} fetching safe owners`);
-    const owners = await multisig.policyAdapter.fetchMultisigOwners(
-      entity.spec.address,
-      entity.spec.deployment?.state,
+    let ownerSpec = await this.fetchCachedSpec<OwnerSpec>(
+      cache,
+      MULTISIG_OWNERS_RUN_ID,
     );
-    const multisigOwners = await Promise.all(
-      owners.map(owner =>
-        BlockchainFactory.fromBlockchainAddress(multisig, 'signer', owner),
-      ),
-    );
-
-    this.logger.debug(
-      `${entity.metadata.name} owners: ${multisigOwners.length}`,
-    );
-    if (multisigOwners.length > 0) {
-      this.appendTags(entity, 'multisig');
+    if (!ownerSpec || !this.isCacheUpToDate(ownerSpec)) {
+      await this.runExclusive(
+        MULTISIG_OWNERS_RUN_ID,
+        multisig.address,
+        async logger => {
+          try {
+            this.logger.debug(`${entity.metadata.name} fetching safe owners`);
+            ownerSpec = await multisig.policyAdapter.fetchMultisigOwners(
+              entity.spec.address,
+              entity.spec.deployment?.state,
+            );
+            if (ownerSpec) {
+              await this.setScopedCachedSpec(
+                MULTISIG_OWNERS_RUN_ID,
+                cache,
+                ownerSpec,
+              );
+            }
+          } catch (error) {
+            logger.error(error);
+          }
+        },
+      );
     } else {
-      this.appendTags(entity, 'non-multisig');
+      await this.setScopedCachedSpec(MULTISIG_OWNERS_RUN_ID, cache, ownerSpec);
     }
 
-    let hasUnknown = false;
-    for (const ownerAddr of multisigOwners) {
-      await ownerAddr.stubOrFind(this.catalogClient);
-      ownerAddr.emitSignerOf(emit);
-      if (ownerAddr.stub) {
-        const signer = ownerAddr.toEntity();
-        hasUnknown = true;
-        emit(processingResult.entity(location, signer));
+    if (ownerSpec?.owners) {
+      const multisigOwners = await Promise.all(
+        ownerSpec.owners.map(owner =>
+          BlockchainFactory.fromBlockchainAddress(multisig, 'signer', owner),
+        ),
+      );
+      this.logger.debug(
+        `${entity.metadata.name} owners: ${multisigOwners.length}`,
+      );
+      if (multisigOwners.length > 0) {
+        this.appendTags(entity, 'multisig');
+      } else {
+        this.appendTags(entity, 'non-multisig');
       }
-    }
 
-    const tags = multisig.entityTags();
-    const hasAllowUnknown = tags
-      ? tags.some(tag => tag === 'allow-unknown')
-      : false;
-    if (hasUnknown && !hasAllowUnknown) {
-      this.appendTags(entity, 'has-unknown');
+      let hasUnknown = false;
+      for (const ownerAddr of multisigOwners) {
+        await ownerAddr.stubOrFind(this.catalogClient);
+        ownerAddr.emitSignerOf(emit);
+        if (ownerAddr.stub) {
+          const signer = ownerAddr.toEntity();
+          hasUnknown = true;
+          emit(processingResult.entity(location, signer));
+        }
+      }
+
+      const tags = multisig.entityTags();
+      const hasAllowUnknown = tags
+        ? tags.some(tag => tag === 'allow-unknown')
+        : false;
+      if (hasUnknown && !hasAllowUnknown) {
+        this.appendTags(entity, 'has-unknown');
+      }
     }
 
     let multisigSpec = entity.spec.multisig;

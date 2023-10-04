@@ -3,6 +3,7 @@ import {
   MultisigSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { getRootLogger } from '@backstage/backend-common';
+import { OwnerSpec } from '../lib/types';
 
 export abstract class PolicyAdapter {
   constructor(
@@ -25,5 +26,5 @@ export abstract class PolicyAdapter {
   abstract fetchMultisigOwners(
     address: string,
     stateSpec: ContractStateSpec | undefined,
-  ): Promise<string[]>;
+  ): Promise<OwnerSpec | undefined>;
 }

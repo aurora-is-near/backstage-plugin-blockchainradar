@@ -13,7 +13,7 @@ export class SafeAdapter extends PolicyAdapter {
 
   public async fetchMultisigOwners(address: string) {
     const client = new SafeClient(this.network, this.logger);
-    const safeOwners = await client.safeOwners(address);
-    return safeOwners;
+    const owners = await client.safeOwners(address);
+    return { owners, fetchDate: new Date().getTime() };
   }
 }
