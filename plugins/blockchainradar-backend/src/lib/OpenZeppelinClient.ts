@@ -8,7 +8,7 @@ const AURORA_ENDPOINT =
 const MAINNET_ENDPOINT =
   'https://api.thegraph.com/subgraphs/name/aurora-is-near/ethereum-oz';
 const GOERLI_ENDPOINT =
-  'https://api.thegraph.com/subgraphs/name/aurora-is-near/goerli-oz';
+  'https://api.thegraph.com/subgraphs/name/aurora-is-near/ethereum-goerli-oz';
 
 export class OpenZeppelinClient {
   private logger;
