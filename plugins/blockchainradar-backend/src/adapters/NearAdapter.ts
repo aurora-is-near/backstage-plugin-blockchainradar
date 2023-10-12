@@ -40,7 +40,12 @@ export class NearAdapter extends BlockchainAdapter {
 
   // it's very rare that .near addresses are too long
   public humanFriendlyAddress(address: string) {
-    return address;
+    return address.length === 64
+      ? `${address.slice(0, 4)}...${address.slice(
+          address.length - 4,
+          address.length,
+        )}`
+      : address;
   }
 
   public async connectApi() {
@@ -52,8 +57,12 @@ export class NearAdapter extends BlockchainAdapter {
   async isContract(address: string): Promise<boolean> {
     await this.connectApi();
     const account = await this.near!.account(address);
-    const state = await account.state();
-    return state.code_hash !== '11111111111111111111111111111111';
+    try {
+      const state = await account.state();
+      return state.code_hash !== '11111111111111111111111111111111';
+    } catch (err) {
+      return false;
+    }
   }
 
   public async keys(address: string) {
@@ -141,7 +150,7 @@ export class NearAdapter extends BlockchainAdapter {
 
         try {
           // for some reason addresses look like "prover.bridge.near" (with "")
-          const potentialAddress = result.replace(/"/, '');
+          const potentialAddress = result.replace(/"/g, '');
           if (this.isValidAddress(potentialAddress)) {
             stateSpec.interactsWith[method] = potentialAddress;
           } else {
