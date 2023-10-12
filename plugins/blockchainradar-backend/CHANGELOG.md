@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.10
+
+### Patch Changes
+
+- 16ee3db: fix: handle near deleted accounts
+
 ## 1.0.9
 
 ### Patch Changes
