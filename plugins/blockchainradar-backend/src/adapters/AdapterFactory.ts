@@ -10,25 +10,25 @@ import { AstroDaoAdapter } from './AstroDaoAdapter';
 import { SafeAdapter } from './SafeAdapter';
 
 export class AdapterFactory {
-  static adapter(
+  static adapter<T extends BlockchainAdapter = BlockchainAdapter>(
     processor: BlockchainProcessor,
     network: string,
     networkType: string,
-  ): BlockchainAdapter {
+  ): T {
     if (network === 'near') {
       return new NearAdapter(
         processor.config,
         network,
         networkType,
         processor.logger,
-      );
+      ) as unknown as T;
     }
     return new EvmAdapter(
       processor.config,
       network,
       networkType,
       processor.logger,
-    );
+    ) as unknown as T;
   }
 
   static roleGroupAdapter(
