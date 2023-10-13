@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.11
+
+### Patch Changes
+
+- 9c13ca5: refactor: better type narrowing for blockchain adapters
+
 ## 1.0.10
 
 ### Patch Changes
