@@ -4,15 +4,12 @@ import {
   createRoutableExtension,
 } from '@backstage/core-plugin-api';
 
-import { catalogIndexRouteRef, rootRouteRef } from './routes';
+import { rootRouteRef } from './routes';
 
 export const blockchainPlugin = createPlugin({
   id: 'blockchain',
   routes: {
     root: rootRouteRef,
-  },
-  externalRoutes: {
-    catalogIndex: catalogIndexRouteRef,
   },
 });
 
