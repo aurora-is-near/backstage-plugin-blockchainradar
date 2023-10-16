@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.12
+
+### Patch Changes
+
+- fb72b7e: chore: fix config type for backend
+
 ## 1.0.11
 
 ### Patch Changes
