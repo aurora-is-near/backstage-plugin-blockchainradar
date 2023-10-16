@@ -1,6 +1,6 @@
 import { blockchainPlugin } from './plugin';
 
-describe('blockchainPlugin', () => {
+describe('blockchain', () => {
   it('should export plugin', () => {
     expect(blockchainPlugin).toBeDefined();
   });

@@ -1,4 +1,1 @@
-export {
-  BlockchainEntityPage,
-  EntityBlockchainContent,
-} from './BlockchainEntityPage';
+export { BlockchainEntityPage } from './BlockchainEntityPage';
