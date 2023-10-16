@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 1.0.12
+
+### Patch Changes
+
+- 15f1f55: refactor: cleanup frontend module
+
 ## 1.0.4
 
 ### Patch Changes
