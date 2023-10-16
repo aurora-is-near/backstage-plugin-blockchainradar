@@ -1,8 +1,3 @@
-type EtherscanConfig = {
-  network: string;
-  apiKey: string;
-};
-
 export interface Config {
   blockchain: {
     etherscan: {
@@ -10,17 +5,26 @@ export interface Config {
        * Etherscan API key
        * @visibility secret
        */
-      'ethereum-mainnet': EtherscanConfig;
+      'ethereum-mainnet': {
+        network: string;
+        apiKey: string;
+      };
       /**
        * Etherscan API key for goerli
        * @visibility secret
        */
-      'ethereum-goerli': EtherscanConfig;
+      'ethereum-goerli': {
+        network: string;
+        apiKey: string;
+      };
       /**
        * Blockscout API key for aurora
        * @visibility secret
        */
-      'aurora-mainnet': EtherscanConfig;
+      'aurora-mainnet': {
+        network: string;
+        apiKey: string;
+      };
     };
   };
 }
