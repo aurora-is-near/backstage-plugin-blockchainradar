@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 
 import React from 'react';
-import { AboutContent } from '../AboutContent';
+import { AboutContent } from './AboutContent';
 import { ContractSpecContent } from './ContractSpecContent';
 import { MultisigSpecContent } from './MultisigSpecContent';
 import { NearKeysContent } from './NearKeysContent';
@@ -35,11 +35,9 @@ const useStyles = makeStyles({
   },
 });
 
-export interface BlockchainInsightsCardProps {
+export function EntityBlockchainInsightsCard(props: {
   variant?: InfoCardVariants;
-}
-
-export function BlockchainInsightsCard(props: BlockchainInsightsCardProps) {
+}) {
   const { variant } = props;
   const classes = useStyles();
   const { entity } = useEntity();

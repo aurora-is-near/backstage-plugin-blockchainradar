@@ -1,0 +1,1 @@
+export { EntityBlockchainContent } from './EntityBlockchainContent';

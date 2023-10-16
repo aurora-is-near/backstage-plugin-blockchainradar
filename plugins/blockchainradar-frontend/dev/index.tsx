@@ -11,16 +11,20 @@ import {
 } from '@backstage/plugin-catalog-graph';
 import { apiDocsPlugin } from '@backstage/plugin-api-docs';
 import { orgPlugin } from '@backstage/plugin-org';
+import { pagerDutyPlugin } from '@backstage/plugin-pagerduty';
 
-import { blockchainPlugin } from '../src/plugin';
-import { BlockchainIndexPage } from '../src/components/BlockchainIndexPage';
-import { BlockchainEntityPage } from '../src/components/BlockchainEntityPage';
+import {
+  blockchainPlugin,
+  BlockchainEntityPage,
+  BlockchainIndexPage,
+} from '../src/plugin';
 
 createDevApp()
   .registerPlugin(catalogPlugin)
   .registerPlugin(orgPlugin)
   .registerPlugin(catalogGraphPlugin)
   .registerPlugin(apiDocsPlugin)
+  .registerPlugin(pagerDutyPlugin)
   .registerPlugin(blockchainPlugin)
   .addPage({
     title: 'Root Page',
@@ -37,5 +41,4 @@ createDevApp()
     path: '/catalog-graph',
     element: <CatalogGraphPage />,
   })
-  // TODO: add exported routable components
   .render();

@@ -1,7 +1,7 @@
 import { Entity } from '@backstage/catalog-model';
 import { Grid, makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
-import { AboutField } from '../AboutField';
+import { AboutField } from './AboutField';
 
 const useStyles = makeStyles({
   description: {
