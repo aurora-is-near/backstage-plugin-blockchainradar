@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.13
+
+### Patch Changes
+
+- 4f3c895: chore: make api key config secret
+
 ## 1.0.12
 
 ### Patch Changes
