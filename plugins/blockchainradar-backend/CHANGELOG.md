@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.14
+
+### Patch Changes
+
+- 6f1b3ff: refactor: creation tx for aurora contract addresses
+
 ## 1.0.13
 
 ### Patch Changes
