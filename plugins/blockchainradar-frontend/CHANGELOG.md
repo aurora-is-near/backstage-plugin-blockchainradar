@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-frontend
 
+## 1.0.14
+
+### Patch Changes
+
+- 551eb07: fix: remove redundant pagerduty card
+
 ## 1.0.12
 
 ### Patch Changes
