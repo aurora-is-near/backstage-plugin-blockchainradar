@@ -113,7 +113,7 @@ export class NearAdapter extends BlockchainAdapter {
       });
     const parsedContract = parseContract(codeResponse.code_base64);
 
-    const firstTx = await this.fetchFirstTransaction(address);
+    const firstTx = await this.fetchCreationTransaction(address);
     const sourceSpec: ContractSourceSpec = {
       sourceCodeVerified: false,
       fetchDate: Date.now(),
@@ -188,6 +188,6 @@ export class NearAdapter extends BlockchainAdapter {
       this.networkType,
       this.logger,
     );
-    return nearBlocksClient.getFirstTransaction(address);
+    return nearBlocksClient.getCreationTransaction(address);
   }
 }
