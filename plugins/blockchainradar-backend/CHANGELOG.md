@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.15
+
+### Patch Changes
+
+- 672fa38: refactor: near deploy tx fetch
+
 ## 1.0.14
 
 ### Patch Changes
