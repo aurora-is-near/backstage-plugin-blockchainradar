@@ -168,4 +168,24 @@ export class EvmAdapter extends BlockchainAdapter {
       return undefined;
     }
   }
+
+  public async fetchCreationTransaction(address: string) {
+    const creds = this.etherscanCreds();
+    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    try {
+      if (this.network === 'aurora') {
+        const { result } = await fetcher.fetchCreationTransaction(address);
+        return result;
+      }
+      const { result } = await fetcher.fetchTransactions(address, {
+        page: 1,
+        offset: 1,
+        sort: 'asc',
+      });
+      return result.length > 0 ? result[0] : undefined;
+    } catch (err) {
+      this.logger.warn(`unable to fetch creation tx for ${address}`);
+      return undefined;
+    }
+  }
 }
