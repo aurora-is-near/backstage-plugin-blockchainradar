@@ -39,6 +39,34 @@ export class NearBlocksClient {
     }
   }
 
+  public async getContractDeployments(address: string) {
+    try {
+      const response = await this.axios.get<ContractDeploymentsResponse>(
+        `account/${address}/contract/deployments`,
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        this.logger.warn('error message: ', error.message);
+      }
+      this.logger.error('unexpected error: ', error);
+      return { deployments: [] };
+    }
+  }
+
+  public async getTransactionInfo(hash: string) {
+    try {
+      const response = await this.axios.get<TxnsResponse>(`txns/${hash}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        this.logger.warn('error message: ', error.message);
+      }
+      this.logger.error('unexpected error: ', error);
+      return { txns: [] };
+    }
+  }
+
   public async getFirstTransaction(address: string) {
     const { txns } = await this.getAccountTransactions(address, {
       ...defaultTxnsParams,
@@ -64,6 +92,22 @@ export class NearBlocksClient {
     return lastTx;
   }
 
+  public async getCreationTransaction(address: string) {
+    const { deployments } = await this.getContractDeployments(address);
+    if (!deployments.length) {
+      return undefined;
+    }
+    const [firstDeployment] = deployments;
+    const { txns } = await this.getTransactionInfo(
+      firstDeployment.transaction_hash,
+    );
+    if (!txns.length) {
+      return undefined;
+    }
+    const [deployTx] = txns;
+    return deployTx;
+  }
+
   private getBaseUrl(networkType: string) {
     return `https://api${
       networkType === 'testnet' ? '-testnet' : ''
@@ -73,4 +117,11 @@ export class NearBlocksClient {
 
 type TxnsResponse = {
   txns: NearTx[];
+};
+
+type ContractDeploymentsResponse = {
+  deployments: {
+    transaction_hash: string;
+    block_timestamp: string;
+  }[];
 };
