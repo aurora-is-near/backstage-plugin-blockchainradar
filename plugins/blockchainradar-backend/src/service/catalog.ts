@@ -13,6 +13,7 @@ import {
   UserProcessor,
   SignerProcessor,
   RoleGroupProcessor,
+  GroupProcessor,
 } from '../processors';
 
 export default async function createPlugin(
@@ -29,6 +30,7 @@ export default async function createPlugin(
   );
 
   builder.addProcessor(new UserProcessor(env));
+  builder.addProcessor(new GroupProcessor(env));
   builder.addProcessor(new SignerProcessor(env));
   builder.addProcessor(new ContractProcessor(env));
   builder.addProcessor(new MultisigProcessor(env));

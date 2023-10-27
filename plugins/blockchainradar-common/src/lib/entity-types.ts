@@ -9,6 +9,7 @@ import {
   isApiEntity,
   isResourceEntity,
   isUserEntity,
+  isGroupEntity,
   isComponentEntity,
 } from '@backstage/catalog-model';
 import {
@@ -28,6 +29,21 @@ export interface BlockchainRoleGroup extends GroupEntity {
       admins: string[] | undefined;
     }
   >;
+}
+
+export interface BlockchainGroup extends GroupEntity {
+  spec: Literal<
+    GroupEntity['spec'] & {
+      interactsWith?: {
+        name: string;
+        description: string;
+      }[];
+    }
+  >;
+}
+
+export function isBlockchainGroup(entity: Entity): entity is BlockchainGroup {
+  return isGroupEntity(entity);
 }
 
 export interface BlockchainUser extends UserEntity {
