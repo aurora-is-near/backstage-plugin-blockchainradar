@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 1.0.16
+
+### Patch Changes
+
+- ab3bc8c: feat: add group owned address support
+
 ## 1.0.7
 
 ### Patch Changes
