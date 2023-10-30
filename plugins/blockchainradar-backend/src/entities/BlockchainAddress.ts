@@ -13,6 +13,9 @@ function base58EncodeSha256(str: string): string {
   return bs58.encode(hash);
 }
 
+const TESTNET_IDS = ['testnet', 'goerli'];
+const SIGNER_KINDS = ['Group', 'User'];
+
 export class BlockchainAddress extends BlockchainHandler {
   address: string;
   network: string; // ethereum | aurora | near
@@ -72,10 +75,10 @@ export class BlockchainAddress extends BlockchainHandler {
     parts.push(this.role);
 
     if (this.role === 'signer') {
-      if (this.parent.kind !== 'User') {
-        parts.push('unknown');
-      } else {
+      if (SIGNER_KINDS.includes(this.parent.kind)) {
         parts.push(this.parent.metadata.name);
+      } else {
+        parts.push('unknown');
       }
     }
 
@@ -83,7 +86,7 @@ export class BlockchainAddress extends BlockchainHandler {
   }
 
   entityLifecycle() {
-    return this.networkType === 'testnet' ? 'testing' : 'production';
+    return TESTNET_IDS.includes(this.networkType) ? 'testing' : 'production';
   }
 
   linkPrefix() {

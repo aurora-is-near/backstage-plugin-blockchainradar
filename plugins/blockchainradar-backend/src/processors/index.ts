@@ -6,3 +6,4 @@ export { SecurityPolicyProcessor } from './SecurityPolicyProcessor';
 export { UserProcessor } from './UserProcessor';
 export { SignerProcessor } from './SignerProcessor';
 export { RoleGroupProcessor } from './RoleGroupProcessor';
+export { GroupProcessor } from './GroupProcessor';
