@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.17
+
+### Patch Changes
+
+- 324ec19: feat: add super admins role group
+
 ## 1.0.16
 
 ### Patch Changes
