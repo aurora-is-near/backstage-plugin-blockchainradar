@@ -24,6 +24,7 @@ export class MultisigDeployment extends ContractDeployment {
   entitySpec() {
     return {
       ...super.entitySpec(),
+      lifecycle: this.parent.spec?.lifecycle ? this.parent.spec.lifecycle : this.entityLifecycle(),
       type: `multisig-deployment`,
       multisig: {},
     };
