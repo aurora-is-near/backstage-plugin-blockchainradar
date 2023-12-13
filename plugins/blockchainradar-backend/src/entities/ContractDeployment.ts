@@ -25,6 +25,9 @@ export class ContractDeployment extends BlockchainAddress {
   entitySpec() {
     return {
       ...super.entitySpec(),
+      lifecycle: this.parent.spec?.lifecycle
+        ? this.parent.spec.lifecycle
+        : this.entityLifecycle(),
       type: `${this.role === 'multisig' ? this.role : 'contract'}-deployment`,
       deployment: {},
       definition: 'none', // required by the API spec, overriden by ContractProcessor
