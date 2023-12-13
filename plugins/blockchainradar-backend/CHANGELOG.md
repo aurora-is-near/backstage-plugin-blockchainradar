@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.18
+
+### Patch Changes
+
+- 4d421c2: feat: add inheritable lifecycle for contracts
+
 ## 1.0.17
 
 ### Patch Changes
