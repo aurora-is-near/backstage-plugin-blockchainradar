@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.19
+
+### Patch Changes
+
+- 6c759dc: perf: add delays between source requests
+
 ## 1.0.18
 
 ### Patch Changes
