@@ -49,6 +49,7 @@ export class EvmAdapter extends BlockchainAdapter {
     const creds = this.etherscanCreds();
     const fetcher = new EtherscanClient(creds.network, creds.apiKey);
     const result = await fetcher.fetchSourcesForAddress(address);
+    await this.delayRequest();
     const firstTx = await this.fetchCreationTransaction(address);
 
     if (result) {
