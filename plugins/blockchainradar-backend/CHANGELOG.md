@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.20
+
+### Patch Changes
+
+- 93e01dd: feat: add scoped cache support
+- 3cc9b1e: feat: add prelim support for silos
+- 18a32b7: refactor: cleanup backend types
+
 ## 1.0.19
 
 ### Patch Changes
