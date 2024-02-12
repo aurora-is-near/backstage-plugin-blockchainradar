@@ -56,6 +56,11 @@ export class BlockchainAddress extends BlockchainHandler {
   // long entity names need to be truncated to pass validation
   entityName() {
     let name = [this.network, this.networkType, this.address].join('-');
+    if (this.networkType.includes('aurora-silo.near')) {
+      name = [this.network, this.networkType.split('.')[0], this.address].join(
+        '-',
+      );
+    }
     if (name.length > 63)
       name = [
         this.network,
