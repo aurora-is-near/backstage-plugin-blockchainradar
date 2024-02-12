@@ -1,4 +1,6 @@
 import Web3 from 'web3';
+import { getRootLogger } from '@backstage/backend-common';
+import { Config } from '@backstage/config';
 import { BlockchainAdapter } from './BlockchainAdapter';
 import { ethers } from 'ethers';
 import {
@@ -12,6 +14,18 @@ import {
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 
 export class EvmAdapter extends BlockchainAdapter {
+  constructor(
+    config: Config,
+    network: string,
+    networkType: string,
+    logger = getRootLogger(),
+  ) {
+    super(config, network, networkType, logger);
+    this.networkType = this.networkType.includes('aurora-silo.near')
+      ? 'mainnet'
+      : this.networkType;
+  }
+
   isValidAddress(address: string): boolean {
     return Web3.utils.isAddress(address);
   }
