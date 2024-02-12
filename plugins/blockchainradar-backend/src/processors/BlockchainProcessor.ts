@@ -77,8 +77,9 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
 
   protected async fetchCachedSpec<T extends JsonValue>(
     cache: CatalogProcessorCache,
+    key = 'cached-spec',
   ) {
-    return cache.get<T>('cached-spec');
+    return cache.get<T>(key);
   }
 
   protected isCacheUpToDate(cachedSpec?: CacheableSpec) {
@@ -94,6 +95,14 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
     spec: CacheableSpec,
   ) {
     await cache.set<CacheableSpec>('cached-spec', spec!);
+  }
+
+  protected async setScopedCachedSpec<T extends CacheableSpec = CacheableSpec>(
+    key: string,
+    cache: CatalogProcessorCache,
+    spec: T,
+  ) {
+    await cache.set<T>(key, spec);
   }
 
   protected async runExclusive(

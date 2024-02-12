@@ -1,4 +1,5 @@
 import {
+  CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
@@ -18,17 +19,21 @@ import { ContractDeployment } from '../entities/ContractDeployment';
 
 const dashed = (camel: string) =>
   camel.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+const DEPLOYMENT_SOURCE_RUN_ID = 'deployment-source-fetch';
+const DEPLOYMENT_STATE_RUN_ID = 'deployment-state-fetch';
+const DEPLOYMENT_RBAC_RUN_ID = 'deployment-rbac-fetch';
 
 export class ContractProcessor extends BlockchainProcessor {
   async postProcessEntity(
     entity: Entity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
+    cache: CatalogProcessorCache,
   ) {
     if (isContractComponent(entity)) {
       return this.processContractComponent(entity, location, emit);
     } else if (isContractDeployment(entity)) {
-      return this.processContractDeployment(entity, location, emit);
+      return this.processContractDeployment(entity, location, emit, cache);
     }
     return entity;
   }
@@ -78,6 +83,7 @@ export class ContractProcessor extends BlockchainProcessor {
     entity: ContractDeploymentEntity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
+    cache: CatalogProcessorCache,
   ) {
     const deployment = await BlockchainFactory.fromEntity<ContractDeployment>(
       this,
@@ -88,16 +94,23 @@ export class ContractProcessor extends BlockchainProcessor {
     if (deploymentSpec) {
       if (!this.isCacheUpToDate(deploymentSpec.source)) {
         await this.runExclusive(
-          'deployment-source-fetch',
+          DEPLOYMENT_SOURCE_RUN_ID,
           deployment.address,
           async _logger => {
             try {
               deploymentSpec.source = await deployment.adapter.fetchSourceSpec(
                 deployment.address,
               );
-              this.logger.debug(
-                `Source spec found for ${entity.metadata.name}`,
-              );
+              if (deploymentSpec.source) {
+                this.logger.debug(
+                  `Source spec found for ${entity.metadata.name}`,
+                );
+                await this.setScopedCachedSpec(
+                  DEPLOYMENT_SOURCE_RUN_ID,
+                  cache,
+                  deploymentSpec.source,
+                );
+              }
             } catch (error) {
               this.logger.warn(
                 `unable to fetch contract source for ${deployment.address}`,
@@ -105,11 +118,17 @@ export class ContractProcessor extends BlockchainProcessor {
             }
           },
         );
+      } else {
+        await this.setScopedCachedSpec(
+          DEPLOYMENT_SOURCE_RUN_ID,
+          cache,
+          deploymentSpec.source!,
+        );
       }
 
       if (!this.isCacheUpToDate(deploymentSpec.state)) {
         await this.runExclusive(
-          'deployment-state-fetch',
+          DEPLOYMENT_STATE_RUN_ID,
           deployment.address,
           async _logger => {
             try {
@@ -117,7 +136,16 @@ export class ContractProcessor extends BlockchainProcessor {
                 deployment.address,
                 deploymentSpec.source!,
               );
-              this.logger.debug(`State spec found for ${entity.metadata.name}`);
+              if (deploymentSpec.state) {
+                this.logger.debug(
+                  `State spec found for ${entity.metadata.name}`,
+                );
+                await this.setScopedCachedSpec(
+                  DEPLOYMENT_STATE_RUN_ID,
+                  cache,
+                  deploymentSpec.state,
+                );
+              }
             } catch (error) {
               this.logger.warn(
                 `unable to fetch contract state for ${deployment.address}`,
@@ -125,27 +153,44 @@ export class ContractProcessor extends BlockchainProcessor {
             }
           },
         );
+      } else {
+        await this.setScopedCachedSpec(
+          DEPLOYMENT_STATE_RUN_ID,
+          cache,
+          deploymentSpec.state!,
+        );
       }
 
       if (!this.isCacheUpToDate(deploymentSpec.rbac)) {
         await this.runExclusive(
-          'deployment-rbac-fetch',
+          DEPLOYMENT_RBAC_RUN_ID,
           deployment.address,
           async _logger => {
             if (entity.spec.deployment?.state) {
-              const spec = await deployment.roleGroupAdapter.fetchRbacSpec(
-                entity.spec.address,
-                entity.spec.deployment.state,
-              );
-              if (spec) {
+              deploymentSpec.rbac =
+                await deployment.roleGroupAdapter.fetchRbacSpec(
+                  entity.spec.address,
+                  entity.spec.deployment.state,
+                );
+              if (deploymentSpec.rbac) {
                 this.logger.debug(
                   `Rbac spec found for ${entity.metadata.name}`,
                 );
                 this.appendTags(entity, 'rbac');
-                deploymentSpec.rbac = spec;
+                await this.setScopedCachedSpec(
+                  DEPLOYMENT_RBAC_RUN_ID,
+                  cache,
+                  deploymentSpec.rbac,
+                );
               }
             }
           },
+        );
+      } else {
+        await this.setScopedCachedSpec(
+          DEPLOYMENT_RBAC_RUN_ID,
+          cache,
+          deploymentSpec.rbac!,
         );
       }
 
