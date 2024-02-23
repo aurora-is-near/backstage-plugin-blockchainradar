@@ -17,8 +17,16 @@ import { BlockchainProcessor } from './BlockchainProcessor';
 import { RoleGroup } from '../entities/RoleGroup';
 import { ContractDeployment } from '../entities/ContractDeployment';
 
-const dashed = (camel: string) =>
-  camel.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+function dashed(input: string) {
+  // Convert camelCase to lower_underscored
+  let formattedString = input.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+
+  // Convert UPPER_UNDERSCORED to lower_underscored
+  formattedString = formattedString.replace(/_/g, '-');
+
+  return formattedString;
+}
+
 const DEPLOYMENT_SOURCE_RUN_ID = 'deployment-source-fetch';
 const DEPLOYMENT_STATE_RUN_ID = 'deployment-state-fetch';
 const DEPLOYMENT_RBAC_RUN_ID = 'deployment-rbac-fetch';

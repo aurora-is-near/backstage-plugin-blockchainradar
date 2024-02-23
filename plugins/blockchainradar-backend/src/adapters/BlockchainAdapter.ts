@@ -7,6 +7,7 @@ import {
   NearTx,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { Logger } from 'winston';
+import { UnifiedTransactionResponse } from '../lib/explorer';
 
 export abstract class BlockchainAdapter {
   config: Config;
@@ -68,7 +69,7 @@ export abstract class BlockchainAdapter {
 
   abstract fetchCreationTransaction(
     address: string,
-  ): Promise<EtherscanTx | NearTx | undefined>;
+  ): Promise<UnifiedTransactionResponse | NearTx | undefined>;
 
   abstract isContract(address: string): Promise<boolean>;
 

@@ -7,6 +7,7 @@ import { BlockchainHandler } from './BlockchainHandler';
 import * as crypto from 'crypto';
 import * as bs58 from 'bs58';
 import { AdapterFactory } from '../adapters/AdapterFactory';
+import { SILO_NAMES_BY_CHAIN_ID, isSiloChainId } from '../lib/networks';
 
 function base58EncodeSha256(str: string): string {
   const hash = crypto.createHash('sha256').update(str).digest();
@@ -15,6 +16,7 @@ function base58EncodeSha256(str: string): string {
 
 const TESTNET_IDS = ['testnet', 'goerli'];
 const SIGNER_KINDS = ['Group', 'User'];
+const BLOCKCHAIN_TYPES = ['contract', 'multisig', 'signer'];
 
 export class BlockchainAddress extends BlockchainHandler {
   address: string;
@@ -56,11 +58,6 @@ export class BlockchainAddress extends BlockchainHandler {
   // long entity names need to be truncated to pass validation
   entityName() {
     let name = [this.network, this.networkType, this.address].join('-');
-    if (this.networkType.includes('aurora-silo.near')) {
-      name = [this.network, this.networkType.split('.')[0], this.address].join(
-        '-',
-      );
-    }
     if (name.length > 63)
       name = [
         this.network,
@@ -103,6 +100,10 @@ export class BlockchainAddress extends BlockchainHandler {
       return `https://explorer.${
         this.networkType === 'testnet' ? 'testnet.' : ''
       }near.org/accounts/`;
+    } else if (isSiloChainId(this.networkType)) {
+      return `https://explorer.${
+        SILO_NAMES_BY_CHAIN_ID[this.networkType]
+      }.aurora.dev/address/`;
     } else if (this.network === 'aurora') {
       return `https://explorer.${
         this.networkType === 'testnet' ? 'testnet.' : ''
@@ -112,9 +113,12 @@ export class BlockchainAddress extends BlockchainHandler {
   }
 
   toLink(): EntityLink {
+    const networkType = isSiloChainId(this.networkType)
+      ? SILO_NAMES_BY_CHAIN_ID[this.networkType]
+      : this.networkType;
     return {
       url: this.linkPrefix() + this.address,
-      title: ['Explorer:', this.network, this.networkType, this.role].join(' '),
+      title: ['Explorer:', this.network, networkType, this.role].join(' '),
     };
   }
 
@@ -123,7 +127,7 @@ export class BlockchainAddress extends BlockchainHandler {
   // emitting role/network as well for consistency
   entitySpec(): Entity['spec'] {
     return {
-      type: `${this.role}-address`,
+      type: `${this.entitySpecType()}-address`,
       address: this.address,
       role: this.role,
       network: this.network,
@@ -133,7 +137,7 @@ export class BlockchainAddress extends BlockchainHandler {
   }
 
   entityTags() {
-    const tags = [`${this.role}-address`, this.network];
+    const tags = [`${this.entitySpecType()}-address`, this.network];
     if (this.stub) tags.push('stub');
     // simple normalization to conform to backstage's tag spec
     return [
@@ -148,6 +152,10 @@ export class BlockchainAddress extends BlockchainHandler {
       description: `${this.address} (${this.role} address)`,
       links: [this.toLink()],
     };
+  }
+
+  entitySpecType() {
+    return BLOCKCHAIN_TYPES.includes(this.role) ? this.role : 'blockchain';
   }
 
   /**

@@ -1,44 +1,29 @@
 import util from 'util';
-import Web3Utils from 'web3-utils';
-import { setTimeout } from 'timers';
-
+import { AbiItem } from 'web3-utils';
+import { EtherscanTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { getRootLogger } from '@backstage/backend-common';
 import axios from 'axios';
 import retry from 'async-retry';
 import { ethers } from 'ethers';
-import type { Networkish } from '@ethersproject/providers';
-import { EtherscanTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { networksByName } from './networks';
+import { Networkish } from '@ethersproject/providers';
+import {
+  isSiloName,
+  NETWORKS_BY_NAME,
+  SILO_NAMES_BY_CHAIN_ID,
+} from './networks';
+import {
+  processJsonResult,
+  processMultiResult,
+  processSingleResult,
+  processVyperResult,
+  SolcInput,
+  SolcSources,
+  SourceInfo,
+  UnifiedSourceResponse,
+  UnifiedTransactionResponse,
+} from './explorer';
 
-const etherscanCommentHeader = `/**
- *Submitted for verification at Etherscan.io on 20XX-XX-XX
-*/
-`; // note we include that final newline
-
-function makeFilename(name: string, extension: string = '.sol'): string {
-  if (!name) {
-    return `Contract${extension}`;
-  }
-  if (name.endsWith(extension)) {
-    return name;
-  }
-  return name + extension;
-}
-
-const makeTimer: (milliseconds: number) => Promise<void> =
-  util.promisify(setTimeout);
-
-function removeLibraries(
-  settings: SolcSettings,
-  alsoRemoveCompilationTarget: boolean = false,
-): SolcSettings {
-  const copySettings: SolcSettings = { ...settings };
-  delete copySettings.libraries;
-  if (alsoRemoveCompilationTarget) {
-    delete copySettings.compilationTarget;
-  }
-  return copySettings;
-}
+const makeTimer = util.promisify(setTimeout);
 
 // this looks awkward but the TS docs actually suggest this :P
 export class EtherscanClient {
@@ -82,10 +67,17 @@ export class EtherscanClient {
     bttc: 'api.bttcscan.com',
     'donau-bttc': 'api-testnet.bttcscan.com',
     aurora: 'explorer.mainnet.aurora.dev',
-    'testnet-aurora': 'explorer.testnet.aurora.dev',
+    'testnet-aurora': 'explorer.old.testnet.aurora.dev',
     celo: 'api.celoscan.xyz',
     'alfajores-celo': 'api-alfajores.celoscan.xyz',
     clover: 'api.clvscan.com',
+    ...Object.values(SILO_NAMES_BY_CHAIN_ID).reduce(
+      (acc, siloName) => ({
+        ...acc,
+        [siloName]: `explorer.${siloName}.aurora.dev`,
+      }),
+      {},
+    ),
   };
 
   constructor(networkName: string, apiKey: string = '') {
@@ -102,26 +94,34 @@ export class EtherscanClient {
   }
 
   async fetchSourcesForAddress(address: string): Promise<SourceInfo | null> {
-    const response = await this.fetchWithRetry(address);
-    if (response.result[0].Proxy || response.result[0].IsProxy) {
-      const implementationAddress =
-        response.result[0].Implementation ||
-        response.result[0].ImplementationAddress;
+    const response = await this.fetchSourceWithRetry(address);
+    if (response.proxy) {
+      const implementationAddress = response.implementation;
       if (implementationAddress) {
-        const impResponse = await this.fetchWithRetry(implementationAddress);
-        const proxyResult = this.processResult(response.result[0]);
-        const impResult = this.processResult(impResponse.result[0]);
-        return {
-          ...proxyResult,
-          sources: {
-            ...proxyResult?.sources,
-            ...impResult?.sources,
-          },
-          etherScanResult: impResult?.etherScanResult,
-        } as any;
+        try {
+          const impResponse = await this.fetchSourceWithRetry(
+            implementationAddress,
+          );
+          const proxyResult = this.processResult(response);
+          const impResult = this.processResult(impResponse);
+          if (proxyResult) {
+            return {
+              ...proxyResult,
+              sources: {
+                ...proxyResult.sources,
+                ...impResult?.sources,
+              },
+              explorerResult: impResponse,
+            };
+          }
+          return impResult;
+        } catch (e) {
+          // todo: handle this edge case without erroring
+          // fail gracefully when proxy is verified but imp contract is not
+        }
       }
     }
-    return this.processResult(response.result[0]);
+    return this.processResult(response);
   }
 
   async fetchTransactions(
@@ -162,41 +162,67 @@ export class EtherscanClient {
 
   async fetchCreationTransaction(
     address: string,
-  ): Promise<EtherscanTxInfoResponse> {
+  ): Promise<UnifiedTransactionResponse> {
+    const initialTimeoutFactor = 1.5;
+    const response = await retry(
+      async () =>
+        isSiloName(this.networkName) ||
+        this.networkName === 'aurora' ||
+        this.networkName === 'testnet-aurora'
+          ? await this.fetchBlockscoutV2CreationTransaction(address)
+          : await this.fetchTransactions(address, {
+              page: 1,
+              offset: 10,
+              sort: 'asc',
+            }),
+      {
+        retries: 3,
+        minTimeout: this.delay * initialTimeoutFactor,
+      },
+    );
+    return toUnifiedTransactionResponse(response);
+  }
+
+  private async fetchBlockscoutV2CreationTransaction(
+    address: string,
+  ): Promise<BlockscoutV2TransactionResponse> {
+    const domain = this.determineUrl();
     // not putting a try/catch around this; if it throws, we throw
     await this.ready;
     const creationTxPromise = axios.get<BlockscoutV2AddressResponse>(
-      `${this.determineUrl()}/v2/addresses/${address}`,
+      `${domain}/v2/addresses/${address}`,
     );
     this.ready = makeTimer(this.delay);
     const { data: addressData } = await creationTxPromise;
 
     await this.ready;
-    const txInfoPromise = axios.get<EtherscanTxInfoResponse>(
-      this.determineUrl(),
-      {
-        headers: {
-          module: 'transaction',
-          action: 'gettxinfo',
-          txhash: addressData.creation_tx_hash,
-        },
-        responseType: 'json',
-        maxRedirects: 50,
-      },
+    const txInfoPromise = axios.get<BlockscoutV2TransactionResponse>(
+      `${domain}/v2/transactions/${addressData.creation_tx_hash}`,
     );
     this.ready = makeTimer(this.delay);
     const { data: txInfo } = await txInfoPromise;
-    if (txInfo.message !== 'OK') throw new Error(txInfo.message);
+    if (txInfo.status !== 'ok') throw new Error(txInfo.result);
 
     return txInfo;
   }
 
-  private async fetchWithRetry(address: string): Promise<EtherscanSuccess> {
+  private async fetchSourceWithRetry(
+    address: string,
+  ): Promise<UnifiedSourceResponse> {
     const initialTimeoutFactor = 1.5;
-    return await retry(async () => await this.makeRequest(address), {
-      retries: 3,
-      minTimeout: this.delay * initialTimeoutFactor,
-    });
+    const response = await retry(
+      async () =>
+        isSiloName(this.networkName) ||
+        this.networkName === 'aurora' ||
+        this.networkName === 'testnet-aurora'
+          ? await this.fetchBlockscoutV2Source(address)
+          : await this.fetchEtherscanSource(address),
+      {
+        retries: 3,
+        minTimeout: this.delay * initialTimeoutFactor,
+      },
+    );
+    return toUnifiedSourceResponse(response);
   }
 
   private determineUrl() {
@@ -204,54 +230,77 @@ export class EtherscanClient {
     return `https://${domain}/api`;
   }
 
-  private async makeRequest(address: string): Promise<EtherscanSuccess> {
+  private async fetchEtherscanSource(address: string) {
     // not putting a try/catch around this; if it throws, we throw
     await this.ready;
-    const responsePromise = axios.get(this.determineUrl(), {
-      params: {
-        module: 'contract',
-        action: 'getsourcecode',
-        address,
-        ...(this.networkName !== 'aurora' ? { apiKey: this.apiKey } : {}),
+    const responsePromise = axios.get<EtherscanSourceCodeResponse>(
+      this.determineUrl(),
+      {
+        params: {
+          module: 'contract',
+          action: 'getsourcecode',
+          address,
+          apiKey: this.apiKey,
+        },
+        responseType: 'json',
+        maxRedirects: 50,
       },
-      responseType: 'json',
-      maxRedirects: 50,
-    });
+    );
     this.ready = makeTimer(this.delay);
-    const response: EtherscanSuccess | EtherscanFailure = (
-      await responsePromise
-    ).data;
-    if (response.status === '0') throw new Error(response.result);
+    const response = (await responsePromise).data;
+    if (response.status === '0') throw new Error(response.message);
 
     return response;
   }
 
-  private processResult(result: EtherscanResult): SourceInfo | null {
+  private async fetchBlockscoutV2Source(address: string) {
+    // not putting a try/catch around this; if it throws, we throw
+    const domain = this.determineUrl();
+    await this.ready;
+    const contractPromise = axios.get<BlockscoutV2SmartContractResponse>(
+      `${domain}/v2/smart-contracts/${address}`,
+    );
+    this.ready = makeTimer(this.delay);
+    const contractResponse = (await contractPromise).data;
+
+    await this.ready;
+    const addressPromise = axios.get<BlockscoutV2AddressResponse>(
+      `${domain}/v2/addresses/${address}`,
+    );
+    this.ready = makeTimer(this.delay);
+
+    const addressResponse = (await addressPromise).data;
+    return { ...contractResponse, ...addressResponse };
+  }
+
+  private processResult(result: UnifiedSourceResponse): SourceInfo | null {
     // we have 5 cases here.
     // case 1: the address doesn't exist
     if (
-      result.SourceCode === '' &&
-      result.ABI === 'Contract source code not verified'
+      result.sourceCode &&
+      result.sourceCode === '' &&
+      result.abi &&
+      result.abi === 'Contract source code not verified'
     ) {
       return null;
     }
     // case 2: it's a Vyper contract
-    if (result.CompilerVersion.startsWith('vyper:')) {
-      return this.processVyperResult(result);
+    if (result.compilerVersion.startsWith('vyper:')) {
+      return processVyperResult(result);
     }
     let multifileJson: SolcSources;
     try {
       // try to parse the source JSON.  if it succeeds,
       // we're in the multi-file case.
-      multifileJson = JSON.parse(result.SourceCode);
+      multifileJson = JSON.parse(result.sourceCode);
     } catch (_) {
       // otherwise, we could be single-file or we could be full JSON.
       // for full JSON input, etherscan will stick an extra pair of braces around it
       if (
-        result.SourceCode.startsWith('{') &&
-        result.SourceCode.endsWith('}')
+        result.sourceCode.startsWith('{') &&
+        result.sourceCode.endsWith('}')
       ) {
-        const trimmedSource = result.SourceCode.slice(1).slice(0, -1); // remove braces
+        const trimmedSource = result.sourceCode.slice(1).slice(0, -1); // remove braces
         let fullJson: SolcInput;
         try {
           fullJson = JSON.parse(trimmedSource);
@@ -259,177 +308,33 @@ export class EtherscanClient {
           // if it still doesn't parse, it's single-source I guess?
           // (note: we shouldn't really end up here?)
           this.logger.debug('single-file input??');
-          return this.processSingleResult(result);
+          return processSingleResult(result);
         }
         // case 5: full JSON input
         this.logger.debug('json input');
-        return this.processJsonResult(result, fullJson);
+        return processJsonResult(result, fullJson);
       }
       // case 3 (the way it should happen): single source
       this.logger.debug('single-file input');
-      return this.processSingleResult(result);
+      return processSingleResult(result);
     }
     // case 4: multiple sources
     this.logger.debug('multi-file input');
-    return this.processMultiResult(result, multifileJson);
-  }
-
-  private processSingleResult(result: EtherscanResult): SourceInfo {
-    const filename = makeFilename(result.ContractName);
-    return {
-      etherScanResult: result,
-      contractName: result.ContractName,
-      sources: {
-        // we prepend this header comment so that line numbers in the debugger
-        // will match up with what's displayed on the website; note that other
-        // cases don't display a similar header on the website
-        [filename]: etherscanCommentHeader + result.SourceCode,
-      },
-      options: {
-        language: 'Solidity',
-        version: result.CompilerVersion,
-        settings: this.extractSettings(result),
-        specializations: {
-          libraries: this.processLibraries(result.Library),
-          constructorArguments: result.ConstructorArguments,
-        },
-      },
-    };
-  }
-
-  private processMultiResult(
-    result: EtherscanResult,
-    sources: SolcSources,
-  ): SourceInfo {
-    return {
-      etherScanResult: result,
-      contractName: result.ContractName,
-      sources: this.processSources(sources),
-      options: {
-        language: 'Solidity',
-        version: result.CompilerVersion,
-        settings: this.extractSettings(result),
-        specializations: {
-          libraries: this.processLibraries(result.Library),
-          constructorArguments: result.ConstructorArguments,
-        },
-      },
-    };
-  }
-
-  private processJsonResult(
-    result: EtherscanResult,
-    jsonInput: SolcInput,
-  ): SourceInfo {
-    return {
-      etherScanResult: result,
-      contractName: result.ContractName,
-      sources: this.processSources(jsonInput.sources),
-      options: {
-        language: jsonInput.language,
-        version: result.CompilerVersion,
-        settings: removeLibraries(jsonInput.settings), // we *don't* want to pass library info!  unlinked bytecode is better!
-        specializations: {
-          libraries: jsonInput.settings.libraries,
-          constructorArguments: result.ConstructorArguments,
-        },
-      },
-    };
-  }
-
-  private processVyperResult(result: EtherscanResult): SourceInfo {
-    const filename = makeFilename(result.ContractName, '.vy');
-    // note: this means filename will always be Vyper_contract.vy
-    return {
-      etherScanResult: result,
-      sources: {
-        [filename]: result.SourceCode,
-      },
-      options: {
-        language: 'Vyper',
-        version: result.CompilerVersion.replace(/^vyper:/, ''),
-        settings: this.extractVyperSettings(result),
-        specializations: {
-          constructorArguments: result.ConstructorArguments,
-        },
-      },
-    };
-  }
-
-  private processSources(sources: SolcSources): SourcesByPath {
-    return Object.assign(
-      {},
-      ...Object.entries(sources).map(([path, { content: source }]) => ({
-        [makeFilename(path)]: source,
-      })),
-    );
-  }
-
-  private extractSettings(result: EtherscanResult): SolcSettings {
-    const evmVersion =
-      result.EVMVersion === 'Default' ? undefined : result.EVMVersion;
-    const optimizer = {
-      enabled:
-        result.OptimizationUsed === '1' || result.OptimizationUsed === 'true',
-      runs:
-        result.OptimizationRuns !== undefined
-          ? parseInt(result.OptimizationRuns)
-          : parseInt(result.Runs),
-    };
-    // old version got libraries here, but we don't actually want that!
-    if (evmVersion !== undefined) {
-      return {
-        optimizer,
-        evmVersion,
-      };
-    }
-    return {
-      optimizer,
-    };
-  }
-
-  private processLibraries(
-    librariesString: string | undefined,
-  ): LibrarySettings {
-    let libraries: Libraries;
-    if (!librariesString || librariesString === '') {
-      libraries = {};
-    } else {
-      libraries = Object.assign(
-        {},
-        ...librariesString.split(';').map(pair => {
-          const [name, address] = pair.split(':');
-          return { [name]: Web3Utils.toChecksumAddress(address) };
-        }),
-      );
-    }
-    return { '': libraries }; // empty string as key means it applies to all contracts
-  }
-
-  private extractVyperSettings(result: EtherscanResult): VyperSettings {
-    const evmVersion =
-      result.EVMVersion === 'Default' ? undefined : result.EVMVersion;
-    // the optimize flag is not currently supported by etherscan;
-    // any Vyper contract currently verified on etherscan necessarily has
-    // optimize flag left unspecified (and therefore effectively true).
-    // do NOT look at OptimizationUsed for Vyper contracts; it will always
-    // be "0" even though in fact optimization *was* used.  just leave
-    // the optimize flag unspecified.
-    if (evmVersion !== undefined) {
-      return { evmVersion };
-    }
-    return {};
+    return processMultiResult(result, multifileJson);
   }
 }
 
 export class BackstageEtherscanProvider extends ethers.providers
   .EtherscanProvider {
-  constructor(network?: Networkish, apiKey?: string) {
-    const standardNetwork = networksByName[network as string];
+  constructor(networkish: Networkish, apiKey?: string) {
+    if (typeof networkish === 'string') {
+      const standardNetwork = NETWORKS_BY_NAME[networkish];
+      if (!standardNetwork) throw Error(`unsupported network: ${networkish}`);
 
-    if (!standardNetwork) throw Error(`unsupported network${network}`);
-
-    super(standardNetwork, apiKey);
+      super(standardNetwork, apiKey);
+    } else {
+      super(networkish, apiKey);
+    }
   }
 
   getBaseUrl(): string {
@@ -438,16 +343,95 @@ export class BackstageEtherscanProvider extends ethers.providers
   }
 }
 
-export interface SourceInfo {
-  contractName?: string;
-  sources: SourcesByPath;
-  options: CompilerOptions;
-  etherScanResult: EtherscanResult;
+function toUnifiedTransactionResponse(
+  res: BlockscoutV2TransactionResponse | EtherscanTxlistResponse,
+): UnifiedTransactionResponse {
+  if ('block' in res) {
+    return {
+      blockHash: '',
+      blockNumber: res.block,
+      timestamp: res.timestamp,
+      txStatus: res.status,
+      confirmations: res.confirmations,
+    };
+  }
+  const [result] = res.result;
+  return {
+    blockHash: result.blockHash,
+    blockNumber: parseInt(result.blockNumber),
+    timestamp: result.timeStamp,
+    txStatus: result.txreceipt_status,
+    confirmations: parseInt(result.confirmations),
+  };
 }
+
+function toUnifiedSourceResponse(
+  res: EtherscanSourceCodeResponse | BlockscoutV2SourceResponse,
+): UnifiedSourceResponse {
+  if ('result' in res) {
+    const result = res.result[0];
+    return {
+      abi: result.ABI,
+      contractName: result.ContractName,
+      sourceCode: result.SourceCode,
+      optimizationEnabled:
+        result.OptimizationUsed === '1' || result.OptimizationUsed === 'true',
+      optimizationRuns:
+        result.OptimizationRuns !== undefined
+          ? parseInt(result.OptimizationRuns)
+          : parseInt(result.Runs),
+      compilerVersion: result.CompilerVersion,
+      evmVersion: result.EVMVersion,
+      contructorArguments: result.ConstructorArguments,
+      libraries: result.Library,
+      proxy: Boolean(result.Proxy) || Boolean(result.IsProxy),
+      implementation: result.Implementation || result.ImplementationAddress,
+    };
+  }
+  return {
+    abi: JSON.stringify(res.abi),
+    contractName: res.name,
+    sourceCode: res.source_code,
+    optimizationEnabled: res.optimization_enabled,
+    optimizationRuns: res.optimization_runs,
+    compilerVersion: res.compiler_version,
+    evmVersion: res.evm_version,
+    contructorArguments: res.constructor_args,
+    libraries: res.external_libraries
+      .map(lib => `${lib.name}-${lib.address_hash}`)
+      .join(';'),
+    proxy: res.implementation_address !== null,
+    implementation: res.implementation_address ?? undefined,
+  };
+}
+
+interface FetchTransactionsOpts
+  extends Partial<{
+    startblock: number;
+    endblock: number;
+    page: number;
+    offset: number;
+    sort: 'asc' | 'desc';
+  }> {}
+
+interface EtherscanGenericResponse<T> {
+  /**
+   * '1' = success, '0' = error
+   */
+  status: '1' | '0';
+  message: string;
+  result: T;
+}
+
+interface EtherscanTxlistResponse
+  extends EtherscanGenericResponse<EtherscanTx[]> {}
+
+interface EtherscanSourceCodeResponse
+  extends EtherscanGenericResponse<EtherscanBlockscoutV1SourceCodeResult[]> {}
 
 // apologies for this being stringly-typed, but that's how
 // Etherscan does it
-interface EtherscanResult {
+interface EtherscanBlockscoutV1SourceCodeResult {
   SourceCode: string; // really: string | SolcSources | SolcInput
   ABI: string; // really: it's the ABI [we won't use this]
   ContractName: string;
@@ -466,146 +450,35 @@ interface EtherscanResult {
   SwarmSource: string; // ignored
 }
 
-interface SourcesByPath {
-  [sourcePath: string]: string;
-}
-
-// apologies if reinventing the wheel here
-type CompilerOptions = SolcOptions | VyperOptions; // note: only Solidity really supported atm
-
-interface SolcOptions {
-  language: 'Solidity' | 'Yul'; // again, only Solidity really supported atm
-  version: string;
-  settings: SolcSettings;
-  specializations: SolcSpecializations;
-}
-
-interface VyperOptions {
-  language: 'Vyper';
-  version: string;
-  settings: VyperSettings;
-  specializations: VyperSpecializations;
-}
-
-// only including settings that would alter compiled result
-// (no outputSelection, no modelChecker once that exists, no stopAfter)
-interface SolcSettings {
-  remappings?: string[];
-  optimizer?: OptimizerSettings;
-  evmVersion?: string; // not gonna enumerate these
-  debug?: DebugSettings;
-  metadata?: MetadataSettings;
-  viaIR?: boolean;
-  libraries?: LibrarySettings; // note: we don't actually want to return this!
-  compilationTarget?: {
-    // not actually a valid compiler setting, but rather where the
-    // contract name is stored! (as the lone value, the lone key being the source
-    // where it's defined)
-    [sourcePath: string]: string;
-  };
-}
-
-interface VyperSettings {
-  evmVersion?: string; // not gonna enumerate these
-  optimize?: boolean; // warning: the Vyper compiler treats this as true if it's not specified!
-  // also Etherscan currently doesn't support this flag; any Vyper contract currently
-  // verified on Etherscan necessarily has this field unspecified (and thus effectively true)
-}
-
-interface SolcSpecializations {
-  libraries?: LibrarySettings;
-  constructorArguments?: string; // encoded, as hex string, w/o 0x in front
-}
-
-interface VyperSpecializations {
-  constructorArguments?: string; // encoded, as hex string, w/o 0x in front
-}
-
-interface SolcSources {
-  [sourcePath: string]: {
-    keccak256?: string;
-    content?: string; // for Etherscan we assume this exists
-    urls?: string;
-  };
-}
-
-interface SolcInput {
-  language: 'Solidity';
-  sources: SolcSources;
-  settings: SolcSettings;
-}
-
-interface LibrarySettings {
-  [contractPath: string]: Libraries;
-}
-
-interface Libraries {
-  [libraryName: string]: string;
-}
-
-interface MetadataSettings {
-  useLiteralContent?: boolean;
-  bytecodeHash?: 'none' | 'ipfs' | 'bzzr1';
-}
-
-interface DebugSettings {
-  revertStrings?: 'default' | 'strip' | 'debug' | 'verboseDebug';
-}
-
-interface OptimizerSettings {
-  enabled?: boolean;
-  runs?: number;
-  details?: OptimizerDetails;
-}
-
-interface OptimizerDetails {
-  peephole?: boolean;
-  jumpdestRemover?: boolean;
-  orderLiterals?: boolean;
-  deduplicate?: boolean;
-  cse?: boolean;
-  constantOptimizer?: boolean;
-  yul?: boolean;
-  yulDetails?: YulDetails;
-}
-
-interface YulDetails {
-  stackAllocation?: boolean;
-  optimizerSteps?: string;
-}
-
-interface EtherscanSuccess {
-  status: '1';
-  message: string;
-  result: EtherscanResult[];
-}
-
-interface EtherscanFailure {
-  status: '0';
-  message: string;
+export interface BlockscoutV2TransactionResponse {
+  block: number;
+  confirmations: number;
+  status: 'ok' | 'error';
   result: string;
+  timestamp: string;
 }
 
-type FetchTransactionsOpts = Partial<{
-  startblock: number;
-  endblock: number;
-  page: number;
-  offset: number;
-  sort: 'asc' | 'desc';
-}>;
+interface BlockscoutV2SmartContractResponse {
+  source_code: string;
+  abi: AbiItem[];
+  name: string;
+  compiler_version: string;
+  optimization_enabled: boolean;
+  optimization_runs: number;
+  constructor_args: string;
+  evm_version: string;
+  external_libraries: { name: string; address_hash: string }[];
+  minimal_proxy_address_hash: string | null; // todo: investigate why this isn't populated
+}
 
-type EtherscanTxlistResponse = {
-  status: '0' | '1';
-  message: string;
-  result: EtherscanTx[];
-};
-
-type EtherscanTxInfoResponse = {
-  message: string;
-  result: EtherscanTx;
-};
-
-type BlockscoutV2AddressResponse = {
+interface BlockscoutV2AddressResponse {
   creation_tx_hash: string;
   creator_address_hash: string;
-};
+  implementation_address: string | null;
+  is_contract: boolean;
+  is_verified: boolean;
+}
+
+interface BlockscoutV2SourceResponse
+  extends BlockscoutV2SmartContractResponse,
+    BlockscoutV2AddressResponse {}
