@@ -1,17 +1,22 @@
 import Web3 from 'web3';
 import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
-import { BlockchainAdapter } from './BlockchainAdapter';
 import { ethers } from 'ethers';
-import {
-  BackstageEtherscanProvider,
-  EtherscanClient,
-} from '../lib/EtherscanClient';
 import {
   ContractSourceSpec,
   ContractStateSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import {
+  BackstageEtherscanProvider,
+  EtherscanClient,
+} from '../lib/EtherscanClient';
+import {
+  SILO_NAMES_BY_CHAIN_ID,
+  isSiloChainId,
+  isSiloName,
+} from '../lib/networks';
+import { BlockchainAdapter } from './BlockchainAdapter';
 
 export class EvmAdapter extends BlockchainAdapter {
   constructor(
@@ -21,8 +26,9 @@ export class EvmAdapter extends BlockchainAdapter {
     logger = getRootLogger(),
   ) {
     super(config, network, networkType, logger);
-    this.networkType = this.networkType.includes('aurora-silo.near')
-      ? 'mainnet'
+    // todo: use config registry to find network name
+    this.networkType = isSiloChainId(networkType)
+      ? SILO_NAMES_BY_CHAIN_ID[networkType]
       : this.networkType;
   }
 
@@ -36,18 +42,32 @@ export class EvmAdapter extends BlockchainAdapter {
 
   etherscanCreds() {
     const networkName = `${this.network}-${this.networkType}`;
-    const network = this.config.getString(`etherscan.${networkName}.network`);
-    const apiKey = this.config.getString(`etherscan.${networkName}.apiKey`);
+    const isSilo = isSiloName(this.networkType);
+    const isAurora = this.network === 'aurora';
+    const network = this.getNetwork();
+    const apiKey =
+      isSilo || isAurora
+        ? undefined
+        : this.config.getString(`etherscan.${networkName}.apiKey`);
     return { network, apiKey };
+  }
+
+  getNetwork() {
+    if (isSiloName(this.networkType)) {
+      return this.networkType;
+    }
+    if (this.network === 'aurora' && this.networkType === 'mainnet') {
+      return 'aurora';
+    }
+    if (this.network === 'aurora' && this.networkType === 'testnet') {
+      return 'testnet-aurora';
+    }
+    const networkName = `${this.network}-${this.networkType}`;
+    return this.config.getString(`etherscan.${networkName}.network`);
   }
 
   // TODO add caching?
   async isContract(address: string): Promise<boolean> {
-    const creds = this.etherscanCreds();
-    const provider = new BackstageEtherscanProvider(
-      creds.network,
-      creds.apiKey,
-    );
     if (this.network === 'aurora') {
       const auroraProvider = new StaticJsonRpcProvider(
         `https://${this.networkType}.aurora.dev/api`,
@@ -55,6 +75,11 @@ export class EvmAdapter extends BlockchainAdapter {
       const code = await auroraProvider.getCode(address);
       return code !== '0x';
     }
+    const creds = this.etherscanCreds();
+    const provider = new BackstageEtherscanProvider(
+      creds.network,
+      creds.apiKey,
+    );
     const bytecode = await provider.getCode(address);
     return bytecode !== '0x';
   }
@@ -70,10 +95,10 @@ export class EvmAdapter extends BlockchainAdapter {
       return {
         sourceCodeVerified: true,
         fetchDate: Date.now(),
-        contractName: result.etherScanResult.ContractName,
+        contractName: result.explorerResult.contractName,
         sourceFiles: Object.keys(result.sources),
-        abi: JSON.stringify(JSON.parse(result.etherScanResult.ABI), null, 2),
-        startBlock: firstTx ? parseInt(firstTx.blockNumber) : 0,
+        abi: JSON.stringify(JSON.parse(result.explorerResult.abi), null, 2),
+        startBlock: firstTx ? firstTx.blockNumber : 0,
       };
     }
     this.logger.warn(`unable to fetch abi for ${address}`);
@@ -188,16 +213,8 @@ export class EvmAdapter extends BlockchainAdapter {
     const creds = this.etherscanCreds();
     const fetcher = new EtherscanClient(creds.network, creds.apiKey);
     try {
-      if (this.network === 'aurora') {
-        const { result } = await fetcher.fetchCreationTransaction(address);
-        return result;
-      }
-      const { result } = await fetcher.fetchTransactions(address, {
-        page: 1,
-        offset: 1,
-        sort: 'asc',
-      });
-      return result.length > 0 ? result[0] : undefined;
+      const response = await fetcher.fetchCreationTransaction(address);
+      return response;
     } catch (err) {
       this.logger.warn(`unable to fetch creation tx for ${address}`);
       return undefined;

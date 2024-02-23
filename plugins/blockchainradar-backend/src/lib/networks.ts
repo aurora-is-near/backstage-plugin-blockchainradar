@@ -1,4 +1,19 @@
-export const networkNamesById: { [id: number]: string } = {
+export const SILO_NAMES_BY_CHAIN_ID = {
+  '1313161560': 'powergold',
+};
+
+type SiloChainId = keyof typeof SILO_NAMES_BY_CHAIN_ID;
+type SiloName = (typeof SILO_NAMES_BY_CHAIN_ID)[SiloChainId];
+
+export function isSiloChainId(value: string): value is SiloChainId {
+  return value in SILO_NAMES_BY_CHAIN_ID;
+}
+
+export function isSiloName(value: string): value is SiloName {
+  return Object.values(SILO_NAMES_BY_CHAIN_ID).includes(value);
+}
+
+export const NETWORK_NAMES_BY_CHAIN_ID: { [id: number]: string } = {
   1: 'mainnet',
   3: 'ropsten',
   4: 'rinkeby',
@@ -35,6 +50,7 @@ export const networkNamesById: { [id: number]: string } = {
   83: 'testnet-meter',
   1313161554: 'aurora',
   1313161555: 'testnet-aurora',
+  1313161560: 'powergold',
   250: 'fantom',
   4002: 'testnet-fantom',
   128: 'heco',
@@ -59,12 +75,8 @@ export interface NetworkInfo {
   chainId: number;
 }
 
-export interface SupportedNetworks {
-  [name: string]: NetworkInfo;
-}
-
-export const networksByName: SupportedNetworks = Object.fromEntries(
-  Object.entries(networkNamesById).map(
+export const NETWORKS_BY_NAME = Object.fromEntries<NetworkInfo>(
+  Object.entries(NETWORK_NAMES_BY_CHAIN_ID).map(
     ([id, name]) => [
       name,
       { name, networkId: Number(id), chainId: Number(id) },
