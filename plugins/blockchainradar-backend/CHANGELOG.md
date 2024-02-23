@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.21
+
+### Patch Changes
+
+- 9b9fa92: feat: add generalized silo support
+
 ## 1.0.20
 
 ### Patch Changes
