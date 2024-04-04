@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.22
+
+### Patch Changes
+
+- 06c63da: fix: patch deprecated signers
+
 ## 1.0.21
 
 ### Patch Changes
