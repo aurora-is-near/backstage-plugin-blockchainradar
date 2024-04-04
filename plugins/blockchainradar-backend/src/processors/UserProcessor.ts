@@ -77,13 +77,15 @@ export class UserProcessor extends BlockchainProcessor {
       logger.debug(`${entity.metadata.name} fetching deprecated addresses`);
       const deprecatedSigners = (
         await Promise.all(
-          deprecated.map(ref => {
-            return BlockchainFactory.fromUserSpecifiedAddress(
-              this,
-              ref,
-              entity,
-            );
-          }),
+          deprecated
+            .filter(entry => !entry.includes('ed25519:'))
+            .map(ref => {
+              return BlockchainFactory.fromUserSpecifiedAddress(
+                this,
+                ref,
+                entity,
+              );
+            }),
         )
       ).filter(addr => addr.role === 'signer');
       const deprecatedAddresses = deprecatedSigners.map(s => s.address);
