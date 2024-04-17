@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.23
+
+### Patch Changes
+
+- 11cfe9c: fix: aurora mainnet explorer endpoint
+
 ## 1.0.22
 
 ### Patch Changes
