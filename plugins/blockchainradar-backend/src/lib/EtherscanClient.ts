@@ -66,7 +66,7 @@ export class EtherscanClient {
     'testnet-cronos': 'api-testnet.cronoscan.com',
     bttc: 'api.bttcscan.com',
     'donau-bttc': 'api-testnet.bttcscan.com',
-    aurora: 'explorer.mainnet.aurora.dev',
+    aurora: 'old.explorer.aurora.dev',
     'testnet-aurora': 'explorer.old.testnet.aurora.dev',
     celo: 'api.celoscan.xyz',
     'alfajores-celo': 'api-alfajores.celoscan.xyz',
