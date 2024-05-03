@@ -82,6 +82,7 @@ export class NearAdapter extends BlockchainAdapter {
   isValidAddress(address: string): boolean {
     return (
       !!address.match(/\.near$/) ||
+      !!address.match(/\.aurora/) ||
       !!address.match(/\.testnet$/) ||
       !!address.match(/^[0-9a-fA-F]{64}$/) ||
       address === 'aurora'
