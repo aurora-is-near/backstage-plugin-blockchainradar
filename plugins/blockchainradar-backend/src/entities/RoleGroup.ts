@@ -16,7 +16,7 @@ function base58EncodeSha256(str: string): string {
 
 const ROLE = 'role-group';
 const ACCESS_CONTROL_SOURCE =
-  'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol';
+  'url:https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol';
 
 export class RoleGroup extends BlockchainAddress {
   roleId: string;
