@@ -1,4 +1,8 @@
-import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
+import {
+  Entity,
+  EntityMeta,
+  stringifyEntityRef,
+} from '@backstage/catalog-model';
 import * as crypto from 'crypto';
 import * as bs58 from 'bs58';
 
@@ -11,6 +15,8 @@ function base58EncodeSha256(str: string): string {
 }
 
 const ROLE = 'role-group';
+const ACCESS_CONTROL_SOURCE =
+  'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/AccessControl.sol';
 
 export class RoleGroup extends BlockchainAddress {
   roleId: string;
@@ -73,13 +79,18 @@ export class RoleGroup extends BlockchainAddress {
     return `${super.entityTitle()} ${this.roleName}`;
   }
 
-  entityMetadata() {
+  entityMetadata(): EntityMeta {
     const tags = ['role-group', this.network];
     if (this.stub) tags.push('stub');
+    const meta = super.entityMetadata();
     return {
-      ...super.entityMetadata(),
+      ...meta,
       description: `${this.address} (${this.role})`,
       tags,
+      annotations: {
+        ...meta.annotations,
+        'backstage.io/source-location': ACCESS_CONTROL_SOURCE,
+      },
     };
   }
 
