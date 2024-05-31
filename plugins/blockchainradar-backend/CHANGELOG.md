@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.25
+
+### Patch Changes
+
+- 1266555: feat: use static source location for RoleGroup entities
+
 ## 1.0.24
 
 ### Patch Changes
