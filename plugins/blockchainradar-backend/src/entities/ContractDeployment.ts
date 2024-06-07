@@ -42,7 +42,10 @@ export class ContractDeployment extends BlockchainAddress {
 
     parts.push(this.humanFriendlyAddress());
 
-    if (!this.adapter.isHumanReadable) {
+    // TODO: abstract conditional into BlockchainAddress
+    // NOTE: `member` role check is done to avoid undeterministic titles from uncertain parent
+    // This is caused by addresses that are members of multiple rbac role groups
+    if (!this.adapter.isHumanReadable && this.role !== 'member') {
       parts.push(this.parent.metadata.name);
     }
 
