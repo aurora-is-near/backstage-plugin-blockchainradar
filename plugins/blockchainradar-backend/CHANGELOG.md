@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.26
+
+### Patch Changes
+
+- 21b964b: fix: ensure rbac member entity titles are more deterministic
+
 ## 1.0.25
 
 ### Patch Changes
