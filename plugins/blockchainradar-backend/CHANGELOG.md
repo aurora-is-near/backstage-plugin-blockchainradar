@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.27
+
+### Patch Changes
+
+- 2186945: feat: add rbac endpoint config support
+
 ## 1.0.26
 
 ### Patch Changes
