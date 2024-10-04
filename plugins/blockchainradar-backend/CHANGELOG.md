@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.28
+
+### Patch Changes
+
+- 57a1544: fix: correct rbac endpoint
+
 ## 1.0.27
 
 ### Patch Changes
