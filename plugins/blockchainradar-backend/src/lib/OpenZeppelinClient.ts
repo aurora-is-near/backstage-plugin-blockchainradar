@@ -63,7 +63,9 @@ export class OpenZeppelinClient {
   }
 
   getEndpoint(config: Config, network: string, networkType: string) {
-    const configuredEndpoint = config.getString(`rbac.${networkType}`);
+    const configuredEndpoint = config.getString(
+      `rbac.${network}-${networkType}`,
+    );
     switch (network) {
       case 'ethereum':
         return networkType === 'goerli' ? GOERLI_ENDPOINT : configuredEndpoint;
