@@ -26,5 +26,9 @@ export interface Config {
         apiKey: string;
       };
     };
+    rbac: {
+      'ethereum-mainnet': string;
+      'aurora-mainnet': string;
+    };
   };
 }

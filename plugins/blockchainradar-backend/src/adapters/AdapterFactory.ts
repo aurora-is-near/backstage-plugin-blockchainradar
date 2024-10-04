@@ -37,9 +37,19 @@ export class AdapterFactory {
     networkType: string,
   ): RoleGroupAdapter {
     if (network === 'near') {
-      return new NearPluginsAdapter(network, networkType, processor.logger);
+      return new NearPluginsAdapter(
+        processor.config,
+        network,
+        networkType,
+        processor.logger,
+      );
     }
-    return new OpenZeppelinAdapter(network, networkType, processor.logger);
+    return new OpenZeppelinAdapter(
+      processor.config,
+      network,
+      networkType,
+      processor.logger,
+    );
   }
 
   static policyAdapter(

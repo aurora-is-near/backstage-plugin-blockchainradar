@@ -11,6 +11,7 @@ export class OpenZeppelinAdapter extends RoleGroupAdapter {
     stateSpec: ContractStateSpec,
   ): Promise<RbacSpec | undefined> {
     const client = new OpenZeppelinClient(
+      this.config,
       this.network,
       this.networkType,
       this.logger,

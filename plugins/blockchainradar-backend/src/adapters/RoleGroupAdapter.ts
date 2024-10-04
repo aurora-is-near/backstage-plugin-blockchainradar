@@ -3,11 +3,13 @@ import {
   RbacSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { getRootLogger } from '@backstage/backend-common';
+import { Config } from '@backstage/config';
 
 export abstract class RoleGroupAdapter {
   public logger;
 
   constructor(
+    public config: Config,
     public network: string,
     public networkType: string,
     logger = getRootLogger(),
