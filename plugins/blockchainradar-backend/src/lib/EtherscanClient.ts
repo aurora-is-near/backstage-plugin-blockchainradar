@@ -400,8 +400,11 @@ function toUnifiedSourceResponse(
     libraries: res.external_libraries
       .map(lib => `${lib.name}-${lib.address_hash}`)
       .join(';'),
-    proxy: res.implementation_address !== null,
-    implementation: res.implementation_address ?? undefined,
+    proxy: res.implementations !== null && res.implementations.length > 0,
+    implementation:
+      res.implementations !== null && res.implementations.length > 0
+        ? res.implementations[0].address
+        : undefined,
   };
 }
 
@@ -469,6 +472,7 @@ interface BlockscoutV2SmartContractResponse {
   evm_version: string;
   external_libraries: { name: string; address_hash: string }[];
   minimal_proxy_address_hash: string | null; // todo: investigate why this isn't populated
+  implementations: { address: string; name: string }[];
 }
 
 interface BlockscoutV2AddressResponse {
