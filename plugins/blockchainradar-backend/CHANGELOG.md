@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.29
+
+### Patch Changes
+
+- bbbba03: fix: aurora contract state digestion
+
 ## 1.0.28
 
 ### Patch Changes
