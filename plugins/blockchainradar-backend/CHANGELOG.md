@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.30
+
+### Patch Changes
+
+- fff3d90: fix: source dao version from chain instead of API
+
 ## 1.0.29
 
 ### Patch Changes
