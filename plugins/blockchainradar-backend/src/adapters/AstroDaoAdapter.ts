@@ -3,11 +3,11 @@ import {
   MultisigSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { PolicyAdapter } from './PolicyAdapter';
-import { AstroDaoClient } from '../lib/AstroDaoClient';
+// import { AstroDaoClient } from '../lib/AstroDaoClient';
 
 export class AstroDaoAdapter extends PolicyAdapter {
   public async fetchMultisigSpec(
-    address: string,
+    _address: string,
     stateSpec: ContractStateSpec | undefined,
   ): Promise<MultisigSpec | undefined> {
     if (stateSpec && stateSpec.methods.get_policy) {
@@ -21,7 +21,6 @@ export class AstroDaoAdapter extends PolicyAdapter {
           ? councilRole.kind.Group.length
           : 0;
       if (this.isValidCouncilRole(councilRole) && owners) {
-        const client = new AstroDaoClient(this.logger);
         return {
           policy: {
             owners,
@@ -30,7 +29,7 @@ export class AstroDaoAdapter extends PolicyAdapter {
               councilRole.vote_policy.config || nearPolicy.default_vote_policy,
             ),
           },
-          version: await client.safeVersion(address),
+          version: unescape(stateSpec.methods.version),
           fetchDate: new Date().getTime(),
         };
       }
@@ -108,3 +107,7 @@ type AstroDaoVotePolicy = {
   quorum: string;
   threshold: number[];
 };
+
+function unescape(value: string) {
+  return value.replace(/^\\?"|\\?"$/g, '');
+}
