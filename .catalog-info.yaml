@@ -1,0 +1,15 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-plugin-blockchainradar
+  description: Backstage plugin to solve asset management for EVM chains and Near.
+  tags:
+    - library
+  annotations:
+    aurora.dev/security-tier: '3'
+
+spec:
+  type: library
+  owner: security
+  lifecycle: production
+  system: backstage
