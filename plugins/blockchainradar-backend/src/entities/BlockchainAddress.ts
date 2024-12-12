@@ -4,15 +4,9 @@ import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 
 import { BlockchainHandler } from './BlockchainHandler';
 
-import * as crypto from 'crypto';
-import * as bs58 from 'bs58';
 import { AdapterFactory } from '../adapters/AdapterFactory';
 import { SILO_NAMES_BY_CHAIN_ID, isSiloChainId } from '../lib/networks';
-
-function base58EncodeSha256(str: string): string {
-  const hash = crypto.createHash('sha256').update(str).digest();
-  return bs58.encode(hash);
-}
+import { base58EncodeSha256 } from '../lib/utils';
 
 const TESTNET_IDS = ['testnet', 'goerli'];
 const SIGNER_KINDS = ['Group', 'User'];
