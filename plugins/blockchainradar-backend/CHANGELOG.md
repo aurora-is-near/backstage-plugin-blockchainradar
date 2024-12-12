@@ -1,5 +1,12 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.31
+
+### Patch Changes
+
+- 98045d7: feat: add turbo support
+- 9431b35: feat: add longer keyscheme support
+
 ## 1.0.30
 
 ### Patch Changes
