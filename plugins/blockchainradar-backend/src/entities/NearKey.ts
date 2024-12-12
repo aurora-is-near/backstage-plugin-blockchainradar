@@ -1,6 +1,7 @@
 import { BlockchainHandler } from './BlockchainHandler';
 import { Entity } from '@backstage/catalog-model';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
+import { base58EncodeSha256 } from '../lib/utils';
 
 export class NearKey extends BlockchainHandler {
   publicKey: string;
@@ -19,6 +20,10 @@ export class NearKey extends BlockchainHandler {
   }
 
   entityName() {
+    if (this.publicKey.length > 63) {
+      const [scheme] = this.publicKey.split(':');
+      return `${scheme}-${base58EncodeSha256(this.publicKey)}`;
+    }
     return this.publicKey.replace(':', '-');
   }
 
@@ -50,7 +55,10 @@ export class NearKey extends BlockchainHandler {
       apiVersion: 'backstage.io/v1alpha1',
       kind: 'Resource',
       metadata: this.entityMetadata(),
-      spec: this.entitySpec(),
+      spec: {
+        ...this.entitySpec(),
+        type: 'access-key',
+      },
     };
   }
 }
