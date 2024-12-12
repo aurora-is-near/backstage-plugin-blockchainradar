@@ -1,5 +1,6 @@
 export const SILO_NAMES_BY_CHAIN_ID = {
   '1313161560': 'powergold',
+  '1313161567': 'turbo',
 };
 
 type SiloChainId = keyof typeof SILO_NAMES_BY_CHAIN_ID;

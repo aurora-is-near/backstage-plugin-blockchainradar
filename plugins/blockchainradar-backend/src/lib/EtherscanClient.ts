@@ -71,6 +71,7 @@ export class EtherscanClient {
     celo: 'api.celoscan.xyz',
     'alfajores-celo': 'api-alfajores.celoscan.xyz',
     clover: 'api.clvscan.com',
+    // TODO: handle using hex convention
     ...Object.values(SILO_NAMES_BY_CHAIN_ID).reduce(
       (acc, siloName) => ({
         ...acc,
