@@ -4,12 +4,10 @@ import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
 import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
 
-const GOERLI_ENDPOINT =
-  'https://api.thegraph.com/subgraphs/name/aurora-is-near/ethereum-goerli-oz';
-
 export class OpenZeppelinClient {
   private logger;
   private client;
+  private endpoint: string;
 
   constructor(
     config: Config,
@@ -18,13 +16,18 @@ export class OpenZeppelinClient {
     logger = getRootLogger(),
   ) {
     this.logger = logger.child({ class: this.constructor.name, network });
+    this.endpoint = this.getEndpoint(config, network, networkType);
     this.client = new ApolloClient({
-      uri: this.getEndpoint(config, network, networkType),
+      uri: this.endpoint,
       cache: new InMemoryCache(),
     });
   }
 
   public async getContractAccessControl(address: string) {
+    if (!this.endpoint) {
+      this.logger.warn('no configured RBAC endpoint');
+      return undefined;
+    }
     this.logger.debug('Performing GetContractAccessControl query');
     const { data } = await this.client.query<ContractAccessControlResponse>({
       query: GET_CONTRACT_ACCESSCONTROL,
@@ -45,6 +48,10 @@ export class OpenZeppelinClient {
   }
 
   public async getAccountRoles(address: string) {
+    if (!this.endpoint) {
+      this.logger.warn('no configured RBAC endpoint');
+      return undefined;
+    }
     this.logger.debug('Performing GetAccountAccessControl query');
     const { data } = await this.client.query<AccountRolesResponse>({
       query: GET_ACCOUNT_ROLES,
@@ -63,14 +70,14 @@ export class OpenZeppelinClient {
   }
 
   getEndpoint(config: Config, network: string, networkType: string) {
-    const configuredEndpoint = config.getString(
-      `rbac.${network}-${networkType}`,
-    );
+    const networkName = `${network}-${networkType}`;
     switch (network) {
-      case 'ethereum':
-        return networkType === 'goerli' ? GOERLI_ENDPOINT : configuredEndpoint;
       case 'aurora':
-        return configuredEndpoint;
+      case 'ethereum': {
+        return networkType === 'mainnet'
+          ? config.getString(`rbac.${networkName}`)
+          : '';
+      }
       default:
         return '';
     }
