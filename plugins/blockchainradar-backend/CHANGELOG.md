@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.32
+
+### Patch Changes
+
+- 3587f5f: fix: aurora vc rbac
+
 ## 1.0.31
 
 ### Patch Changes
