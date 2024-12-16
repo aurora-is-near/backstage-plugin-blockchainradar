@@ -1,0 +1,14 @@
+name: Security Analysis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  analysis:
+    name: Shared
+    uses: aurora-is-near/.github/.github/workflows/security_analysis.yml@master
+    secrets: inherit
