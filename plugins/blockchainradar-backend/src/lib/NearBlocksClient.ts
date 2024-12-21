@@ -4,18 +4,21 @@ import { Logger } from 'winston';
 import { getRootLogger } from '@backstage/backend-common';
 
 const defaultTxnsParams = { page: '1', per_page: '10', order: 'desc' };
-const NEAR_BLOCKS_API_KEY = process.env.NEAR_BLOCKS_API_KEY;
 
 export class NearBlocksClient {
   logger: Logger;
   axios: AxiosInstance;
 
-  constructor(networkType: string, logger = getRootLogger()) {
-    this.logger = logger.child({ class: this.constructor.name, networkType });
+  constructor(
+    explorerApiUrl: string,
+    apiKey: string | undefined,
+    logger = getRootLogger(),
+  ) {
+    this.logger = logger.child({ class: this.constructor.name });
     this.axios = axios.create({
-      baseURL: this.getBaseUrl(networkType),
+      baseURL: explorerApiUrl,
       headers: {
-        Authorization: `Bearer ${NEAR_BLOCKS_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
       },
     });
   }
@@ -106,12 +109,6 @@ export class NearBlocksClient {
     }
     const [deployTx] = txns;
     return deployTx;
-  }
-
-  private getBaseUrl(networkType: string) {
-    return `https://api${
-      networkType === 'testnet' ? '-testnet' : ''
-    }.nearblocks.io/v1`;
   }
 }
 

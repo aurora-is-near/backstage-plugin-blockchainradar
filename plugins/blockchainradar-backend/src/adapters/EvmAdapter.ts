@@ -6,19 +6,25 @@ import {
   ContractSourceSpec,
   ContractStateSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import {
-  BackstageEtherscanProvider,
-  EtherscanClient,
-} from '../lib/EtherscanClient';
+  EtherscanProvider,
+  StaticJsonRpcProvider,
+} from '@ethersproject/providers';
+import { EtherscanClient } from '../lib/EtherscanClient';
 import {
+  NetworkConfig,
   SILO_NAMES_BY_CHAIN_ID,
+  defaultNetworks,
   isSiloChainId,
   isSiloName,
 } from '../lib/networks';
 import { BlockchainAdapter } from './BlockchainAdapter';
+import { capitalize } from '../lib/utils';
 
 export class EvmAdapter extends BlockchainAdapter {
+  public networkName: string;
+  public networkConfig: NetworkConfig;
+
   constructor(
     config: Config,
     network: string,
@@ -30,6 +36,30 @@ export class EvmAdapter extends BlockchainAdapter {
     this.networkType = isSiloChainId(networkType)
       ? SILO_NAMES_BY_CHAIN_ID[networkType]
       : this.networkType;
+    this.networkName = `${this.network}${capitalize(this.networkType)}`;
+    const defaultConfig = defaultNetworks[this.networkName];
+    const configured: NetworkConfig | undefined = config.getOptional(
+      this.networkName,
+    );
+    this.networkConfig = {
+      chainId:
+        configured?.chainId ||
+        defaultConfig.chainId ||
+        defaultNetworks.ethereumMainnet.chainId,
+      rpcUrl:
+        configured?.rpcUrl ||
+        defaultConfig.rpcUrl ||
+        defaultNetworks.ethereumMainnet.rpcUrl,
+      explorerApiUrl:
+        configured?.explorerApiUrl ||
+        defaultConfig.explorerApiUrl ||
+        defaultNetworks.ethereumMainnet.explorerApiUrl,
+      explorerApiKey: configured?.explorerApiKey,
+      explorerUrl:
+        configured?.explorerUrl ||
+        defaultConfig.explorerUrl ||
+        defaultNetworks.ethereumMainnet.explorerUrl,
+    };
   }
 
   isValidAddress(address: string): boolean {
@@ -38,18 +68,6 @@ export class EvmAdapter extends BlockchainAdapter {
 
   normalizeAddress(address: string) {
     return Web3.utils.toChecksumAddress(address);
-  }
-
-  etherscanCreds() {
-    const networkName = `${this.network}-${this.networkType}`;
-    const isSilo = isSiloName(this.networkType);
-    const isAurora = this.network === 'aurora';
-    const network = this.getNetwork();
-    const apiKey =
-      isSilo || isAurora
-        ? undefined
-        : this.config.getString(`etherscan.${networkName}.apiKey`);
-    return { network, apiKey };
   }
 
   getNetwork() {
@@ -62,31 +80,30 @@ export class EvmAdapter extends BlockchainAdapter {
     if (this.network === 'aurora' && this.networkType === 'testnet') {
       return 'testnet-aurora';
     }
-    const networkName = `${this.network}-${this.networkType}`;
-    return this.config.getString(`etherscan.${networkName}.network`);
+    return this.networkType;
   }
 
   // TODO add caching?
   async isContract(address: string): Promise<boolean> {
-    if (this.network === 'aurora') {
-      const auroraProvider = new StaticJsonRpcProvider(
-        `https://${this.networkType}.aurora.dev/api`,
-      );
-      const code = await auroraProvider.getCode(address);
-      return code !== '0x';
+    const provider = new StaticJsonRpcProvider(this.networkConfig.rpcUrl);
+
+    // NOTE: for deprecated networks this may fail,
+    // gracefully handle so that processing component
+    // is not blocked by contract-detection
+    try {
+      const bytecode = await provider.getCode(address);
+      return bytecode !== '0x';
+    } catch {
+      return false;
     }
-    const creds = this.etherscanCreds();
-    const provider = new BackstageEtherscanProvider(
-      creds.network,
-      creds.apiKey,
-    );
-    const bytecode = await provider.getCode(address);
-    return bytecode !== '0x';
   }
 
   public async fetchSourceSpec(address: string) {
-    const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      this.getNetwork(),
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
+    );
     const result = await fetcher.fetchSourcesForAddress(address);
     await this.delayRequest();
     const firstTx = await this.fetchCreationTransaction(address);
@@ -114,13 +131,13 @@ export class EvmAdapter extends BlockchainAdapter {
       return undefined;
     }
 
-    const creds = this.etherscanCreds();
     const provider =
       this.network === 'aurora'
-        ? new StaticJsonRpcProvider(
-            `https://${this.networkType}.aurora.dev/api`,
-          )
-        : new BackstageEtherscanProvider(creds.network, creds.apiKey);
+        ? new StaticJsonRpcProvider(this.networkConfig.rpcUrl)
+        : new EtherscanProvider(
+            this.networkConfig.chainId,
+            this.networkConfig.explorerApiKey,
+          );
 
     const contract = new ethers.Contract(address, sourceSpec.abi).connect(
       provider,
@@ -180,8 +197,11 @@ export class EvmAdapter extends BlockchainAdapter {
   }
 
   public async fetchLastTransaction(address: string) {
-    const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      this.getNetwork(),
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
+    );
 
     try {
       const { result } = await fetcher.fetchTransactions(address);
@@ -193,8 +213,11 @@ export class EvmAdapter extends BlockchainAdapter {
   }
 
   public async fetchFirstTransaction(address: string) {
-    const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      this.getNetwork(),
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
+    );
 
     try {
       const { result } = await fetcher.fetchTransactions(address, {
@@ -210,8 +233,11 @@ export class EvmAdapter extends BlockchainAdapter {
   }
 
   public async fetchCreationTransaction(address: string) {
-    const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      this.getNetwork(),
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
+    );
     try {
       const response = await fetcher.fetchCreationTransaction(address);
       return response;

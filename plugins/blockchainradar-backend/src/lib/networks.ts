@@ -84,3 +84,59 @@ export const NETWORKS_BY_NAME = Object.fromEntries<NetworkInfo>(
     ], // id is a string since it's a key so must use Number()
   ),
 );
+
+export interface NetworkConfig {
+  chainId: string;
+  rpcUrl: string;
+  explorerApiUrl: string;
+  explorerApiKey?: string;
+  explorerUrl?: string;
+}
+
+export const defaultNetworks: Record<string, NetworkConfig> = {
+  ethereumMainnet: {
+    chainId: '1',
+    rpcUrl: 'https://ethereum-rpc.publicnode.com',
+    explorerApiUrl: 'https://api.etherscan.io/api',
+    explorerUrl: 'https://etherscan.io',
+  },
+  /**
+   * @deprecated
+   */
+  ethereumGoerli: {
+    chainId: '5',
+    rpcUrl: 'https://ethereum-goerli-rpc.publicnode.com',
+    explorerApiUrl: 'https://api-goerli.etherscan.io/api',
+    explorerUrl: 'https://goerli.etherscan.io',
+  },
+  ethereumSepolia: {
+    chainId: '11155111',
+    rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+    explorerApiUrl: 'https://api-sepolia.etherscan.io/api',
+    explorerUrl: 'https://sepolia.etherscan.io',
+  },
+  auroraMainnet: {
+    chainId: '1313161554',
+    rpcUrl: 'https://mainnet.aurora.dev/api',
+    explorerApiUrl: 'https://explorer.mainnet.aurora.dev/api',
+    explorerUrl: 'https://explorer.mainnet.aurora.dev',
+  },
+  auroraTestnet: {
+    chainId: '1313161555',
+    rpcUrl: 'https://testnet.aurora.dev/api',
+    explorerApiUrl: 'https://explorer.testnet.aurora.dev/api',
+    explorerUrl: 'https://explorer.testnet.aurora.dev',
+  },
+  nearMainnet: {
+    chainId: 'mainnet',
+    rpcUrl: 'https://rpc.mainnet.near.org',
+    explorerApiUrl: 'https://api.nearblocks.io/v1',
+    explorerUrl: 'https://nearblocks.io',
+  },
+  nearTestnet: {
+    chainId: 'testnet',
+    rpcUrl: 'https://rpc.testnet.near.org',
+    explorerApiUrl: 'https://api-testnet.nearblocks.io/v1',
+    explorerUrl: 'https://testnet.nearblocks.io',
+  },
+};

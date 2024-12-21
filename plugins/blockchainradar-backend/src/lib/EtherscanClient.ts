@@ -81,11 +81,15 @@ export class EtherscanClient {
     ),
   };
 
-  constructor(networkName: string, apiKey: string = '') {
-    if (!(networkName in EtherscanClient.apiDomainsByNetworkName)) {
-      throw new Error(`Invalid network ${networkName}`);
-    }
+  explorerApiUrl: string;
+
+  constructor(
+    networkName: string,
+    explorerApiUrl: string,
+    apiKey: string = '',
+  ) {
     this.networkName = networkName;
+    this.explorerApiUrl = explorerApiUrl;
     this.logger = this.logger.child({ network: networkName });
     this.apiKey = apiKey;
     const baseDelay = this.apiKey ? 200 : 3000; // etherscan permits 5 requests/sec w/a key, 1/3sec w/o
@@ -227,8 +231,7 @@ export class EtherscanClient {
   }
 
   private determineUrl() {
-    const domain = EtherscanClient.apiDomainsByNetworkName[this.networkName];
-    return `https://${domain}/api`;
+    return this.explorerApiUrl;
   }
 
   private async fetchEtherscanSource(address: string) {

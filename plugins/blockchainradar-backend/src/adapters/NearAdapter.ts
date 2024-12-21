@@ -9,6 +9,8 @@ import { CodeResult } from 'near-api-js/lib/providers/provider';
 import { NearBlocksClient } from '../lib/NearBlocksClient';
 import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
+import { capitalize } from '../lib/utils';
+import { NetworkConfig, defaultNetworks } from '../lib/networks';
 
 type ViewCodeNear = {
   block_hash: string;
@@ -16,6 +18,8 @@ type ViewCodeNear = {
   code_base64: string;
 };
 export class NearAdapter extends BlockchainAdapter {
+  networkName: string;
+  networkConfig: NetworkConfig;
   constructor(
     config: Config,
     network: string,
@@ -23,12 +27,37 @@ export class NearAdapter extends BlockchainAdapter {
     logger = getRootLogger(),
   ) {
     super(config, network, networkType, logger);
+
+    this.networkName = `${this.network}${capitalize(this.networkType)}`;
+    const defaultConfig = defaultNetworks[this.networkName];
+    const configured: NetworkConfig | undefined = config.getOptional(
+      this.networkName,
+    );
+    this.networkConfig = {
+      chainId:
+        configured?.chainId ||
+        defaultConfig.chainId ||
+        defaultNetworks.nearMainnet.chainId,
+      rpcUrl:
+        configured?.rpcUrl ||
+        defaultConfig.rpcUrl ||
+        defaultNetworks.nearMainnet.rpcUrl,
+      explorerApiUrl:
+        configured?.explorerApiUrl ||
+        defaultConfig.explorerApiUrl ||
+        defaultNetworks.nearMainnet.explorerApiUrl,
+      explorerApiKey: configured?.explorerApiKey,
+      explorerUrl:
+        configured?.explorerUrl ||
+        defaultConfig.explorerUrl ||
+        defaultNetworks.nearMainnet.explorerUrl,
+    };
     this.nearConfig = {
       networkId: networkType,
       keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
-      nodeUrl: `https://rpc.${networkType}.near.org`,
-      walletUrl: `https://wallet.${networkType}.near.org`,
-      helperUrl: `https://helper.${networkType}.near.org`,
+      nodeUrl: this.networkConfig.rpcUrl,
+      walletUrl: `https://wallet.${this.networkConfig.chainId}.near.org`,
+      helperUrl: `https://helper.${this.networkConfig.chainId}.near.org`,
       headers: {},
       // explorerUrl: "https://explorer.mainnet.near.org",
     };
@@ -171,7 +200,8 @@ export class NearAdapter extends BlockchainAdapter {
 
   public async fetchFirstTransaction(address: string) {
     const nearBlocksClient = new NearBlocksClient(
-      this.networkType,
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
       this.logger,
     );
     return nearBlocksClient.getFirstTransaction(address);
@@ -179,7 +209,8 @@ export class NearAdapter extends BlockchainAdapter {
 
   public async fetchLastTransaction(address: string) {
     const nearBlocksClient = new NearBlocksClient(
-      this.networkType,
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
       this.logger,
     );
     return nearBlocksClient.getLastTransaction(address);
@@ -187,7 +218,8 @@ export class NearAdapter extends BlockchainAdapter {
 
   public async fetchCreationTransaction(address: string) {
     const nearBlocksClient = new NearBlocksClient(
-      this.networkType,
+      this.networkConfig.explorerApiUrl,
+      this.networkConfig.explorerApiKey,
       this.logger,
     );
     return nearBlocksClient.getCreationTransaction(address);

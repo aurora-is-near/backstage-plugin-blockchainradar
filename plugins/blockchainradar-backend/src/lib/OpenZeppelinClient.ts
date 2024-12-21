@@ -3,6 +3,7 @@ import { SubgraphEntity } from '@aurora-is-near/backstage-plugin-blockchainradar
 import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
 import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
+import { capitalize } from './utils';
 
 export class OpenZeppelinClient {
   private logger;
@@ -70,12 +71,13 @@ export class OpenZeppelinClient {
   }
 
   getEndpoint(config: Config, network: string, networkType: string) {
-    const networkName = `${network}-${networkType}`;
+    // TODO: make rbac config-based
     switch (network) {
       case 'aurora':
       case 'ethereum': {
+        const networkName = `${network}${capitalize(networkType)}`;
         return networkType === 'mainnet'
-          ? config.getString(`rbac.${networkName}`)
+          ? config.getString(`${networkName}.subgraphUrl`)
           : '';
       }
       default:
