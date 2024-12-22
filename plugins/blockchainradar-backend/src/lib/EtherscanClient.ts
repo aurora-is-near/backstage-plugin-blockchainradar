@@ -1,7 +1,6 @@
 import util from 'util';
 import { AbiItem } from 'web3-utils';
 import { EtherscanTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { getRootLogger } from '@backstage/backend-common';
 import axios from 'axios';
 import retry from 'async-retry';
 import { ethers } from 'ethers';
@@ -22,13 +21,13 @@ import {
   UnifiedSourceResponse,
   UnifiedTransactionResponse,
 } from './explorer';
+import { LoggerService } from '@backstage/backend-plugin-api/index';
 
 const makeTimer = util.promisify(setTimeout);
 
 // this looks awkward but the TS docs actually suggest this :P
 export class EtherscanClient {
-  static logger = getRootLogger().child({ class: this.constructor.name });
-  logger = EtherscanClient.logger;
+  public logger;
 
   private readonly networkName: string;
 
@@ -81,12 +80,12 @@ export class EtherscanClient {
     ),
   };
 
-  constructor(networkName: string, apiKey: string = '') {
+  constructor(networkName: string, apiKey: string, logger: LoggerService) {
     if (!(networkName in EtherscanClient.apiDomainsByNetworkName)) {
       throw new Error(`Invalid network ${networkName}`);
     }
     this.networkName = networkName;
-    this.logger = this.logger.child({ network: networkName });
+    this.logger = logger.child({ network: networkName });
     this.apiKey = apiKey;
     const baseDelay = this.apiKey ? 200 : 3000; // etherscan permits 5 requests/sec w/a key, 1/3sec w/o
     const safetyFactor = 1; // no safety factor atm

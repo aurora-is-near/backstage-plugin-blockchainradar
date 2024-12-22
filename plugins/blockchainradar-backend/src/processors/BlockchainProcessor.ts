@@ -4,18 +4,18 @@ import {
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
+import { LoggerService } from '@backstage/backend-plugin-api';
 import { Entity } from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { CatalogClient } from '@backstage/catalog-client';
 import { Config } from '@backstage/config';
 import { JsonValue } from '@backstage/types';
 import { CacheableSpec } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { Logger } from 'winston';
 import { Mutex } from 'async-mutex';
 
 import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { TrackedRun } from '../lib/TrackedRun';
-import { PluginEnvironment } from '../lib/types';
+import { BlockchainradarEnvironment } from '../lib/types';
 
 export abstract class BlockchainProcessor implements CatalogProcessor {
   static mutexes: Record<string, Mutex> = {};
@@ -24,10 +24,10 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
 
   catalogClient: CatalogClient;
   config: Config;
-  logger: Logger;
+  logger: LoggerService;
   name: string;
 
-  constructor(private readonly env: PluginEnvironment) {
+  constructor(private readonly env: BlockchainradarEnvironment) {
     this.catalogClient = new CatalogClient({
       discoveryApi: this.env.discovery,
     });
@@ -108,7 +108,7 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
   protected async runExclusive(
     what: string,
     addr: string,
-    callback: (l: Logger) => Promise<void>,
+    callback: (l: LoggerService) => Promise<void>,
   ) {
     const mutexName = this.name;
 

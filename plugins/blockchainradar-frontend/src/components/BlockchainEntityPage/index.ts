@@ -1,1 +1,0 @@
-export { BlockchainEntityPage } from './BlockchainEntityPage';

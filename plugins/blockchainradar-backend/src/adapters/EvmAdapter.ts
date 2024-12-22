@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
 import { ethers } from 'ethers';
 import {
@@ -17,13 +16,14 @@ import {
   isSiloName,
 } from '../lib/networks';
 import { BlockchainAdapter } from './BlockchainAdapter';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 export class EvmAdapter extends BlockchainAdapter {
   constructor(
     config: Config,
     network: string,
     networkType: string,
-    logger = getRootLogger(),
+    logger: LoggerService,
   ) {
     super(config, network, networkType, logger);
     // todo: use config registry to find network name
@@ -47,7 +47,7 @@ export class EvmAdapter extends BlockchainAdapter {
     const network = this.getNetwork();
     const apiKey =
       isSilo || isAurora
-        ? undefined
+        ? ''
         : this.config.getString(`etherscan.${networkName}.apiKey`);
     return { network, apiKey };
   }
@@ -86,7 +86,11 @@ export class EvmAdapter extends BlockchainAdapter {
 
   public async fetchSourceSpec(address: string) {
     const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      creds.network,
+      creds.apiKey,
+      this.logger,
+    );
     const result = await fetcher.fetchSourcesForAddress(address);
     await this.delayRequest();
     const firstTx = await this.fetchCreationTransaction(address);
@@ -181,7 +185,11 @@ export class EvmAdapter extends BlockchainAdapter {
 
   public async fetchLastTransaction(address: string) {
     const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      creds.network,
+      creds.apiKey,
+      this.logger,
+    );
 
     try {
       const { result } = await fetcher.fetchTransactions(address);
@@ -194,7 +202,11 @@ export class EvmAdapter extends BlockchainAdapter {
 
   public async fetchFirstTransaction(address: string) {
     const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      creds.network,
+      creds.apiKey,
+      this.logger,
+    );
 
     try {
       const { result } = await fetcher.fetchTransactions(address, {
@@ -211,7 +223,11 @@ export class EvmAdapter extends BlockchainAdapter {
 
   public async fetchCreationTransaction(address: string) {
     const creds = this.etherscanCreds();
-    const fetcher = new EtherscanClient(creds.network, creds.apiKey);
+    const fetcher = new EtherscanClient(
+      creds.network,
+      creds.apiKey,
+      this.logger,
+    );
     try {
       const response = await fetcher.fetchCreationTransaction(address);
       return response;

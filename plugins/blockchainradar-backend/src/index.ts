@@ -1,1 +1,2 @@
-export * from './plugin';
+export * from './processors';
+export { catalogModuleBlockchainradar as default } from './module';

@@ -1,4 +1,3 @@
-import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
 import {
   ContractSourceSpec,
@@ -6,14 +5,14 @@ import {
   EtherscanTx,
   NearTx,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { Logger } from 'winston';
 import { UnifiedTransactionResponse } from '../lib/explorer';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 export abstract class BlockchainAdapter {
   config: Config;
   network: string;
   networkType: string;
-  logger: Logger;
+  logger: LoggerService;
   requestDelaySeconds = 1;
   // is it possible to guess what that contract does
   // by reading its blockchain address?
@@ -23,7 +22,7 @@ export abstract class BlockchainAdapter {
     config: Config,
     network: string,
     networkType: string,
-    logger = getRootLogger(),
+    logger: LoggerService,
   ) {
     this.config = config;
     this.network = network;

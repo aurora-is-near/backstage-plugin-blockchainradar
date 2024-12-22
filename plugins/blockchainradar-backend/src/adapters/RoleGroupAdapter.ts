@@ -2,7 +2,7 @@ import {
   ContractStateSpec,
   RbacSpec,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { getRootLogger } from '@backstage/backend-common';
+import { LoggerService } from '@backstage/backend-plugin-api';
 import { Config } from '@backstage/config';
 
 export abstract class RoleGroupAdapter {
@@ -12,7 +12,7 @@ export abstract class RoleGroupAdapter {
     public config: Config,
     public network: string,
     public networkType: string,
-    logger = getRootLogger(),
+    logger: LoggerService,
   ) {
     this.logger = logger.child({
       adapter: this.constructor.name,

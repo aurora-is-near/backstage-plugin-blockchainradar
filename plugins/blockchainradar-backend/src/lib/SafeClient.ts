@@ -1,13 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
-import { getRootLogger } from '@backstage/backend-common';
-import { Logger } from 'winston';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 export class SafeClient {
   network: string;
   axios: AxiosInstance;
-  logger: Logger;
+  public logger;
 
-  constructor(network: string, logger = getRootLogger()) {
+  constructor(network: string, logger: LoggerService) {
     this.network = network;
     this.axios = axios.create({
       baseURL: this.gnosisBaseUrl(),
@@ -23,7 +22,7 @@ export class SafeClient {
       return this.gnosisSafePolicy(address);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
       }
       this.logger.error('unexpected error: ', error);
       throw error;
@@ -35,7 +34,7 @@ export class SafeClient {
       return this.gnosisSafeOwners(address);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
         return [];
       }
       this.logger.error('unexpected error: ', error);

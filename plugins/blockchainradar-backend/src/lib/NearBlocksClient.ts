@@ -1,16 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 import { NearTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { Logger } from 'winston';
-import { getRootLogger } from '@backstage/backend-common';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 const defaultTxnsParams = { page: '1', per_page: '10', order: 'desc' };
 const NEAR_BLOCKS_API_KEY = process.env.NEAR_BLOCKS_API_KEY;
 
 export class NearBlocksClient {
-  logger: Logger;
+  public logger;
   axios: AxiosInstance;
 
-  constructor(networkType: string, logger = getRootLogger()) {
+  constructor(networkType: string, logger: LoggerService) {
     this.logger = logger.child({ class: this.constructor.name, networkType });
     this.axios = axios.create({
       baseURL: this.getBaseUrl(networkType),
@@ -32,7 +31,7 @@ export class NearBlocksClient {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
       }
       this.logger.error('unexpected error: ', error);
       return { txns: [] };
@@ -47,7 +46,7 @@ export class NearBlocksClient {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
       }
       this.logger.error('unexpected error: ', error);
       return { deployments: [] };
@@ -60,7 +59,7 @@ export class NearBlocksClient {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
       }
       this.logger.error('unexpected error: ', error);
       return { txns: [] };

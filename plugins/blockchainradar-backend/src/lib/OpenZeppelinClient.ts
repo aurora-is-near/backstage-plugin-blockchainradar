@@ -1,11 +1,11 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { SubgraphEntity } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { GET_ACCOUNT_ROLES, GET_CONTRACT_ACCESSCONTROL } from '../queries';
-import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 export class OpenZeppelinClient {
-  private logger;
+  public logger;
   private client;
   private endpoint: string;
 
@@ -13,7 +13,7 @@ export class OpenZeppelinClient {
     config: Config,
     network: string,
     networkType: string,
-    logger = getRootLogger(),
+    logger: LoggerService,
   ) {
     this.logger = logger.child({ class: this.constructor.name, network });
     this.endpoint = this.getEndpoint(config, network, networkType);

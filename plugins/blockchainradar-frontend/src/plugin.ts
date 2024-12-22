@@ -7,36 +7,36 @@ import {
 import { rootRouteRef } from './routes';
 
 export const blockchainPlugin = createPlugin({
-  id: 'blockchain',
+  id: 'blockchainradar',
   routes: {
     root: rootRouteRef,
   },
 });
 
-export const BlockchainIndexPage = blockchainPlugin.provide(
-  createRoutableExtension({
-    name: 'BlockchainIndexPage',
-    component: () => import('./components').then(m => m.BlockchainIndexPage),
-    mountPoint: rootRouteRef,
-  }),
-);
-
-export const BlockchainEntityPage = blockchainPlugin.provide(
-  createRoutableExtension({
-    name: 'BlockchainEntityPage',
-    component: () => import('./components').then(m => m.BlockchainEntityPage),
-    mountPoint: rootRouteRef,
-  }),
-);
-
-export const EntityBlockchainContent = blockchainPlugin.provide(
-  createComponentExtension({
-    name: 'EntityBlockchainContent',
-    component: {
-      lazy: () => import('./components').then(m => m.EntityBlockchainContent),
-    },
-  }),
-);
+// export const BlockchainIndexPage = blockchainPlugin.provide(
+//   createRoutableExtension({
+//     name: 'BlockchainIndexPage',
+//     component: () => import('./components').then(m => m.BlockchainIndexPage),
+//     mountPoint: rootRouteRef,
+//   }),
+// );
+//
+// export const BlockchainEntityPage = blockchainPlugin.provide(
+//   createRoutableExtension({
+//     name: 'BlockchainEntityPage',
+//     component: () => import('./components').then(m => m.BlockchainEntityPage),
+//     mountPoint: rootRouteRef,
+//   }),
+// );
+//
+// export const EntityBlockchainContent = blockchainPlugin.provide(
+//   createComponentExtension({
+//     name: 'EntityBlockchainContent',
+//     component: {
+//       lazy: () => import('./components').then(m => m.EntityBlockchainContent),
+//     },
+//   }),
+// );
 
 export const EntityBlockchainInsightsCard = blockchainPlugin.provide(
   createComponentExtension({

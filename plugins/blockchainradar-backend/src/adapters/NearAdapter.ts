@@ -7,8 +7,8 @@ import {
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { CodeResult } from 'near-api-js/lib/providers/provider';
 import { NearBlocksClient } from '../lib/NearBlocksClient';
-import { getRootLogger } from '@backstage/backend-common';
 import { Config } from '@backstage/config';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 type ViewCodeNear = {
   block_hash: string;
@@ -20,7 +20,7 @@ export class NearAdapter extends BlockchainAdapter {
     config: Config,
     network: string,
     networkType: string,
-    logger = getRootLogger(),
+    logger: LoggerService,
   ) {
     super(config, network, networkType, logger);
     this.nearConfig = {

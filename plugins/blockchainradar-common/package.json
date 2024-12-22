@@ -11,7 +11,7 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "backend-plugin-module"
+    "role": "common-library"
   },
   "repository": {
     "type": "git",
@@ -27,13 +27,7 @@
     "postpack": "backstage-cli package postpack"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.9",
-    "@backstage/core-app-api": "^1.9.0",
-    "@backstage/dev-utils": "^1.0.17",
-    "@backstage/test-utils": "^1.4.1",
-    "@testing-library/jest-dom": "^5.10.1",
-    "@types/jest": "^26.0.7",
-    "@types/node": "^16.11.26"
+    "@backstage/cli": "^0.29.4"
   },
   "files": [
     "dist"

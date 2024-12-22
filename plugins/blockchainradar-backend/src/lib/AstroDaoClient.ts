@@ -1,14 +1,13 @@
-import { getRootLogger } from '@backstage/backend-common';
 import axios, { AxiosInstance } from 'axios';
-import { Logger } from 'winston';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 const ASTRO_DAO_API_URL = 'https://api.app.astrodao.com/api/';
 
 export class AstroDaoClient {
   axios: AxiosInstance;
-  logger: Logger;
+  public logger;
 
-  constructor(logger = getRootLogger()) {
+  constructor(logger: LoggerService) {
     this.axios = axios.create({
       baseURL: ASTRO_DAO_API_URL,
       headers: {
@@ -24,7 +23,7 @@ export class AstroDaoClient {
       return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
         return [];
       }
       this.logger.error('unexpected error: ', error);
@@ -60,7 +59,7 @@ export class AstroDaoClient {
       };
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
       }
       this.logger.error('unexpected error: ', error);
       throw error;
@@ -74,7 +73,7 @@ export class AstroDaoClient {
       return daoVersion.version.join('.');
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn('error message: ', error);
       }
       this.logger.error('unexpected error: ', error);
       throw error;

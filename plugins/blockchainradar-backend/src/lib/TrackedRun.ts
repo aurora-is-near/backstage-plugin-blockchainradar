@@ -1,18 +1,18 @@
-import { Logger } from 'winston';
 import retry from 'async-retry';
+import { LoggerService } from '@backstage/backend-plugin-api';
 
 interface TrackedObject {
-  logger: Logger;
+  logger: LoggerService;
 }
 
 export class TrackedRun {
-  public trackedObject: any;
+  public trackedObject: TrackedObject;
   public action: string;
 
   public duration = 0;
   public success = true;
   public error: string = '';
-  public logger: Logger;
+  public logger: LoggerService;
   public tags: Record<string, string> = {};
 
   constructor(
@@ -36,7 +36,7 @@ export class TrackedRun {
     retries: number,
     action: string,
     callback: (
-      logger: Logger,
+      logger: LoggerService,
       callbackBail: (e: Error) => void,
     ) => Promise<void>,
   ): Promise<void> {
@@ -55,7 +55,7 @@ export class TrackedRun {
   public async executeWithRetry(
     retries: number,
     callback: (
-      logger: Logger,
+      logger: LoggerService,
       callbackBail: (e: Error) => void,
     ) => Promise<void>,
   ) {
@@ -64,36 +64,40 @@ export class TrackedRun {
     });
   }
 
-  public async execute(callback: (logger: Logger) => Promise<void>) {
+  public async execute(callback: (logger: LoggerService) => Promise<void>) {
     try {
       this.duration = await this.benchmark(this.action, callback);
     } catch (e) {
-      this.success = false;
-      this.duration = -1;
-      this.error = (e as Error).message;
-      this.logger.error(this.error);
-      this.logger.verbose((e as Error).stack);
+      if (e instanceof Error) {
+        this.success = false;
+        this.duration = -1;
+        this.error = e.message;
+        this.logger.error(this.error);
+        this.logger.debug('error', e);
+      }
       throw e;
     }
   }
 
   public async benchmark(
     action: string,
-    callback: (logger: Logger) => Promise<void>,
+    callback: (logger: LoggerService) => Promise<void>,
   ): Promise<number> {
     const startDate = new Date();
 
-    this.logger.verbose(`${action} start`);
+    this.logger.debug(`${action} start`);
 
     try {
       await callback(this.logger);
 
-      this.logger.verbose(`${action} end ${this.bm(startDate)}`);
+      this.logger.debug(`${action} end ${this.bm(startDate)}`);
     } catch (e) {
-      this.logger.warn(
-        `${action} error ${this.bm(startDate)}: ${(e as Error).message}`,
-      );
-      this.logger.debug((e as Error).stack);
+      if (e instanceof Error) {
+        this.logger.warn(
+          `${action} error ${this.bm(startDate)}: ${(e as Error).message}`,
+        );
+        this.logger.debug('error', e);
+      }
       throw e;
     }
     return this.durationCalc(startDate);
