@@ -1,6 +1,9 @@
 import React from 'react';
 import { createDevApp } from '@backstage/dev-utils';
-import { EntityProvider } from '@backstage/plugin-catalog-react';
+import {
+  DefaultFilters,
+  EntityProvider,
+} from '@backstage/plugin-catalog-react';
 import {
   CatalogEntityPage,
   CatalogIndexPage,
@@ -15,7 +18,11 @@ import MenuBookIcon from '@material-ui/icons/MenuBook';
 import MemoryIcon from '@material-ui/icons/Memory';
 
 import { blockchainPlugin } from '../src/plugin';
-import { EntityBlockchainContent } from '../src/components';
+import {
+  EntityBlockchainContent,
+  EntitySecurityTierPicker,
+} from '../src/components';
+import { EntityNetworkPicker } from '../src/components/EntityNetworkPicker';
 
 const mockContract = {
   apiVersion: 'backstage.io/v1alpha1',
@@ -156,8 +163,17 @@ createDevApp()
     icon: MenuBookIcon,
     title: 'Catalog',
     path: '/catalog',
-    element: <CatalogIndexPage />,
-    // children: <BlockchainIndexPage />,
+    element: (
+      <CatalogIndexPage
+        filters={
+          <>
+            <DefaultFilters />
+            <EntitySecurityTierPicker />
+            <EntityNetworkPicker />
+          </>
+        }
+      />
+    ),
   })
   .addPage({
     path: '/catalog/:kind/:namespace/:name',

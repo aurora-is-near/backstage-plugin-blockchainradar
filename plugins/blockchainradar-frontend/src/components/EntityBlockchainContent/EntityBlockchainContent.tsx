@@ -8,6 +8,7 @@ import { EntityCatalogGraphCard } from '@backstage/plugin-catalog-graph';
 import { Grid } from '@material-ui/core';
 import { EntityBlockchainInsightsCard } from '../EntityBlockchainInsightsCard';
 import { entityWarningContent } from '../common';
+import { DefaultRenderNode } from './DefaultRenderNode';
 
 export const EntityBlockchainContent = ({
   children,
@@ -18,7 +19,11 @@ export const EntityBlockchainContent = ({
       <EntityAboutCard variant="gridItem" />
     </Grid>
     <Grid item md={12}>
-      <EntityCatalogGraphCard variant="gridItem" height={400} />
+      <EntityCatalogGraphCard
+        renderNode={DefaultRenderNode}
+        variant="gridItem"
+        height={400}
+      />
     </Grid>
 
     <Grid item lg={6} sm={12}>
