@@ -3,19 +3,26 @@ import {
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
-import { Entity } from '@backstage/catalog-model';
+import {
+  Entity,
+  RELATION_API_PROVIDED_BY,
+  RELATION_CONSUMES_API,
+  RELATION_DEPENDS_ON,
+} from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import {
+  ContractComponentEntity,
   ContractDeploymentEntity,
+  ContractDeploymentSpec,
   isContractComponent,
   isContractDeployment,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
-import { ContractComponent } from '../entities/ContractComponent';
-import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
-import { RoleGroup } from '../entities/RoleGroup';
-import { ContractDeployment } from '../entities/ContractDeployment';
+import { Address } from '../models/Address';
+import { Contract } from '../models/Contract';
+import { Role } from '../models/Role';
+import { AdapterFactory } from '../adapters/AdapterFactory';
 
 function dashed(input: string) {
   // Convert camelCase to lower_underscored
@@ -57,22 +64,63 @@ export class ContractProcessor extends BlockchainProcessor {
    * WARNING: All deployedAt/interactsWith entities must be contract addresses
    */
   async processContractComponent(
-    entity: Entity,
+    entity: ContractComponentEntity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
   ) {
-    const contract = new ContractComponent(this, entity);
-    for (const deployment of await contract.deployedAddresses()) {
-      this.appendLink(entity, deployment);
-      deployment.emitDeployedBy(emit);
-      emit(processingResult.entity(location, deployment.toEntity()));
+    if (entity.spec.deployedAt) {
+      const contracts = entity.spec.deployedAt.map(ref =>
+        Contract.fromRef(ref),
+      );
+      for (const contract of contracts) {
+        this.appendLink(entity, contract.toLink());
+        const contractEntity = contract.toEntity();
+        contractEntity.spec = {
+          ...contractEntity.spec,
+          owner: this.ownerSpec(entity),
+          system: this.systemSpec(entity),
+        };
 
-      // emit interactions between the contract and the other addresses on the same network
-      for (const targetAddr of await contract.interactsWith(deployment)) {
-        this.appendLink(entity, targetAddr);
-        // at this point we don't yet know what kind of entity targetAddr is,
-        // it could be either a normal contract, multisig, or a user account.
-        await this.emitActsOn(targetAddr, location, emit);
+        this.emitRelationship(
+          emit,
+          RELATION_API_PROVIDED_BY,
+          entity,
+          contractEntity,
+        );
+        emit(processingResult.entity(location, contractEntity));
+
+        if (entity.spec.interactsWith) {
+          const addresses = entity.spec.interactsWith
+            .map(ref => Address.fromRef(ref))
+            .filter(addr => addr.isSameNetwork(contract));
+          for (const address of addresses) {
+            this.appendLink(entity, address.toLink());
+
+            const adapter = AdapterFactory.adapter(
+              this,
+              address.network,
+              address.networkType,
+            );
+            const isContract = await adapter.isContract(address.address);
+            const target = isContract ? Contract.from(address) : address;
+            const addressEntity = await this.stubOrFind(target);
+            addressEntity.spec = {
+              ...addressEntity.spec,
+              owner: this.ownerSpec(entity),
+              system: this.systemSpec(entity),
+            };
+
+            this.emitRelationship(
+              emit,
+              RELATION_CONSUMES_API,
+              contractEntity,
+              addressEntity,
+            );
+            if (target.stub) {
+              emit(processingResult.entity(location, addressEntity));
+            }
+          }
+        }
       }
     }
     return entity;
@@ -93,158 +141,187 @@ export class ContractProcessor extends BlockchainProcessor {
     emit: CatalogProcessorEmit,
     cache: CatalogProcessorCache,
   ) {
-    const deployment = await BlockchainFactory.fromEntity<ContractDeployment>(
+    const contract = Contract.from(entity.spec);
+    const adapter = AdapterFactory.adapter(
       this,
-      entity,
-      'contract',
+      contract.network,
+      contract.networkType,
     );
-    const deploymentSpec = entity.spec.deployment;
-    if (deploymentSpec) {
-      if (!this.isCacheUpToDate(deploymentSpec.source)) {
-        await this.runExclusive(
-          DEPLOYMENT_SOURCE_RUN_ID,
-          deployment.address,
-          async _logger => {
-            try {
-              deploymentSpec.source = await deployment.adapter.fetchSourceSpec(
-                deployment.address,
-              );
-              if (deploymentSpec.source) {
-                this.logger.debug(
-                  `Source spec found for ${entity.metadata.name}`,
-                );
-                await this.setScopedCachedSpec(
-                  DEPLOYMENT_SOURCE_RUN_ID,
-                  cache,
-                  deploymentSpec.source,
-                );
-              }
-            } catch (error) {
-              this.logger.warn(
-                `unable to fetch contract source for ${deployment.address}`,
-              );
-            }
-          },
-        );
-      } else {
-        await this.setScopedCachedSpec(
-          DEPLOYMENT_SOURCE_RUN_ID,
-          cache,
-          deploymentSpec.source!,
-        );
-      }
 
-      if (!this.isCacheUpToDate(deploymentSpec.state)) {
-        await this.runExclusive(
-          DEPLOYMENT_STATE_RUN_ID,
-          deployment.address,
-          async _logger => {
-            try {
-              deploymentSpec.state = await deployment.adapter.fetchStateSpec(
-                deployment.address,
-                deploymentSpec.source!,
-              );
-              if (deploymentSpec.state) {
-                this.logger.debug(
-                  `State spec found for ${entity.metadata.name}`,
-                );
-                await this.setScopedCachedSpec(
-                  DEPLOYMENT_STATE_RUN_ID,
-                  cache,
-                  deploymentSpec.state,
-                );
-              }
-            } catch (error) {
-              this.logger.warn(
-                `unable to fetch contract state for ${deployment.address}`,
-              );
-            }
-          },
-        );
-      } else {
-        await this.setScopedCachedSpec(
-          DEPLOYMENT_STATE_RUN_ID,
-          cache,
-          deploymentSpec.state!,
-        );
-      }
-
-      if (!this.isCacheUpToDate(deploymentSpec.rbac)) {
-        await this.runExclusive(
-          DEPLOYMENT_RBAC_RUN_ID,
-          deployment.address,
-          async _logger => {
-            if (entity.spec.deployment?.state) {
-              deploymentSpec.rbac =
-                await deployment.roleGroupAdapter.fetchRbacSpec(
-                  entity.spec.address,
-                  entity.spec.deployment.state,
-                );
-              if (deploymentSpec.rbac) {
-                this.logger.debug(
-                  `Rbac spec found for ${entity.metadata.name}`,
-                );
-                this.appendTags(entity, 'rbac');
-                await this.setScopedCachedSpec(
-                  DEPLOYMENT_RBAC_RUN_ID,
-                  cache,
-                  deploymentSpec.rbac,
-                );
-              }
-            }
-          },
-        );
-      } else {
-        await this.setScopedCachedSpec(
-          DEPLOYMENT_RBAC_RUN_ID,
-          cache,
-          deploymentSpec.rbac!,
-        );
-      }
-
-      if (deploymentSpec.state?.interactsWith) {
-        for (const [role, val] of Object.entries(
-          deploymentSpec.state.interactsWith,
-        )) {
+    const deploymentSpec: ContractDeploymentSpec =
+      (await this.fetchCachedSpec(cache, DEPLOYMENT_SOURCE_RUN_ID)) || {};
+    if (!this.isCacheUpToDate(deploymentSpec.source)) {
+      await this.runExclusive(
+        DEPLOYMENT_SOURCE_RUN_ID,
+        contract.address,
+        async _logger => {
           try {
-            const intAddr = await BlockchainFactory.fromEntity(
-              this,
-              entity,
-              dashed(role),
-              val,
+            deploymentSpec.source = await adapter.fetchSourceSpec(
+              contract.address,
             );
-            // No need to emit interactions with itself
-            if (intAddr.address !== deployment.address)
-              await this.emitActsOn(intAddr, location, emit, [
-                'contract-state',
-              ]);
-          } catch (err) {
-            this.logger.debug(err);
+            if (deploymentSpec.source) {
+              this.logger.debug(
+                `Source spec found for ${entity.metadata.name}`,
+              );
+              await this.setScopedCachedSpec(
+                DEPLOYMENT_SOURCE_RUN_ID,
+                cache,
+                deploymentSpec.source,
+              );
+            }
+          } catch (error) {
+            this.logger.warn(
+              `unable to fetch contract source for ${contract.address}`,
+            );
           }
+        },
+      );
+    } else {
+      await this.setScopedCachedSpec(
+        DEPLOYMENT_SOURCE_RUN_ID,
+        cache,
+        deploymentSpec.source!,
+      );
+    }
+
+    if (!this.isCacheUpToDate(deploymentSpec.state)) {
+      await this.runExclusive(
+        DEPLOYMENT_STATE_RUN_ID,
+        contract.address,
+        async _logger => {
+          try {
+            deploymentSpec.state = await adapter.fetchStateSpec(
+              contract.address,
+              deploymentSpec.source!,
+            );
+            if (deploymentSpec.state) {
+              this.logger.debug(`State spec found for ${entity.metadata.name}`);
+              await this.setScopedCachedSpec(
+                DEPLOYMENT_STATE_RUN_ID,
+                cache,
+                deploymentSpec.state,
+              );
+            }
+          } catch (error) {
+            this.logger.warn(
+              `unable to fetch contract state for ${contract.address}`,
+            );
+          }
+        },
+      );
+    } else {
+      await this.setScopedCachedSpec(
+        DEPLOYMENT_STATE_RUN_ID,
+        cache,
+        deploymentSpec.state!,
+      );
+    }
+
+    if (!this.isCacheUpToDate(deploymentSpec.rbac)) {
+      const roleGroupAdapter = AdapterFactory.roleGroupAdapter(
+        this,
+        contract.network,
+        contract.networkType,
+      );
+      await this.runExclusive(
+        DEPLOYMENT_RBAC_RUN_ID,
+        contract.address,
+        async _logger => {
+          if (deploymentSpec.state) {
+            deploymentSpec.rbac = await roleGroupAdapter.fetchRbacSpec(
+              contract.address,
+              deploymentSpec.state,
+            );
+            if (deploymentSpec.rbac) {
+              this.logger.debug(`Rbac spec found for ${entity.metadata.name}`);
+              this.appendTags(entity, 'rbac');
+              await this.setScopedCachedSpec(
+                DEPLOYMENT_RBAC_RUN_ID,
+                cache,
+                deploymentSpec.rbac,
+              );
+            }
+          }
+        },
+      );
+    } else {
+      await this.setScopedCachedSpec(
+        DEPLOYMENT_RBAC_RUN_ID,
+        cache,
+        deploymentSpec.rbac!,
+      );
+    }
+
+    if (deploymentSpec.state?.interactsWith) {
+      const addresses = Object.entries(deploymentSpec.state.interactsWith)
+        .map(
+          ([role, address]) =>
+            new Address(
+              contract.network,
+              contract.networkType,
+              address,
+              dashed(role),
+            ),
+        )
+        .filter(address => !address.isSame(contract));
+      for (const address of addresses) {
+        try {
+          const isContract = await adapter.isContract(address.address);
+          const target = isContract ? Contract.from(address) : address;
+          const addressEntity = await this.stubOrFind(target);
+
+          this.emitRelationship(
+            emit,
+            RELATION_CONSUMES_API,
+            entity,
+            addressEntity,
+          );
+          if (target.stub) {
+            addressEntity.spec = {
+              ...addressEntity.spec,
+              interactions: {
+                ...(typeof addressEntity.spec?.interactions === 'object' &&
+                  addressEntity.spec.interactions),
+                [contract.getEntityName()]: address.role,
+              },
+              owner: this.ownerSpec(entity),
+              system: this.systemSpec(entity),
+            };
+            this.appendTags(addressEntity, 'contract-state');
+
+            emit(processingResult.entity(location, addressEntity));
+          }
+        } catch (err) {
+          this.logger.debug(err);
         }
       }
+    }
 
-      if (deploymentSpec.rbac?.roles) {
-        // TODO move this to the ETH-specific discovery
-        for (const role of deploymentSpec.rbac.roles) {
-          const roleGroup = new RoleGroup(
-            this,
-            entity,
-            entity.spec.network,
-            entity.spec.networkType,
-            entity.spec.address,
-            role.id,
-          );
-          roleGroup.roleName = role.roleName || role.id;
-          roleGroup.admin = role.admin;
-          roleGroup.adminOf = role.adminOf;
-          roleGroup.members = role.members;
-          this.logger.debug(
-            `RoleGroup (${entity.metadata.name}): ${roleGroup.roleName}`,
-          );
-          roleGroup.emitDependencyOf(emit);
-          emit(processingResult.entity(location, roleGroup.toEntity()));
-        }
+    if (deploymentSpec.rbac?.roles) {
+      // TODO move this to the ETH-specific discovery
+      for (const role of deploymentSpec.rbac.roles) {
+        const roleGroup = new Role(
+          entity.spec.network,
+          entity.spec.networkType,
+          entity.spec.address,
+          role.id,
+        );
+        roleGroup.roleName = role.roleName || role.id;
+        roleGroup.admin = role.admin;
+        roleGroup.adminOf = role.adminOf;
+        roleGroup.members = role.members;
+        this.logger.debug(
+          `RoleGroup (${entity.metadata.name}): ${roleGroup.roleName}`,
+        );
+        const roleEntity = roleGroup.toEntity();
+        roleEntity.spec = {
+          ...roleEntity.spec,
+          owner: this.ownerSpec(entity),
+          system: this.systemSpec(entity),
+        };
+
+        this.emitRelationship(emit, RELATION_DEPENDS_ON, entity, roleEntity);
+        emit(processingResult.entity(location, roleEntity));
       }
     }
 

@@ -5,6 +5,7 @@ const backend = createBackend();
 
 backend.add(import('@backstage/plugin-catalog-backend'));
 backend.add(import('@backstage/plugin-catalog-backend-module-github'));
+backend.add(import('@backstage/plugin-catalog-backend-module-logs'));
 backend.add(import('../src'));
 
 // backend.add(import('@backstage/plugin-auth-backend'));
@@ -15,7 +16,7 @@ backend.add(import('../src'));
 
 // backend.add(import('@backstage/plugin-proxy-backend'));
 
-// backend.add(import('@backstage/plugin-events-backend'));
+backend.add(import('@backstage/plugin-events-backend'));
 
 // backend.add(import('@backstage/plugin-devtools-backend'));
 

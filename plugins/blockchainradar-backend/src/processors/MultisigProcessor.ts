@@ -3,19 +3,24 @@ import {
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
-import { Entity } from '@backstage/catalog-model';
+import {
+  Entity,
+  RELATION_API_PROVIDED_BY,
+  RELATION_OWNED_BY,
+} from '@backstage/catalog-model';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import {
+  MultisigComponentEntity,
   MultisigDeploymentEntity,
   isMultisigComponent,
   isMultisigDeployment,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 import { BlockchainProcessor } from './BlockchainProcessor';
-import { ContractComponent } from '../entities/ContractComponent';
-import { BlockchainFactory } from '../lib/BlockchainFactory';
-import { MultisigDeployment } from '../entities/MultisigDeployment';
 import { OwnerSpec } from '../lib/types';
+import { Multisig } from '../models/Multisig';
+import { Address } from '../models/Address';
+import { AdapterFactory } from '../adapters/AdapterFactory';
 
 const MULTISIG_OWNERS_RUN_ID = 'multisig-owners-fetch';
 
@@ -35,17 +40,31 @@ export class MultisigProcessor extends BlockchainProcessor {
   }
 
   async processContractComponent(
-    entity: Entity,
+    entity: MultisigComponentEntity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
   ) {
-    const contract = new ContractComponent(this, entity);
-    // don't parse interactsWith for multisigs as we expect interactions
-    // to be defined on the smart contract side or discovered on-chain
-    for (const deployment of await contract.deployedAddresses()) {
-      this.appendLink(entity, deployment);
-      deployment.emitDeployedBy(emit);
-      emit(processingResult.entity(location, deployment.toEntity()));
+    if (entity.spec.deployedAt) {
+      const contracts = entity.spec.deployedAt.map(ref =>
+        Multisig.fromRef(ref),
+      );
+      for (const contract of contracts) {
+        this.appendLink(entity, contract.toLink());
+        const contractEntity = contract.toEntity();
+        contractEntity.spec = {
+          ...contractEntity.spec,
+          owner: this.ownerSpec(entity),
+          system: this.systemSpec(entity),
+        };
+
+        emit(processingResult.entity(location, contractEntity));
+        this.emitRelationship(
+          emit,
+          RELATION_API_PROVIDED_BY,
+          entity,
+          contractEntity,
+        );
+      }
     }
     return entity;
   }
@@ -56,10 +75,11 @@ export class MultisigProcessor extends BlockchainProcessor {
     emit: CatalogProcessorEmit,
     cache: CatalogProcessorCache,
   ) {
-    const multisig = await BlockchainFactory.fromEntity<MultisigDeployment>(
+    const multisig = Multisig.from(entity.spec);
+    const policyAdapter = AdapterFactory.policyAdapter(
       this,
-      entity,
-      'multisig',
+      multisig.network,
+      multisig.networkType,
     );
 
     let ownerSpec = await this.fetchCachedSpec<OwnerSpec>(
@@ -73,7 +93,7 @@ export class MultisigProcessor extends BlockchainProcessor {
         async logger => {
           try {
             this.logger.debug(`${entity.metadata.name} fetching safe owners`);
-            ownerSpec = await multisig.policyAdapter.fetchMultisigOwners(
+            ownerSpec = await policyAdapter.fetchMultisigOwners(
               entity.spec.address,
               entity.spec.deployment?.state,
             );
@@ -94,10 +114,14 @@ export class MultisigProcessor extends BlockchainProcessor {
     }
 
     if (ownerSpec?.owners) {
-      const multisigOwners = await Promise.all(
-        ownerSpec.owners.map(owner =>
-          BlockchainFactory.fromBlockchainAddress(multisig, 'signer', owner),
-        ),
+      const multisigOwners = ownerSpec.owners.map(
+        address =>
+          new Address(
+            multisig.network,
+            multisig.networkType,
+            address,
+            'signer',
+          ),
       );
       this.logger.debug(
         `${entity.metadata.name} owners: ${multisigOwners.length}`,
@@ -109,17 +133,26 @@ export class MultisigProcessor extends BlockchainProcessor {
       }
 
       let hasUnknown = false;
-      for (const ownerAddr of multisigOwners) {
-        await ownerAddr.stubOrFind(this.catalogClient);
-        ownerAddr.emitSignerOf(emit);
-        if (ownerAddr.stub) {
-          const signer = ownerAddr.toEntity();
+      for (const target of multisigOwners) {
+        const addressEntity = await this.stubOrFind(target);
+        this.emitRelationship(emit, RELATION_OWNED_BY, entity, addressEntity);
+
+        if (target.stub) {
+          addressEntity.spec = {
+            ...addressEntity.spec,
+            interactions: {
+              ...(typeof addressEntity.spec?.interactions === 'object' &&
+                addressEntity.spec.interactions),
+              [multisig.getEntityName()]: 'signer',
+            },
+            owner: this.ownerSpec(entity),
+          };
           hasUnknown = true;
-          emit(processingResult.entity(location, signer));
+          emit(processingResult.entity(location, addressEntity));
         }
       }
 
-      const tags = multisig.entityTags();
+      const tags = multisig.getEntityTags();
       const hasAllowUnknown = tags
         ? tags.some(tag => tag === 'allow-unknown')
         : false;
@@ -135,7 +168,7 @@ export class MultisigProcessor extends BlockchainProcessor {
         multisig.address,
         async logger => {
           try {
-            multisigSpec = await multisig.policyAdapter.fetchMultisigSpec(
+            multisigSpec = await policyAdapter.fetchMultisigSpec(
               entity.spec.address,
               entity.spec.deployment?.state,
             );

@@ -4,11 +4,19 @@ import {
   processingResult,
 } from '@backstage/plugin-catalog-node';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
-import { Entity, isApiEntity } from '@backstage/catalog-model';
+import {
+  Entity,
+  RELATION_API_CONSUMED_BY,
+  isApiEntity,
+} from '@backstage/catalog-model';
 import { ContractDeploymentEntity } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
-import { BlockchainFactory } from '../lib/BlockchainFactory';
 import { BlockchainProcessor } from './BlockchainProcessor';
+import { AdapterFactory } from '../adapters/AdapterFactory';
+import { Contract } from '../models/Contract';
+import { Address } from '../models/Address';
+
+const SPUTNIK_ROLE_RUN_ID = 'sputnik-role-fetch';
 
 interface ISputnikRole {
   name: string;
@@ -41,17 +49,45 @@ export class SputnikProcessor extends BlockchainProcessor {
           const roles = parsedPolicy.roles as ISputnikRole[];
           for (const role of roles) {
             if (typeof role.kind !== 'string') {
-              const roleAddresses = role.kind.Group;
-              for (const addr of roleAddresses) {
-                const roleAddress = await BlockchainFactory.fromEntity(
+              const roleAddresses = role.kind.Group.map(address =>
+                Address.from({ ...entity.spec, address }),
+              );
+              for (const address of roleAddresses) {
+                const adapter = AdapterFactory.adapter(
                   this,
-                  entity,
-                  role.name,
-                  addr,
+                  entity.spec.network,
+                  entity.spec.networkType,
                 );
-                await this.emitActsOn(roleAddress, location, emit, [
-                  'sputnik-member',
-                ]);
+                let isContract = false;
+                await this.runExclusive(
+                  SPUTNIK_ROLE_RUN_ID,
+                  address.address,
+                  async _logger => {
+                    try {
+                      isContract = await adapter.isContract(address.address);
+                    } catch (error) {
+                      this.logger.warn(
+                        `unable to fetch user signer for ${address}`,
+                      );
+                    }
+                  },
+                );
+                const target = isContract ? Contract.from(address) : address;
+                const addressEntity = await this.stubOrFind(target);
+                addressEntity.spec = {
+                  ...addressEntity.spec,
+                  owner: this.ownerSpec(entity),
+                };
+                this.appendTags(addressEntity, 'sputnik-member');
+                this.emitRelationship(
+                  emit,
+                  RELATION_API_CONSUMED_BY,
+                  entity,
+                  addressEntity,
+                );
+                if (target.stub) {
+                  emit(processingResult.entity(location, addressEntity));
+                }
               }
             }
           }

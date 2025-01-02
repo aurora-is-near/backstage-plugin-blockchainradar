@@ -64,6 +64,8 @@ export function isBlockchainUser(entity: Entity): entity is BlockchainUser {
 export interface ContractComponentEntity extends ComponentEntity {
   spec: ComponentEntity['spec'] & {
     type: 'contract';
+    deployedAt?: string[];
+    interactsWith?: string[];
   };
 }
 
@@ -74,7 +76,7 @@ export function isContractComponent(
 }
 
 export interface MultisigComponentEntity extends ComponentEntity {
-  spec: ComponentEntity['spec'] & {
+  spec: ContractComponentEntity['spec'] & {
     type: 'contract';
   };
 }
