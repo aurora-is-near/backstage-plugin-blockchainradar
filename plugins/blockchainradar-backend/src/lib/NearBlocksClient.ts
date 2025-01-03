@@ -1,3 +1,4 @@
+import util from 'util';
 import axios, { AxiosInstance } from 'axios';
 import { NearTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 import { Logger } from 'winston';
@@ -6,10 +7,14 @@ import { getRootLogger } from '@backstage/backend-common';
 const defaultTxnsParams = { page: '1', per_page: '10', order: 'desc' };
 const NEAR_BLOCKS_API_KEY = process.env.NEAR_BLOCKS_API_KEY;
 
+const makeTimer = util.promisify(setTimeout);
+
 export class NearBlocksClient {
   logger: Logger;
   axios: AxiosInstance;
 
+  private readonly delay: number; // minimum # of ms to wait between requests
+  private ready: Promise<void>; // always await this timer before making a request.
   constructor(networkType: string, logger = getRootLogger()) {
     this.logger = logger.child({ class: this.constructor.name, networkType });
     this.axios = axios.create({
@@ -18,6 +23,10 @@ export class NearBlocksClient {
         Authorization: `Bearer ${NEAR_BLOCKS_API_KEY}`,
       },
     });
+    const baseDelay = 10000; // nearblocks permits 6 req/m
+    const safetyFactor = 1; // no safety factor atm
+    this.delay = baseDelay * safetyFactor;
+    this.ready = makeTimer(0); // at start, it's ready to go immediately
   }
 
   public async getAccountTransactions(
@@ -26,43 +35,61 @@ export class NearBlocksClient {
   ) {
     try {
       const params = new URLSearchParams(opts || defaultTxnsParams);
+      await this.ready;
       const response = await this.axios.get<TxnsResponse>(
         `account/${address}/txns?${params.toString()}`,
       );
+      this.ready = makeTimer(this.delay);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn(
+          `Error message: ${error.response?.data.message}`,
+          error,
+        );
+      } else {
+        this.logger.error('Unexpected error: ', error);
       }
-      this.logger.error('unexpected error: ', error);
       return { txns: [] };
     }
   }
 
   public async getContractDeployments(address: string) {
     try {
+      await this.ready;
       const response = await this.axios.get<ContractDeploymentsResponse>(
         `account/${address}/contract/deployments`,
       );
+      this.ready = makeTimer(this.delay);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn(
+          `Error message: ${error.response?.data.message}`,
+          error,
+        );
+      } else {
+        this.logger.error('Unexpected error: ', error);
       }
-      this.logger.error('unexpected error: ', error);
       return { deployments: [] };
     }
   }
 
   public async getTransactionInfo(hash: string) {
     try {
+      await this.ready;
       const response = await this.axios.get<TxnsResponse>(`txns/${hash}`);
+      this.ready = makeTimer(this.delay);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.warn('error message: ', error.message);
+        this.logger.warn(
+          `Error message: ${error.response?.data.message}`,
+          error,
+        );
+      } else {
+        this.logger.error('Unexpected error: ', error);
       }
-      this.logger.error('unexpected error: ', error);
       return { txns: [] };
     }
   }
