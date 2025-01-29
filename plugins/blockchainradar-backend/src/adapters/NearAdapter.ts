@@ -112,7 +112,7 @@ export class NearAdapter extends BlockchainAdapter {
         finality: 'final',
         request_type: 'view_code',
       });
-    const parsedContract = parseContract(codeResponse.code_base64);
+    const parsedContract = await parseContract(codeResponse.code_base64);
     await this.delayRequest();
 
     const firstTx = await this.fetchCreationTransaction(address);

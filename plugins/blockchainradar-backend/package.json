@@ -50,7 +50,7 @@
     "lodash": "^4.17.21",
     "msw": "^0.35.0",
     "near-api-js": "^0.44.2",
-    "near-contract-parser": "0.1.4",
+    "near-contract-parser": "1.0.0",
     "node-fetch": "^2.6.7",
     "react-json-view": "^1.21.3",
     "react-use": "^17.2.4",
