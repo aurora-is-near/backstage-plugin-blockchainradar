@@ -1,5 +1,12 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.33
+
+### Patch Changes
+
+- 96e5dc0: fix: near multisig links
+- ceec049: refactor: update near-contract-parser
+
 ## 1.0.32
 
 ### Patch Changes
