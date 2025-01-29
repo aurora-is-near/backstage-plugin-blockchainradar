@@ -185,7 +185,7 @@ __metadata:
     lodash: ^4.17.21
     msw: ^0.35.0
     near-api-js: ^0.44.2
-    near-contract-parser: 0.1.4
+    near-contract-parser: 1.0.0
     node-fetch: ^2.6.7
     react-json-view: ^1.21.3
     react-use: ^17.2.4
@@ -10226,7 +10226,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webassemblyjs/wasm-parser@npm:1.11.5, @webassemblyjs/wasm-parser@npm:^1.11.1, @webassemblyjs/wasm-parser@npm:^1.11.5":
+"@webassemblyjs/wasm-parser@npm:1.11.5, @webassemblyjs/wasm-parser@npm:^1.11.5":
   version: 1.11.5
   resolution: "@webassemblyjs/wasm-parser@npm:1.11.5"
   dependencies:
@@ -21928,12 +21928,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"near-contract-parser@npm:0.1.4":
-  version: 0.1.4
-  resolution: "near-contract-parser@npm:0.1.4"
-  dependencies:
-    "@webassemblyjs/wasm-parser": ^1.11.1
-  checksum: 911c0a5f4c571108eef5d5d1c7e99ad48b662c690cec91c42c61744c46bc8038a9143d499b5d686463f37c1f3bc5a08bb1e23db1b45bf1bba2067af1a79ca1a5
+"near-contract-parser@npm:1.0.0":
+  version: 1.0.0
+  resolution: "near-contract-parser@npm:1.0.0"
+  checksum: b48b722759521470ab058370d62b28459d83c110db240cee0b4620fa014ed3945b74856eb79049c5539d273d7e764f354a2b0913b6d9dad9db58090cf6ef3aa5
   languageName: node
   linkType: hard
 
