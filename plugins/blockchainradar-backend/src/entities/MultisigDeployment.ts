@@ -60,9 +60,7 @@ export class MultisigDeployment extends ContractDeployment {
     const safeLink = { title: '', url: '' };
     if (this.network === 'near') {
       safeLink.title = 'Safe (AstroDao)';
-      safeLink.url = `https://${
-        this.networkType === 'testnet' ? 'testnet.' : ''
-      }app.astrodao.com/dao/${this.address}`;
+      safeLink.url = `https://dev.near.org/astraplusplus.ndctools.near/widget/home?page=dao&daoId=${this.address}`;
     } else {
       safeLink.title = 'Safe (Gnosis)';
       safeLink.url = `https://app.safe.global/${
