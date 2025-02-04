@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.34
+
+### Patch Changes
+
+- 0ff5f4d: fix: add subsequent request throttling to nearblocks/subgraphs
+
 ## 1.0.33
 
 ### Patch Changes
