@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.35
+
+### Patch Changes
+
+- dc4eb45: feat: support team-owned access-keys
+- Updated dependencies [5521fd5]
+  - @aurora-is-near/backstage-plugin-blockchainradar-common@1.0.35
+
 ## 1.0.34
 
 ### Patch Changes
