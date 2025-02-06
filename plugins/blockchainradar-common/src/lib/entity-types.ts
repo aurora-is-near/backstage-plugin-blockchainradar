@@ -38,6 +38,8 @@ export interface BlockchainGroup extends GroupEntity {
         name: string;
         description: string;
       }[];
+      keys?: string[];
+      deprecated?: string[];
     }
   >;
 }
@@ -52,7 +54,6 @@ export interface BlockchainUser extends UserEntity {
       interactsWith?: string[];
       keys?: string[];
       deprecated?: string[];
-      nearKeys?: NearKeysSpec;
     }
   >;
 }
