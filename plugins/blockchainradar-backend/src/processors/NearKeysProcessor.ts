@@ -15,6 +15,8 @@ import {
   isFullAccessKey,
   isRoleGroup,
   isBlockchainAddress,
+  BlockchainGroup,
+  isBlockchainGroup,
 } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
 
 import { BlockchainProcessor } from './BlockchainProcessor';
@@ -77,6 +79,8 @@ export class NearKeysProcessor extends BlockchainProcessor {
   ): Promise<Entity> {
     if (isBlockchainUser(entity)) {
       this.processUserEntity(entity, emit, location);
+    } else if (isBlockchainGroup(entity)) {
+      this.processGroupEntity(entity, emit, location);
     } else {
       if (this.isAcceptableNearAddress(entity)) {
         if (isContractDeployment(entity)) {
@@ -109,6 +113,31 @@ export class NearKeysProcessor extends BlockchainProcessor {
       for (const nearKey of nearKeys) {
         const key = nearKey.toEntity();
         if (nearKey.publicKey in deprecatedNearKeys || isRetired) {
+          this.appendTags(key, 'deprecated');
+        }
+        emit(processingResult.entity(location, key));
+        nearKey.emitOwnedBy(emit);
+      }
+    }
+  }
+
+  private processGroupEntity(
+    entity: BlockchainGroup,
+    emit: CatalogProcessorEmit,
+    location: LocationSpec,
+  ) {
+    if (entity.spec.keys) {
+      const deprecated = entity.spec.deprecated || [];
+      const nearKeys = entity.spec.keys.map(
+        (k: string) => new NearKey(this, entity, k),
+      );
+      const deprecatedNearKeys = deprecated
+        .map((k: string) => new NearKey(this, entity, k))
+        .filter(key => key.publicKey.includes('ed25519'))
+        .reduce((acc, s) => ({ ...acc, [s.publicKey]: true }), {});
+      for (const nearKey of nearKeys) {
+        const key = nearKey.toEntity();
+        if (nearKey.publicKey in deprecatedNearKeys) {
           this.appendTags(key, 'deprecated');
         }
         emit(processingResult.entity(location, key));

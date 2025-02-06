@@ -3,6 +3,7 @@ import { Entity } from '@backstage/catalog-model';
 import { BlockchainProcessor } from '../processors/BlockchainProcessor';
 import { base58EncodeSha256 } from '../lib/utils';
 
+const OWNERSHIP_KINDS = ['User', 'Group'];
 export class NearKey extends BlockchainHandler {
   publicKey: string;
 
@@ -36,7 +37,7 @@ export class NearKey extends BlockchainHandler {
     parts.push(this.publicKey.split(':')[1].slice(0, 5));
 
     parts.push(this.parent.metadata.name);
-    if (this.parent.kind !== 'User') {
+    if (!OWNERSHIP_KINDS.includes(this.parent.kind)) {
       parts.push('unknown');
     }
 
