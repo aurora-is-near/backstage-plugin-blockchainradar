@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-common
 
+## 1.0.35
+
+### Patch Changes
+
+- 5521fd5: feat: support team-owned access-keys
+
 ## 1.0.16
 
 ### Patch Changes
