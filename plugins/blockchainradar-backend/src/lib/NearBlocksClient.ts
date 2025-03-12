@@ -1,13 +1,18 @@
-import util from 'util';
-import axios, { AxiosInstance } from 'axios';
 import { NearTx } from '@aurora-is-near/backstage-plugin-blockchainradar-common';
-import { Logger } from 'winston';
 import { getRootLogger } from '@backstage/backend-common';
+import axios, { AxiosInstance } from 'axios';
+import util from 'util';
+import { Logger } from 'winston';
 
 const defaultTxnsParams = { page: '1', per_page: '10', order: 'desc' };
-const NEAR_BLOCKS_API_KEY = process.env.NEAR_BLOCKS_API_KEY;
 
 const makeTimer = util.promisify(setTimeout);
+
+export type NearBlocksClientOpts = {
+  requestsPerSecond?: number;
+  apiKey?: string;
+  logger: Logger;
+};
 
 export class NearBlocksClient {
   logger: Logger;
@@ -15,15 +20,20 @@ export class NearBlocksClient {
 
   private readonly delay: number; // minimum # of ms to wait between requests
   private ready: Promise<void>; // always await this timer before making a request.
-  constructor(networkType: string, logger = getRootLogger()) {
-    this.logger = logger.child({ class: this.constructor.name, networkType });
+
+  constructor(networkType: string, opts?: NearBlocksClientOpts) {
+    this.logger =
+      opts?.logger.child({ class: this.constructor.name, networkType }) ||
+      getRootLogger();
     this.axios = axios.create({
       baseURL: this.getBaseUrl(networkType),
       headers: {
-        Authorization: `Bearer ${NEAR_BLOCKS_API_KEY}`,
+        Authorization: `Bearer ${opts?.apiKey}`,
       },
     });
-    const baseDelay = 10000; // nearblocks permits 6 req/m
+    const baseDelay = opts?.requestsPerSecond
+      ? opts.requestsPerSecond * 1000
+      : 10000; // 6 req/m = 1 req per 10s on the free tier
     const safetyFactor = 1; // no safety factor atm
     this.delay = baseDelay * safetyFactor;
     this.ready = makeTimer(0); // at start, it's ready to go immediately

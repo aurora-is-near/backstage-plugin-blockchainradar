@@ -32,9 +32,18 @@ export class NearAdapter extends BlockchainAdapter {
       headers: {},
       // explorerUrl: "https://explorer.mainnet.near.org",
     };
+
+    this.nearBlocksClient = new NearBlocksClient(this.networkType, {
+      apiKey: config.getOptionalString('nearblocks.apiKey'),
+      requestsPerSecond: config.getOptionalNumber(
+        'nearblocks.requestsPerSecond',
+      ),
+      logger: this.logger,
+    });
   }
   nearConfig: nearAPI.ConnectConfig;
   isHumanReadable = true;
+  nearBlocksClient: NearBlocksClient;
 
   private near?: nearAPI.Near;
 
@@ -170,26 +179,14 @@ export class NearAdapter extends BlockchainAdapter {
   }
 
   public async fetchFirstTransaction(address: string) {
-    const nearBlocksClient = new NearBlocksClient(
-      this.networkType,
-      this.logger,
-    );
-    return nearBlocksClient.getFirstTransaction(address);
+    return this.nearBlocksClient.getFirstTransaction(address);
   }
 
   public async fetchLastTransaction(address: string) {
-    const nearBlocksClient = new NearBlocksClient(
-      this.networkType,
-      this.logger,
-    );
-    return nearBlocksClient.getLastTransaction(address);
+    return this.nearBlocksClient.getLastTransaction(address);
   }
 
   public async fetchCreationTransaction(address: string) {
-    const nearBlocksClient = new NearBlocksClient(
-      this.networkType,
-      this.logger,
-    );
-    return nearBlocksClient.getCreationTransaction(address);
+    return this.nearBlocksClient.getCreationTransaction(address);
   }
 }
