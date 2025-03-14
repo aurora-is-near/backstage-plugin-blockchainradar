@@ -30,7 +30,7 @@ export interface Config {
       'ethereum-mainnet': string;
       'aurora-mainnet': string;
     };
-    nearblocks: {
+    nearblocks?: {
       requestsPerSecond?: number;
       /**
        * Nearblocks API key for near
