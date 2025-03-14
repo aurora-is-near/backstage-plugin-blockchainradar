@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.36
+
+### Patch Changes
+
+- 4b7b109: feat: support configurable rps and api key for nearblocks
+
 ## 1.0.35
 
 ### Patch Changes
