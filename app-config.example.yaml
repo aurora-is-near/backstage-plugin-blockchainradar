@@ -9,11 +9,17 @@ blockchain:
     aurora-mainnet:
       network: aurora
       apiKey: ${AURORASCAN_API_KEY}
+  nearblocks:
+    requestsPerSecond: 2
+    apiKey: ${NEAR_BLOCKS_API_KEY}
 catalog:
   locations:
     # Aurora Engine components
     - type: url
       target: https://github.com/aurora-is-near/aurora-engine/blob/develop/.catalog-info.yaml
-    # Fast Bridge components
+    # Omni Bridge components
     - type: url
-      target: https://github.com/aurora-is-near/fast-bridge-protocol/blob/master/.catalog-info.yaml
+      target: https://github.com/Near-One/omni-bridge/blob/main/.catalog-info.yaml
+    # Near Intents components
+    - type: url
+      target: https://github.com/near/intents/blob/main/.catalog-info.yaml

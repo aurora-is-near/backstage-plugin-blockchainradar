@@ -17,6 +17,11 @@ import { BlockchainAddress } from '../entities/BlockchainAddress';
 import { TrackedRun } from '../lib/TrackedRun';
 import { PluginEnvironment } from '../lib/types';
 
+export const SCOPES = {
+  explorer: 'explorer',
+} as const;
+export type MutexScope = keyof typeof SCOPES;
+
 export abstract class BlockchainProcessor implements CatalogProcessor {
   static mutexes: Record<string, Mutex> = {};
   cacheTtlMinutes = 120;
@@ -111,6 +116,25 @@ export abstract class BlockchainProcessor implements CatalogProcessor {
     callback: (l: Logger) => Promise<void>,
   ) {
     const mutexName = this.name;
+
+    if (!BlockchainProcessor.mutexes[mutexName]) {
+      BlockchainProcessor.mutexes[mutexName] = new Mutex();
+      this.logger.info(`created ${mutexName} mutex`);
+    }
+
+    const mutex = BlockchainProcessor.mutexes[mutexName];
+    await mutex.runExclusive(async () => {
+      await new TrackedRun(this, what, { addr }).executeWithRetry(3, callback);
+    });
+  }
+
+  protected async runExclusiveScoped(
+    scope: MutexScope,
+    what: string,
+    addr: string,
+    callback: (l: Logger) => Promise<void>,
+  ) {
+    const mutexName = scope;
 
     if (!BlockchainProcessor.mutexes[mutexName]) {
       BlockchainProcessor.mutexes[mutexName] = new Mutex();
