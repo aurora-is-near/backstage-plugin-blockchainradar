@@ -11,6 +11,8 @@ import { BlockchainProcessor } from './BlockchainProcessor';
 import { LocationSpec } from '@backstage/plugin-catalog-common';
 import { AdapterFactory } from '../adapters/AdapterFactory';
 
+const SIGNER_INFO_RUN_ID = 'signer-info-fetch';
+
 export class SignerProcessor extends BlockchainProcessor {
   async postProcessEntity(
     entity: Entity,
@@ -27,8 +29,9 @@ export class SignerProcessor extends BlockchainProcessor {
   async processSigner(entity: SignerEntity, cache: CatalogProcessorCache) {
     const spec = entity.spec;
     if (!this.isCacheUpToDate(spec)) {
-      await this.runExclusive(
-        'signer-info-fetch',
+      await this.runExclusiveScoped(
+        'explorer',
+        SIGNER_INFO_RUN_ID,
         entity.spec.address,
         async _logger => {
           if (entity.spec) {

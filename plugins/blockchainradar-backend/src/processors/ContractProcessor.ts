@@ -101,7 +101,8 @@ export class ContractProcessor extends BlockchainProcessor {
     const deploymentSpec = entity.spec.deployment;
     if (deploymentSpec) {
       if (!this.isCacheUpToDate(deploymentSpec.source)) {
-        await this.runExclusive(
+        await this.runExclusiveScoped(
+          'explorer',
           DEPLOYMENT_SOURCE_RUN_ID,
           deployment.address,
           async _logger => {
