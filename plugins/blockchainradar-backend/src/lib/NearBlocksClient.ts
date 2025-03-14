@@ -27,12 +27,14 @@ export class NearBlocksClient {
       getRootLogger();
     this.axios = axios.create({
       baseURL: this.getBaseUrl(networkType),
-      headers: {
-        Authorization: `Bearer ${opts?.apiKey}`,
-      },
+      headers: opts?.apiKey
+        ? {
+            Authorization: `Bearer ${opts?.apiKey}`,
+          }
+        : undefined,
     });
     const baseDelay = opts?.requestsPerSecond
-      ? opts.requestsPerSecond * 1000
+      ? (1 / opts.requestsPerSecond) * 1000
       : 10000; // 6 req/m = 1 req per 10s on the free tier
     const safetyFactor = 1; // no safety factor atm
     this.delay = baseDelay * safetyFactor;
