@@ -111,13 +111,16 @@ export class SecurityPolicyProcessor extends BlockchainProcessor {
         `${entity.metadata.name} consumers: ${consumerRefs.length}`,
       );
 
-      for (const [k, r] of consumerRefs.entries()) {
-        const consumer = await this.catalogClient.getEntityByRef(r);
-        if (consumer && isResourceEntity(consumer) && isAccessKey(consumer)) {
-          this.logger.debug(
-            `${entity.metadata.name} access-key ${k} => ${consumer.metadata.namespace}`,
-          );
-          accessKeys.push(consumer);
+      // NOTE: edge case where a retired user has deployed a contract under a registered account
+      if (!entity.metadata.tags?.some(tag => tag === 'deprecated')) {
+        for (const [k, r] of consumerRefs.entries()) {
+          const consumer = await this.catalogClient.getEntityByRef(r);
+          if (consumer && isResourceEntity(consumer) && isAccessKey(consumer)) {
+            this.logger.debug(
+              `${entity.metadata.name} access-key ${k} => ${consumer.metadata.namespace}`,
+            );
+            accessKeys.push(consumer);
+          }
         }
       }
     } catch (error) {
