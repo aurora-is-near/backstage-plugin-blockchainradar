@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.37
+
+### Patch Changes
+
+- baf33b3: fix: skip unknown labeling for deprecated contracts
+
 ## 1.0.36
 
 ### Patch Changes
