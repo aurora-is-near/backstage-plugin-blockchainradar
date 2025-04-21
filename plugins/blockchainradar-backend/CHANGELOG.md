@@ -1,5 +1,11 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.38
+
+### Patch Changes
+
+- 1662cfb: feat: track full access keys only
+
 ## 1.0.37
 
 ### Patch Changes
