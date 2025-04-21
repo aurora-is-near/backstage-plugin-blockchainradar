@@ -159,7 +159,8 @@ export class NearKeysProcessor extends BlockchainProcessor {
     if (Object.keys(keysSpec.keys).length === 0)
       this.appendTags(entity, 'locked');
 
-    for (const [publicKey] of Object.entries(keysSpec.keys)) {
+    for (const [publicKey, perms] of Object.entries(keysSpec.keys)) {
+      if (!isFullAccessKey(perms)) continue;
       const nearKey = new NearKey(this, entity, publicKey);
       await nearKey.stubOrFind(this.catalogClient);
       if (!isBlockchainUser(nearKey.parent) || nearKey.stub) {
