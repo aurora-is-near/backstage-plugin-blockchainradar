@@ -1,5 +1,4 @@
 import {
-  CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
@@ -24,12 +23,11 @@ export class MultisigProcessor extends BlockchainProcessor {
     entity: Entity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
-    cache: CatalogProcessorCache,
   ): Promise<Entity> {
     if (isMultisigComponent(entity)) {
       return this.processContractComponent(entity, location, emit);
     } else if (isMultisigDeployment(entity)) {
-      return this.processMultisigDeployment(entity, location, emit, cache);
+      return this.processMultisigDeployment(entity, location, emit);
     }
     return entity;
   }
@@ -54,7 +52,6 @@ export class MultisigProcessor extends BlockchainProcessor {
     entity: MultisigDeploymentEntity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
-    cache: CatalogProcessorCache,
   ) {
     const multisig = await BlockchainFactory.fromEntity<MultisigDeployment>(
       this,
@@ -62,36 +59,22 @@ export class MultisigProcessor extends BlockchainProcessor {
       'multisig',
     );
 
-    let ownerSpec = await this.fetchCachedSpec<OwnerSpec>(
-      cache,
+    let ownerSpec: OwnerSpec | undefined;
+    await this.runExclusive(
       MULTISIG_OWNERS_RUN_ID,
+      multisig.address,
+      async logger => {
+        try {
+          this.logger.debug(`${entity.metadata.name} fetching safe owners`);
+          ownerSpec = await multisig.policyAdapter.fetchMultisigOwners(
+            entity.spec.address,
+            entity.spec.deployment?.state,
+          );
+        } catch (error) {
+          logger.error(error);
+        }
+      },
     );
-    if (!this.isCacheUpToDate(ownerSpec)) {
-      await this.runExclusive(
-        MULTISIG_OWNERS_RUN_ID,
-        multisig.address,
-        async logger => {
-          try {
-            this.logger.debug(`${entity.metadata.name} fetching safe owners`);
-            ownerSpec = await multisig.policyAdapter.fetchMultisigOwners(
-              entity.spec.address,
-              entity.spec.deployment?.state,
-            );
-            if (ownerSpec) {
-              await this.setScopedCachedSpec(
-                MULTISIG_OWNERS_RUN_ID,
-                cache,
-                ownerSpec,
-              );
-            }
-          } catch (error) {
-            logger.error(error);
-          }
-        },
-      );
-    } else {
-      await this.setScopedCachedSpec(MULTISIG_OWNERS_RUN_ID, cache, ownerSpec!);
-    }
 
     if (ownerSpec?.owners) {
       const multisigOwners = await Promise.all(
@@ -129,22 +112,20 @@ export class MultisigProcessor extends BlockchainProcessor {
     }
 
     let multisigSpec = entity.spec.multisig;
-    if (!this.isCacheUpToDate(multisigSpec)) {
-      await this.runExclusive(
-        'multisig-info-fetch',
-        multisig.address,
-        async logger => {
-          try {
-            multisigSpec = await multisig.policyAdapter.fetchMultisigSpec(
-              entity.spec.address,
-              entity.spec.deployment?.state,
-            );
-          } catch (error) {
-            logger.error(error);
-          }
-        },
-      );
-    }
+    await this.runExclusive(
+      'multisig-info-fetch',
+      multisig.address,
+      async logger => {
+        try {
+          multisigSpec = await multisig.policyAdapter.fetchMultisigSpec(
+            entity.spec.address,
+            entity.spec.deployment?.state,
+          );
+        } catch (error) {
+          logger.error(error);
+        }
+      },
+    );
     entity.spec.multisig = multisigSpec;
     return entity;
   }

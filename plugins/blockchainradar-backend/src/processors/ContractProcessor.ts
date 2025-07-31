@@ -1,5 +1,4 @@
 import {
-  CatalogProcessorCache,
   CatalogProcessorEmit,
   processingResult,
 } from '@backstage/plugin-catalog-node';
@@ -36,12 +35,11 @@ export class ContractProcessor extends BlockchainProcessor {
     entity: Entity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
-    cache: CatalogProcessorCache,
   ) {
     if (isContractComponent(entity)) {
       return this.processContractComponent(entity, location, emit);
     } else if (isContractDeployment(entity)) {
-      return this.processContractDeployment(entity, location, emit, cache);
+      return this.processContractDeployment(entity, location, emit);
     }
     return entity;
   }
@@ -91,7 +89,6 @@ export class ContractProcessor extends BlockchainProcessor {
     entity: ContractDeploymentEntity,
     location: LocationSpec,
     emit: CatalogProcessorEmit,
-    cache: CatalogProcessorCache,
   ) {
     const deployment = await BlockchainFactory.fromEntity<ContractDeployment>(
       this,
@@ -100,107 +97,67 @@ export class ContractProcessor extends BlockchainProcessor {
     );
     const deploymentSpec = entity.spec.deployment;
     if (deploymentSpec) {
-      if (!this.isCacheUpToDate(deploymentSpec.source)) {
-        await this.runExclusiveScoped(
-          'explorer',
-          DEPLOYMENT_SOURCE_RUN_ID,
-          deployment.address,
-          async _logger => {
-            try {
-              deploymentSpec.source = await deployment.adapter.fetchSourceSpec(
+      let sourceSpec = deploymentSpec.source;
+      await this.runExclusiveScoped(
+        'explorer',
+        DEPLOYMENT_SOURCE_RUN_ID,
+        deployment.address,
+        async _logger => {
+          try {
+            sourceSpec = await deployment.adapter.fetchSourceSpec(
+              deployment.address,
+            );
+          } catch (error) {
+            this.logger.warn(
+              `unable to fetch contract source for ${deployment.address}`,
+            );
+          }
+        },
+      );
+      deploymentSpec.source = sourceSpec;
+
+      let stateSpec = deploymentSpec.state;
+      await this.runExclusive(
+        DEPLOYMENT_STATE_RUN_ID,
+        deployment.address,
+        async _logger => {
+          try {
+            if (sourceSpec) {
+              stateSpec = await deployment.adapter.fetchStateSpec(
                 deployment.address,
-              );
-              if (deploymentSpec.source) {
-                this.logger.debug(
-                  `Source spec found for ${entity.metadata.name}`,
-                );
-                await this.setScopedCachedSpec(
-                  DEPLOYMENT_SOURCE_RUN_ID,
-                  cache,
-                  deploymentSpec.source,
-                );
-              }
-            } catch (error) {
-              this.logger.warn(
-                `unable to fetch contract source for ${deployment.address}`,
+                sourceSpec,
               );
             }
-          },
-        );
-      } else {
-        await this.setScopedCachedSpec(
-          DEPLOYMENT_SOURCE_RUN_ID,
-          cache,
-          deploymentSpec.source!,
-        );
+          } catch (error) {
+            this.logger.warn(
+              `unable to fetch contract state for ${deployment.address}`,
+            );
+          }
+        },
+      );
+      if (stateSpec) {
+        deploymentSpec.state = stateSpec;
       }
 
-      if (!this.isCacheUpToDate(deploymentSpec.state)) {
-        await this.runExclusive(
-          DEPLOYMENT_STATE_RUN_ID,
-          deployment.address,
-          async _logger => {
-            try {
-              deploymentSpec.state = await deployment.adapter.fetchStateSpec(
-                deployment.address,
-                deploymentSpec.source!,
-              );
-              if (deploymentSpec.state) {
-                this.logger.debug(
-                  `State spec found for ${entity.metadata.name}`,
-                );
-                await this.setScopedCachedSpec(
-                  DEPLOYMENT_STATE_RUN_ID,
-                  cache,
-                  deploymentSpec.state,
-                );
-              }
-            } catch (error) {
-              this.logger.warn(
-                `unable to fetch contract state for ${deployment.address}`,
-              );
+      let rbacSpec = deploymentSpec.rbac;
+      await this.runExclusive(
+        DEPLOYMENT_RBAC_RUN_ID,
+        deployment.address,
+        async _logger => {
+          if (deploymentSpec.state) {
+            rbacSpec = await deployment.roleGroupAdapter.fetchRbacSpec(
+              entity.spec.address,
+              deploymentSpec.state,
+            );
+            if (rbacSpec) {
+              this.logger.debug(`Rbac spec found for ${entity.metadata.name}`);
+              this.appendTags(entity, 'rbac');
             }
-          },
-        );
-      } else {
-        await this.setScopedCachedSpec(
-          DEPLOYMENT_STATE_RUN_ID,
-          cache,
-          deploymentSpec.state!,
-        );
-      }
-
-      if (!this.isCacheUpToDate(deploymentSpec.rbac)) {
-        await this.runExclusive(
-          DEPLOYMENT_RBAC_RUN_ID,
-          deployment.address,
-          async _logger => {
-            if (entity.spec.deployment?.state) {
-              deploymentSpec.rbac =
-                await deployment.roleGroupAdapter.fetchRbacSpec(
-                  entity.spec.address,
-                  entity.spec.deployment.state,
-                );
-              if (deploymentSpec.rbac) {
-                this.logger.debug(
-                  `Rbac spec found for ${entity.metadata.name}`,
-                );
-                this.appendTags(entity, 'rbac');
-                await this.setScopedCachedSpec(
-                  DEPLOYMENT_RBAC_RUN_ID,
-                  cache,
-                  deploymentSpec.rbac,
-                );
-              }
-            }
-          },
-        );
-      } else {
-        await this.setScopedCachedSpec(
-          DEPLOYMENT_RBAC_RUN_ID,
-          cache,
-          deploymentSpec.rbac!,
-        );
+          }
+        },
+      );
+      if (rbacSpec) {
+        deploymentSpec.rbac = rbacSpec;
       }
 
       if (deploymentSpec.state?.interactsWith) {
