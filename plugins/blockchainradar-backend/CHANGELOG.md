@@ -1,5 +1,13 @@
 # @aurora-is-near/backstage-plugin-blockchain-backend
 
+## 1.0.39
+
+### Patch Changes
+
+- 7db5d92: feat: implement rpc scoped mutex
+- 3b7d31e: feat: use fastnear public rpc
+- ff7d857: feat: remove entity level caching
+
 ## 1.0.38
 
 ### Patch Changes
