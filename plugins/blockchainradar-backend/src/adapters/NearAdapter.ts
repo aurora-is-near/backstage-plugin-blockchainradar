@@ -26,7 +26,7 @@ export class NearAdapter extends BlockchainAdapter {
     this.nearConfig = {
       networkId: networkType,
       keyStore: new nearAPI.keyStores.InMemoryKeyStore(),
-      nodeUrl: `https://rpc.${networkType}.near.org`,
+      nodeUrl: `https://rpc.${networkType}.fastnear.com`,
       walletUrl: `https://wallet.${networkType}.near.org`,
       helperUrl: `https://helper.${networkType}.near.org`,
       headers: {},
