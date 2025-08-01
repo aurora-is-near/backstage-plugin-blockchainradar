@@ -33,7 +33,8 @@ export class NearKeysProcessor extends BlockchainProcessor {
     const blockchainAddress = await BlockchainFactory.fromEntity(this, entity);
     let keysSpec = await this.fetchCachedSpec<NearKeysSpec>(cache);
     if (!this.isCacheUpToDate(keysSpec)) {
-      await this.runExclusive(
+      await this.runExclusiveScoped(
+        'rpc',
         'near-keys-fetch',
         blockchainAddress.address,
         async logger => {

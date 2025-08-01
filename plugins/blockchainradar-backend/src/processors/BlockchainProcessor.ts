@@ -19,6 +19,7 @@ import { PluginEnvironment } from '../lib/types';
 
 export const SCOPES = {
   explorer: 'explorer',
+  rpc: 'rpc',
 } as const;
 export type MutexScope = keyof typeof SCOPES;
 

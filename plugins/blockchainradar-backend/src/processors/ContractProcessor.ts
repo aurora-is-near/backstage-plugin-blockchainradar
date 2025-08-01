@@ -117,7 +117,8 @@ export class ContractProcessor extends BlockchainProcessor {
       deploymentSpec.source = sourceSpec;
 
       let stateSpec = deploymentSpec.state;
-      await this.runExclusive(
+      await this.runExclusiveScoped(
+        'rpc',
         DEPLOYMENT_STATE_RUN_ID,
         deployment.address,
         async _logger => {
